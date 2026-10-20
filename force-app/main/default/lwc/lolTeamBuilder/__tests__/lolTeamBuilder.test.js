@@ -273,10 +273,10 @@ describe('c-lol-team-builder', () => {
         expect($(el, '.analyze-button').disabled).toBe(false);
     });
 
-    it('공개 사이트 게스트: 점수·조합표는 보이고 분석 요청 버튼과 최근 요청은 숨긴다', async () => {
+    it('공개 사이트 분석이 꺼져 있으면: 점수·조합표는 보이고 분석 버튼과 최근 요청은 숨긴다', async () => {
         const el = createElement('c-lol-team-builder', { is: LolTeamBuilder });
         document.body.appendChild(el);
-        getBuilderData.emit(builderData('CLAUDE_CODE', false));
+        getBuilderData.emit(builderData('CLAUDE_CODE', false, true));
         await flush();
         await flush();
 
@@ -285,7 +285,28 @@ describe('c-lol-team-builder', () => {
         expect($(el, '.export-button')).not.toBeNull();
         expect($(el, '.analyze-button')).toBeNull();
         expect($(el, '.recent')).toBeNull();
-        expect($(el, '.guest-note').textContent).toContain('로그인한 사용자만');
+        expect($(el, '.guest-note').textContent).toContain('꺼져 있습니다');
         expect(getRecentRequests).not.toHaveBeenCalled();
+    });
+
+    it('공개 사이트 방문자: 분석 버튼은 보이고, 최근 요청 목록 대신 공유·횟수 제한 안내를 보여 준다', async () => {
+        submitAnalysisRequest.mockResolvedValue('a01GUEST');
+        getAnalysisRequest.mockResolvedValue({ Id: 'a01GUEST', Name: 'LAR-00100', Status__c: 'Pending', Composition__c: 'x' });
+        const el = createElement('c-lol-team-builder', { is: LolTeamBuilder });
+        document.body.appendChild(el);
+        getBuilderData.emit(builderData('CLAUDE_CODE', true, true));
+        await flush();
+        await flush();
+
+        expect($(el, '.analyze-button')).not.toBeNull();
+        expect($(el, '.recent')).toBeNull();
+        expect($(el, '.guest-info').textContent).toContain('시간당');
+        expect(getRecentRequests).not.toHaveBeenCalled();
+
+        $(el, '.analyze-button').click();
+        await flush();
+        expect(submitAnalysisRequest).toHaveBeenCalledTimes(1);
+        expect($(el, '.waiting-text').textContent).toContain('LAR-00100 대기 중');
+        expect(getRecentRequests).not.toHaveBeenCalled(); // 요청 후에도 목록을 불러오지 않음
     });
 });

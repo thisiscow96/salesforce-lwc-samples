@@ -147,7 +147,10 @@
                                 </div>
                             </template>
                             <template lwc:if={showGuestNote}>
-                                <p class="guest-note slds-text-color_weak">Claude 분석 요청은 로그인한 사용자만 사용할 수 있습니다. 조합 점수·추천 조합표·Excel 다운로드는 누구나 이용할 수 있습니다.</p>
+                                <p class="guest-note slds-text-color_weak">{guestNoteText}</p>
+                            </template>
+                            <template lwc:if={showGuestInfo}>
+                                <p class="guest-info slds-text-color_weak slds-m-bottom_x-small">공개 사이트 안내: 같은 조합은 최근 분석 결과를 함께 보여 주며, 새 분석 요청은 시간당 횟수가 제한됩니다. 분석에는 1~2분 정도 걸립니다.</p>
                             </template>
                             <template lwc:if={showAnalysisHint}>
                                 <p class="slds-text-color_weak">조합을 정한 뒤 [{analyzeLabel}]을 누르면 현재 패치 메타·커뮤니티 의견을 검색해 강점·약점·운영 플랜·밴 추천을 받습니다.</p>

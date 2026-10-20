@@ -27,6 +27,18 @@
         <value xsi:type="xsd:double">120</value>
     </values>
     <values>
+        <field>Guest_Analysis_Enabled__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Guest_Hourly_Limit__c</field>
+        <value xsi:type="xsd:double">10</value>
+    </values>
+    <values>
+        <field>Guest_Cache_Hours__c</field>
+        <value xsi:type="xsd:double">24</value>
+    </values>
+    <values>
         <field>Routine_Fire_Path__c</field>
         <value xsi:type="xsd:string">/v1/claude_code/routines/trig_016zhLGx3x9QL1KiPxuV8KQm/fire</value>
     </values>

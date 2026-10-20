@@ -87,7 +87,8 @@ export default class LolTeamBuilder extends LightningElement {
     analysisError;
     analyzing = false;
     mode = 'CLAUDE_CODE';
-    canAnalyze = false; // 서버가 알려 준 분석 요청 가능 여부 (Experience Cloud 게스트는 false)
+    canAnalyze = false; // 서버가 알려 준 분석 요청 가능 여부
+    isGuestUser = false; // Experience Cloud 공개 사이트 방문자
     queued; // Claude Code 모드에서 추적 중인 요청 { id, name, status, composition, processedBy }
     recentRequests = [];
     pollTimer;
@@ -104,7 +105,8 @@ export default class LolTeamBuilder extends LightningElement {
             this.model = data.model;
             this.mode = data.mode || 'CLAUDE_CODE';
             this.canAnalyze = data.canRequestAnalysis === true;
-            if (this.isClaudeCodeMode && this.canAnalyze) {
+            this.isGuestUser = data.isGuest === true;
+            if (this.showRecent) {
                 this.loadRecent();
             }
             this.loadError = undefined;
@@ -299,7 +301,9 @@ export default class LolTeamBuilder extends LightningElement {
         }
         return this.queued.status === 'Processing'
             ? `${this.queued.name} 분석 중 — ${this.queued.processedBy || 'Claude Code'}가 최신 메타를 검색하고 있습니다.`
-            : `${this.queued.name || '요청'} 대기 중 — Claude Code 워커가 켜져 있으면 몇 분 안에 처리됩니다. 화면을 닫아도 결과는 최근 요청에 남습니다.`;
+            : this.isGuestUser
+              ? `${this.queued.name || '요청'} 대기 중 — 보통 1~2분 걸립니다. 화면을 닫았다면 같은 조합으로 다시 요청하면 결과를 볼 수 있습니다.`
+              : `${this.queued.name || '요청'} 대기 중 — 보통 1~2분 걸립니다. 화면을 닫아도 결과는 최근 요청에 남습니다.`;
     }
     get hasRecent() {
         return this.recentRequests.length > 0;
@@ -321,11 +325,18 @@ export default class LolTeamBuilder extends LightningElement {
     get noData() {
         return !this.loadError;
     }
+    // 방문자는 모두 같은 게스트 계정이라 "내 최근 요청"이 의미 없으므로 숨김
     get showRecent() {
-        return this.isClaudeCodeMode && this.canAnalyze;
+        return this.isClaudeCodeMode && this.canAnalyze && !this.isGuestUser;
     }
     get showGuestNote() {
         return !!this.ctx && !this.canAnalyze;
+    }
+    get guestNoteText() {
+        return this.isGuestUser ? '공개 사이트의 Claude 분석 요청이 현재 꺼져 있습니다. 조합 점수·추천 조합표·Excel 다운로드는 이용할 수 있습니다.' : 'Claude 분석 요청 권한이 없습니다. 관리자에게 권한 집합(LoL Team Builder User)을 요청하세요.';
+    }
+    get showGuestInfo() {
+        return this.isGuestUser && this.canAnalyze;
     }
     get showAnalysisHint() {
         return this.canAnalyze && !this.analysis && !this.analyzing && !this.analysisError;
@@ -497,6 +508,9 @@ export default class LolTeamBuilder extends LightningElement {
     }
 
     async loadRecent() {
+        if (!this.showRecent) {
+            return; // 방문자·권한 없는 사용자는 목록을 쓰지 않으므로 호출 생략
+        }
         try {
             this.recentRequests = await getRecentRequests();
         } catch {

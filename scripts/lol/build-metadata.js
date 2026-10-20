@@ -40,6 +40,10 @@ const fieldXml = (f) => {
     <type>Number</type>
     <unique>false</unique>
 `;
+    } else if (f.type === 'Checkbox') {
+        typeXml = `    <defaultValue>${f.defaultValue ? 'true' : 'false'}</defaultValue>
+    <type>Checkbox</type>
+`;
     } else if (f.type === 'LongTextArea') {
         typeXml = `    <length>${f.length}</length>
     <type>LongTextArea</type>
@@ -136,6 +140,9 @@ const TYPES = {
             text('Web_Search_Tool__c', 'Web Search Tool', '웹 검색 도구 타입 (비우면 검색 안 함)', 40),
             num('Web_Search_Max_Uses__c', 'Web Search Max Uses', '요청당 최대 검색 횟수', 2, 0),
             num('Timeout_Seconds__c', 'Timeout Seconds', 'Continuation 타임아웃(최대 120)', 3, 0),
+            { name: 'Guest_Analysis_Enabled__c', label: 'Guest Analysis Enabled', description: '공개 사이트 방문자의 분석 요청 허용', type: 'Checkbox', defaultValue: false },
+            num('Guest_Hourly_Limit__c', 'Guest Hourly Limit', '방문자 전체의 시간당 새 분석 요청 상한 (같은 조합 결과 재사용은 제외)', 4, 0),
+            num('Guest_Cache_Hours__c', 'Guest Cache Hours', '같은 조합의 방문자 분석 결과를 재사용하는 시간', 4, 0),
             text('Routine_Fire_Path__c', 'Routine Fire Path', '클라우드 루틴 API 트리거 경로 /v1/claude_code/routines/<id>/fire (비우면 즉시 실행 안 함)', 255),
             { name: 'Team_Goal__c', label: 'Team Goal', description: '팀 성향·목표 (분석 프롬프트에 포함)', type: 'LongTextArea', length: 2000 }
         ]
@@ -170,7 +177,7 @@ function record(type, developerName, label, values) {
     </values>
 `;
             }
-            const xsiType = typeof value === 'number' ? 'xsd:double' : 'xsd:string';
+            const xsiType = typeof value === 'number' ? 'xsd:double' : typeof value === 'boolean' ? 'xsd:boolean' : 'xsd:string';
             return `    <values>
         <field>${field}</field>
         <value xsi:type="${xsiType}">${esc(value)}</value>
@@ -240,6 +247,9 @@ record('LoL_AI_Setting__mdt', 'Default', 'Default', {
     Web_Search_Tool__c: 'web_search_20250305',
     Web_Search_Max_Uses__c: 3,
     Timeout_Seconds__c: 120,
+    Guest_Analysis_Enabled__c: true,
+    Guest_Hourly_Limit__c: 10,
+    Guest_Cache_Hours__c: 24,
     Routine_Fire_Path__c: '/v1/claude_code/routines/trig_016zhLGx3x9QL1KiPxuV8KQm/fire',
     Team_Goal__c: TEAM_GOAL
 });

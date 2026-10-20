@@ -1,7 +1,7 @@
 // 배포되는 Custom Metadata와 같은 원본(scripts/lol/lol-data.js)으로 Apex 응답 형태를 만든다 → 실제 데이터로 로직 검증
 const D = require('../../../../../../../scripts/lol/lol-data.js');
 
-function builderData(mode = 'CLAUDE_CODE', canRequestAnalysis = true) {
+function builderData(mode = 'CLAUDE_CODE', canRequestAnalysis = true, isGuest = false) {
     const suffix = { TOP: 'Top', JUNGLE: 'Jungle', MID: 'Mid', ADC: 'Adc', SUPPORT: 'Support' };
     return {
         champions: D.CHAMPIONS.map((c, i) => ({
@@ -34,7 +34,8 @@ function builderData(mode = 'CLAUDE_CODE', canRequestAnalysis = true) {
         teamGoal: D.TEAM_GOAL,
         model: 'claude-sonnet-5-5',
         mode,
-        canRequestAnalysis
+        canRequestAnalysis,
+        isGuest
     };
 }
 

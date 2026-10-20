@@ -18,7 +18,8 @@ public with sharing class LolTeamBuilderController {
         @AuraEnabled public String teamGoal;
         @AuraEnabled public String model;
         @AuraEnabled public String mode;
-        @AuraEnabled public Boolean canRequestAnalysis; // 화면에서 분석 버튼 표시 여부 (게스트·권한 없는 사용자는 false)
+        @AuraEnabled public Boolean canRequestAnalysis; // 화면에서 분석 버튼 표시 여부
+        @AuraEnabled public Boolean isGuest; // 공개 사이트 방문자 (최근 요청 목록은 숨김: 모든 방문자가 같은 게스트 계정)
     }
 
     @AuraEnabled(cacheable=true)
@@ -33,17 +34,21 @@ public with sharing class LolTeamBuilderController {
         data.model = s?.Model__c;
         data.mode = String.isBlank(s?.Mode__c) ? 'CLAUDE_CODE' : s.Mode__c;
         data.canRequestAnalysis = canRequestAnalysis();
+        data.isGuest = isGuest();
         return data;
     }
 
-    // Experience Cloud 공개 사이트의 게스트는 조회(점수·조합표·Excel)만 허용.
-    // 분석 요청은 Claude 실행(구독 사용량)을 일으키므로 로그인 사용자만 — 화면 숨김과 별도로 서버에서도 차단
+    // Experience Cloud 공개 사이트 방문자: 설정(Guest_Analysis_Enabled__c)이 켜져 있고 CLAUDE_CODE 모드일 때만 분석 요청 가능.
+    // 남용 방지(결과 재사용·시간당 상한)는 LolGuestAnalysis에서 처리. API 모드(크레딧 과금)는 로그인 사용자만
     static Boolean isGuest() {
         return UserInfo.getUserType() == 'Guest';
     }
 
     static Boolean canRequestAnalysis() {
-        return !isGuest() && Schema.SObjectType.LoL_Analysis_Request__c.isCreateable();
+        if (isGuest()) {
+            return LolGuestAnalysis.enabled(LoL_AI_Setting__mdt.getInstance('Default'));
+        }
+        return Schema.SObjectType.LoL_Analysis_Request__c.isCreateable();
     }
 
     static void requireMember() {
@@ -55,7 +60,6 @@ public with sharing class LolTeamBuilderController {
     /** 분석 요청 저장 (Pending). 프롬프트는 서버가 Custom Metadata로 조립 → 워커는 사용자 입력이 아닌 검증된 텍스트만 받음 */
     @AuraEnabled
     public static Id submitAnalysisRequest(String requestJson) {
-        requireMember();
         LolClaudeAnalysisService.AnalysisRequest req;
         try {
             req = (LolClaudeAnalysisService.AnalysisRequest) JSON.deserialize(requestJson, LolClaudeAnalysisService.AnalysisRequest.class);
@@ -65,9 +69,13 @@ public with sharing class LolTeamBuilderController {
         try {
             LolClaudeAnalysisService.validate(req);
             LoL_AI_Setting__mdt s = LolClaudeAnalysisService.setting();
+            if (isGuest()) {
+                return LolGuestAnalysis.submit(req, s);
+            }
             LoL_Analysis_Request__c record = new LoL_Analysis_Request__c(
                 Status__c = 'Pending',
                 Composition__c = LolClaudeAnalysisService.composition(req),
+                Composition_Key__c = LolGuestAnalysis.compositionKey(req),
                 Request_JSON__c = JSON.serialize(req),
                 Prompt__c = LolClaudeAnalysisService.fullPrompt(req, s),
                 Total_Score__c = req.totalScore
@@ -80,14 +88,20 @@ public with sharing class LolTeamBuilderController {
             throw userError(e.getMessage());
         } catch (Exception e) {
             System.debug(LoggingLevel.ERROR, 'LolTeamBuilderController.submitAnalysisRequest: ' + e.getTypeName() + ' ' + e.getMessage());
-            throw userError('분석 요청을 저장하지 못했습니다. 권한 집합(LoL Team Builder User)을 확인하세요.');
+            throw userError(isGuest() ? '분석 요청을 저장하지 못했습니다. 잠시 후 다시 시도하세요.' : '분석 요청을 저장하지 못했습니다. 권한 집합(LoL Team Builder User)을 확인하세요.');
         }
     }
 
     /** 폴링용 (상태가 계속 바뀌므로 cacheable 아님) */
     @AuraEnabled
     public static LoL_Analysis_Request__c getAnalysisRequest(Id requestId) {
-        requireMember();
+        if (isGuest()) {
+            LoL_Analysis_Request__c guestRow = LolGuestAnalysis.get(requestId);
+            if (guestRow == null) {
+                throw userError('분석 요청을 찾을 수 없습니다.');
+            }
+            return guestRow;
+        }
         List<LoL_Analysis_Request__c> rows = [
             SELECT Id, Name, Status__c, Composition__c, Total_Score__c, Result__c, Sources_JSON__c, Search_Count__c,
                 Error_Message__c, Processed_By__c, CreatedDate, Completed_At__c

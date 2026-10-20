@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 분석 요청 저장 → 클라우드 루틴 즉시 실행 신호. 커밋 후 발행(PublishAfterCommit)이라 저장이 롤백되면 실행하지 않음.
+     구독 트리거는 지정 사용자(PlatformEventSubscriberConfig)로 실행되므로, 공개 사이트 게스트에게 자격 증명 권한을 주지 않아도 됨 -->
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>LoL 분석 요청 저장 시 Claude Code 클라우드 루틴 실행 신호</description>
+    <eventType>HighVolume</eventType>
+    <label>LoL Routine Fire</label>
+    <pluralLabel>LoL Routine Fires</pluralLabel>
+    <publishBehavior>PublishAfterCommit</publishBehavior>
+</CustomObject>

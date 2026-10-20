@@ -225,38 +225,91 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(stored.Request_JSON__c.contains('Jinx_Adc'));
     }
 
-    @IsTest
-    static void guestCanViewButCannotRequestAnalysis() {
-        // Experience Cloud 공개 사이트 게스트: 데이터 조회는 가능, 분석 요청(Claude 실행)은 서버에서 차단
+    static User siteGuest() {
         List<User> guests = [SELECT Id FROM User WHERE UserType = 'Guest' AND IsActive = true LIMIT 1];
         Assert.isFalse(guests.isEmpty(), '사이트 게스트 사용자가 있어야 함');
+        return guests[0];
+    }
+
+    class FireMock implements HttpCalloutMock {
+        public HttpResponse respond(HttpRequest req) {
+            HttpResponse res = new HttpResponse();
+            res.setStatusCode(200);
+            res.setBody('{}');
+            return res;
+        }
+    }
+
+    @IsTest
+    static void guestCanRequestAnalysisAndReusesSameComposition() {
+        Test.setMock(HttpCalloutMock.class, new FireMock());
+        User guest = siteGuest();
         LolTeamBuilderController.BuilderData data;
-        List<String> errors = new List<String>();
+        Id first;
+        Id second;
+        LoL_Analysis_Request__c fetched;
+        String apiModeError;
         Test.startTest();
-        System.runAs(guests[0]) {
+        System.runAs(guest) {
             data = LolTeamBuilderController.getBuilderData();
-            Assert.isTrue(LolTeamBuilderController.getRecentRequests().isEmpty());
-            for (Integer i = 0; i < 2; i++) {
-                try {
-                    if (i == 0) {
-                        LolTeamBuilderController.submitAnalysisRequest(JSON.serialize(validRequest()));
-                    } else {
-                        LolTeamBuilderController.startAnalysis(JSON.serialize(validRequest()));
-                    }
-                } catch (AuraHandledException e) {
-                    errors.add(e.getMessage());
-                }
+            first = LolTeamBuilderController.submitAnalysisRequest(JSON.serialize(validRequest()));
+            second = LolTeamBuilderController.submitAnalysisRequest(JSON.serialize(validRequest()));
+            fetched = LolTeamBuilderController.getAnalysisRequest(first);
+            Assert.isTrue(LolTeamBuilderController.getRecentRequests().isEmpty(), '방문자는 최근 요청 목록 없음');
+            try {
+                LolTeamBuilderController.startAnalysis(JSON.serialize(validRequest()));
+            } catch (AuraHandledException e) {
+                apiModeError = e.getMessage();
             }
         }
         Test.stopTest();
-        Assert.isFalse(data.champions.isEmpty(), '게스트도 챔피언 데이터 조회 가능');
-        Assert.isFalse(data.canRequestAnalysis, '게스트는 분석 버튼 숨김');
-        Assert.areEqual(2, errors.size());
-        for (String message : errors) {
-            Assert.areEqual('분석 요청은 로그인한 사용자만 사용할 수 있습니다.', message);
+
+        Assert.isTrue(data.isGuest);
+        Assert.isTrue(data.canRequestAnalysis, '설정이 켜져 있으면 방문자도 분석 버튼 표시');
+        Assert.areEqual(first, second, '같은 조합은 진행 중 요청을 재사용 (Claude 실행 1회)');
+        Assert.areEqual(1, [SELECT COUNT() FROM LoL_Analysis_Request__c]);
+        Assert.areEqual('Pending', fetched.Status__c);
+        LoL_Analysis_Request__c stored = [SELECT Composition_Key__c, Prompt__c FROM LoL_Analysis_Request__c WHERE Id = :first];
+        Assert.isTrue(stored.Composition_Key__c.startsWith('Ornn_Top/EMERALD_LOW|'), stored.Composition_Key__c);
+        Assert.isTrue(stored.Prompt__c.startsWith('[지침]'), '프롬프트는 서버가 조립');
+        Assert.areEqual('분석 요청은 로그인한 사용자만 사용할 수 있습니다.', apiModeError, 'API(크레딧) 모드는 로그인 사용자만');
+    }
+
+    @IsTest
+    static void guestHourlyLimitAndVisibility() {
+        Test.setMock(HttpCalloutMock.class, new FireMock());
+        User guest = siteGuest();
+        Integer hourlyLimit = LoL_AI_Setting__mdt.getInstance('Default').Guest_Hourly_Limit__c.intValue();
+        // 로그인 사용자의 요청: 방문자에게 보이면 안 됨
+        LoL_Analysis_Request__c memberRow = new LoL_Analysis_Request__c(Status__c = 'Completed', Composition__c = 'member', Result__c = 'private');
+        insert memberRow;
+
+        String limitError;
+        String hiddenError;
+        Test.startTest();
+        System.runAs(guest) {
+            List<LoL_Analysis_Request__c> filler = new List<LoL_Analysis_Request__c>();
+            for (Integer i = 0; i < hourlyLimit; i++) {
+                filler.add(new LoL_Analysis_Request__c(Status__c = 'Completed', Composition__c = 'filler ' + i, Composition_Key__c = 'filler-' + i, Completed_At__c = Datetime.now()));
+            }
+            insert filler;
+            try {
+                LolTeamBuilderController.submitAnalysisRequest(JSON.serialize(validRequest()));
+            } catch (AuraHandledException e) {
+                limitError = e.getMessage();
+            }
+            try {
+                LolTeamBuilderController.getAnalysisRequest(memberRow.Id);
+            } catch (AuraHandledException e) {
+                hiddenError = e.getMessage();
+            }
         }
-        Assert.areEqual(0, [SELECT COUNT() FROM LoL_Analysis_Request__c]);
-        Assert.isTrue(LolTeamBuilderController.getBuilderData().canRequestAnalysis, '관리자는 요청 가능');
+        Test.stopTest();
+
+        Assert.isNotNull(limitError, '시간당 상한 초과 시 거부');
+        Assert.isTrue(limitError.contains('시간당 ' + hourlyLimit + '건'), limitError);
+        Assert.areEqual('분석 요청을 찾을 수 없습니다.', hiddenError, '로그인 사용자의 요청은 방문자에게 보이지 않음');
+        Assert.areEqual(hourlyLimit + 1, [SELECT COUNT() FROM LoL_Analysis_Request__c], '새 요청이 만들어지지 않음');
     }
 
     @IsTest

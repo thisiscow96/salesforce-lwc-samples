@@ -143,8 +143,10 @@ private class LolWorkerApiTest {
     // ===== 루틴 즉시 실행 (LolRoutineFire) =====
     class FireMock implements HttpCalloutMock {
         HttpRequest captured;
+        Integer calls = 0;
         public HttpResponse respond(HttpRequest req) {
             captured = req;
+            calls++;
             HttpResponse res = new HttpResponse();
             res.setStatusCode(200);
             res.setBody('{"type":"routine_fire"}');
@@ -158,10 +160,14 @@ private class LolWorkerApiTest {
         FireMock mock = new FireMock();
         Test.setMock(HttpCalloutMock.class, mock);
         Test.startTest();
-        LolRoutineFire.enqueueIfConfigured('LAR-00099');
-        Test.stopTest();
+        LolRoutineFire.enqueueIfConfigured('LAR-00099'); // 이벤트 발행
+        LolRoutineFire.enqueueIfConfigured('LAR-00100');
+        Test.getEventBus().deliver(); // 구독 트리거 실행 → Queueable 1개로 묶음 (트리거는 별도 컨텍스트라 Limits로는 확인 불가)
+        Test.stopTest(); // Queueable(콜아웃) 실행
 
         Assert.areEqual('callout:Claude_Routine/v1/claude_code/routines/trig_TEST/fire', mock.captured.getEndpoint());
+        Assert.isTrue(mock.captured.getBody().contains('LAR-00099, LAR-00100'), '두 신호가 루틴 1회 호출로 묶임');
+        Assert.areEqual(1, mock.calls, '콜아웃 1회');
         Assert.areEqual('experimental-cc-routine-2026-04-01', mock.captured.getHeader('anthropic-beta'));
         Assert.isNull(mock.captured.getHeader('Authorization'), '토큰은 Named Credential이 주입');
         Assert.isTrue(mock.captured.getBody().contains('LAR-00099'));
@@ -174,7 +180,8 @@ private class LolWorkerApiTest {
         LolRoutineFire.firePathOverride = '';
         Test.startTest();
         LolRoutineFire.enqueueIfConfigured('LAR-1');
-        Assert.areEqual(0, Limits.getQueueableJobs(), '경로 없으면 큐잉 안 함');
+        Test.getEventBus().deliver();
+        Assert.areEqual(0, Limits.getQueueableJobs(), '경로 없으면 발행·큐잉 안 함');
         LolRoutineFire.firePathOverride = 'https://evil.example.com/steal';
         new LolRoutineFire('LAR-2').execute(null);
         Test.stopTest();

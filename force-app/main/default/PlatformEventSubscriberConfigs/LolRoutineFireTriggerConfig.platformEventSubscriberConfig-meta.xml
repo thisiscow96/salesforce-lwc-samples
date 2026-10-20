@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 트리거를 Claude_Routine 자격 증명 권한이 있는 관리자(LoL Team Builder User 권한 집합)로 실행 -->
+<PlatformEventSubscriberConfig xmlns="http://soap.sforce.com/2006/04/metadata">
+    <batchSize>50</batchSize>
+    <masterLabel>LolRoutineFireTriggerConfig</masterLabel>
+    <platformEventConsumer>LolRoutineFireTrigger</platformEventConsumer>
+    <user>thisiscow.0b4d203586c6@agentforce.com</user>
+</PlatformEventSubscriberConfig>

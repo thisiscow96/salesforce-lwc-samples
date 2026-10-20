@@ -26,10 +26,28 @@ public with sharing class LolRoutineFire implements Queueable, Database.AllowsCa
         return s == null ? null : s.Routine_Fire_Path__c;
     }
 
-    /** 루틴이 설정된 경우에만 큐잉 */
+    /**
+     * 루틴이 설정된 경우 실행 신호(Platform Event)를 발행.
+     * 콜아웃은 이벤트 구독 트리거(지정 관리자 사용자로 실행)가 맡으므로, 공개 사이트 게스트처럼
+     * 자격 증명 권한이 없는 사용자의 요청도 루틴을 실행할 수 있다. 커밋 후 발행이라 저장이 롤백되면 실행 안 함.
+     */
     public static void enqueueIfConfigured(String requestName) {
-        if (String.isNotBlank(firePath()) && Limits.getQueueableJobs() < Limits.getLimitQueueableJobs()) {
-            System.enqueueJob(new LolRoutineFire(requestName));
+        if (String.isNotBlank(firePath())) {
+            Database.SaveResult result = EventBus.publish(new LoL_Routine_Fire__e(Request_Name__c = requestName));
+            if (!result.isSuccess()) {
+                System.debug(LoggingLevel.ERROR, 'LolRoutineFire publish 실패: ' + result.getErrors());
+            }
+        }
+    }
+
+    /** 구독 트리거: 한 번에 들어온 신호를 묶어 루틴을 1회만 실행 (루틴은 대기 요청을 여러 건 함께 처리) */
+    public static void handleEvents(List<LoL_Routine_Fire__e> events) {
+        List<String> names = new List<String>();
+        for (LoL_Routine_Fire__e e : events) {
+            names.add(e.Request_Name__c);
+        }
+        if (!names.isEmpty() && String.isNotBlank(firePath())) {
+            System.enqueueJob(new LolRoutineFire(String.join(names, ', ').left(200)));
         }
     }
 

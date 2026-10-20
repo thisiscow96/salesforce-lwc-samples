@@ -206,3 +206,10 @@ Claude Code 워커: claude-worker.js pending → claim → 웹 검색·분석 �
 
 - 루틴 예약 실행의 최소 간격은 1시간 → 즉시성은 API 트리거(/fire)로 확보
 - PC 작업 스케줄러 워커와 동시에 켜 두어도 선점(claim)으로 중복 처리되지 않음
+
+### 공개 사이트 (Experience Cloud LWR, /lol)
+
+- 방문자: 점수·조합표·Excel + Claude 분석 요청 가능 (`LoL AI Setting.Guest_Analysis_Enabled__c`로 켜고 끔)
+- 남용 방지 (`LolGuestAnalysis`): 같은 조합은 진행 중/최근 `Guest_Cache_Hours__c`시간 결과 재사용, 새 요청은 방문자 전체 시간당 `Guest_Hourly_Limit__c`건, 방문자는 방문자 요청만 조회
+- 루틴 실행: 요청 저장 → Platform Event `LoL_Routine_Fire__e`(커밋 후 발행) → 트리거가 지정 관리자(PlatformEventSubscriberConfig)로 실행되어 Claude_Routine 호출 → 게스트에게 자격 증명 권한 불필요
+- API(크레딧) 모드는 로그인 사용자만
