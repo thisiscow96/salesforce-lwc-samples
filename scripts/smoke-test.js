@@ -3,6 +3,7 @@
  *  1) 브라우저 콘솔 error / 페이지 예외가 없는지
  *  2) 각 페이지에서 기대한 수의 차트(canvas)가 실제 크기로 그려졌는지, 컴포넌트 에러 문구가 없는지
  *  3) Excel 업로드 E2E: 버튼 → 모달 → 실제 .xlsx 선택 → 미리보기 검증 → 업로드 → org에 레코드 생성 확인 → 정리
+ *  4) 공통 Excel 업로드 진입점: List View 버튼, URL 페이지(파라미터 누락 오류 포함), 레코드 Quick Action 업로드
  * 를 확인하고 스크린샷을 남긴다. 하나라도 실패하면 exit code 1.
  *
  * 사용: node scripts/smoke-test.js [출력폴더]
@@ -31,7 +32,7 @@ const IGNORED = [/favicon/i, /Content Security Policy.*report-only/i];
 
 function frontdoorUrl(pagePath) {
     // .cmd는 shell로 실행해야 하고, 경로에 공백이 있어 따옴표로 감쌈
-    const raw = execFileSync(`"${SF}"`, ['org', 'open', '--target-org', ORG, '--path', pagePath, '--url-only', '--json'], {
+    const raw = execFileSync(`"${SF}"`, ['org', 'open', '--target-org', ORG, '--path', `"${pagePath}"`, '--url-only', '--json'], {
         encoding: 'utf8',
         shell: true
     });
@@ -158,12 +159,12 @@ async function checkExcelUpload(browser) {
         await (await deepHandle(tab, '.upload-button >>> button')).click();
 
         // 모달 안 파일 입력이 활성화될 때까지 (= SheetJS 로드 완료)
-        await waitDeep(tab, 'c-account-excel-import >>> .file-input >>> input[type="file"]', { enabled: true });
-        await (await deepHandle(tab, 'c-account-excel-import >>> .file-input >>> input[type="file"]')).uploadFile(file);
+        await waitDeep(tab, 'c-excel-import >>> .file-input >>> input[type="file"]', { enabled: true });
+        await (await deepHandle(tab, 'c-excel-import >>> .file-input >>> input[type="file"]')).uploadFile(file);
 
         await waitDeep(tab, '.preview-summary');
         const summary = (await deepText(tab, '.preview-summary')).replace(/\s+/g, ' ');
-        if (!summary.includes('업로드 가능 3건 (Account 2건) · 오류 1건')) problems.push(`미리보기 집계가 다름: ${summary.trim()}`);
+        if (!summary.includes('업로드 가능 3건 · 오류 1건')) problems.push(`미리보기 집계가 다름: ${summary.trim()}`);
 
         await (await deepHandle(tab, '.import-button >>> button')).click();
         await waitDeep(tab, '.success-count');
@@ -183,6 +184,121 @@ async function checkExcelUpload(browser) {
         if (counts !== '2/3') problems.push(`org 저장 결과가 다름: Account/Contact = ${counts || '확인 불가'} (기대 2/3)`);
     }
     return { name, ok: problems.length === 0, problems, result: { canvases: 0, sizes: [`org Account/Contact=${counts}`] }, shot };
+}
+
+// 화면 안 모든 shadow DOM의 버튼·링크 텍스트 (List View 버튼 확인용, 브라우저 안에서 실행)
+function collectButtonTexts() {
+    const out = [];
+    const more = [];
+    const walk = (root) => {
+        root.querySelectorAll('button, a, [role="menuitem"]').forEach((el) => {
+            const text = (el.textContent || '').trim();
+            out.push(text);
+            // title 예: 'Show one more action', 'Show 3 more actions' (버튼 수에 따라 문구가 바뀜)
+            if (/more actions?$|작업 \d* ?개? ?더/i.test(el.title || '')) more.push(el);
+        });
+        root.querySelectorAll('*').forEach((el) => el.shadowRoot && walk(el.shadowRoot));
+    };
+    walk(document);
+    // 버튼이 많으면 List View 버튼은 ▼(더보기) 메뉴 안에 있으므로 메뉴를 열어 다음 확인 때 보이게 함
+    if (!out.includes('Excel 업로드') && more.length && !window.__moreOpened) {
+        window.__moreOpened = true; // 반복 클릭하면 메뉴가 다시 닫힘
+        more[0].click();
+    }
+    return out.filter(Boolean);
+}
+
+/*
+ * 공통 Excel 업로드 진입점 E2E
+ *  1) Account List View에 'Excel 업로드' 버튼  2) URL 페이지(파라미터 있음 → 파일 선택 / 없음 → 설정 오류)
+ *  3) Account 레코드 Quick Action → Account_Related_Contact 설정으로 실제 업로드 → org에 Contact 저장 확인 → 정리
+ */
+async function checkExcelEntryPoints(browser) {
+    const name = 'Excel 공통 진입점';
+    const problems = [];
+    const cleanup = path.join(__dirname, 'apex', 'delete-smoke-data.apex');
+    const setup = path.join(OUT, 'smoke-parent.apex');
+    fs.writeFileSync(setup, "Account a = new Account(Name = '[SMOKE] Action Parent'); insert a; System.debug(LoggingLevel.ERROR, 'SMOKE_PARENT=' + a.Id);");
+    runApexFile(cleanup);
+    const parentId = (runApexFile(setup).match(/SMOKE_PARENT=(\w{18})/) || [])[1];
+
+    const XLSX = require('../force-app/main/default/staticresources/sheetjs.js');
+    const stamp = Date.now();
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([
+        ['Last Name', 'First Name', 'Email', 'Birthdate'],
+        ['Kim', 'Action', `action1.${stamp}@example.com`, '1990-05-01'],
+        ['Lee', 'Action', `action2.${stamp}@example.com`, ''],
+        ['Bad', 'Date', '', '1990-13-01']
+    ]), 'Contacts');
+    const file = path.join(OUT, 'smoke-action-upload.xlsx');
+    fs.writeFileSync(file, Buffer.from(XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })));
+
+    const tab = await browser.newPage();
+    await tab.setViewport({ width: 1400, height: 1000 });
+    tab.on('console', (msg) => {
+        if (msg.type() === 'error' && !IGNORED.some((re) => re.test(msg.text()))) problems.push(`console.error: ${msg.text()}`);
+    });
+    tab.on('pageerror', (err) => problems.push(`page exception: ${err.message}`));
+    await installDeepFind(tab);
+    const shots = [];
+    const shoot = async (label) => {
+        const p = path.join(OUT, `Excel${label}.png`);
+        await tab.screenshot({ path: p, fullPage: true }).catch(() => {});
+        shots.push(p);
+    };
+    let counts = '';
+    try {
+        // 1) List View 버튼
+        await tab.goto(frontdoorUrl('lightning/o/Account/list?filterName=AllAccounts'), { waitUntil: 'domcontentloaded', timeout: 90000 });
+        const deadline = Date.now() + 60000;
+        let found = false;
+        while (Date.now() < deadline && !found) {
+            try {
+                found = (await tab.evaluate(collectButtonTexts)).includes('Excel 업로드');
+            } catch (e) {
+                if (!/context was destroyed|Cannot find context/i.test(e.message)) throw e;
+            }
+            if (!found) await sleep(1000);
+        }
+        if (!found) problems.push('Account List View에 Excel 업로드 버튼이 없음');
+        await shoot('ListView');
+
+        // 2) URL 페이지 (List View 버튼이 여는 주소)
+        await tab.goto(frontdoorUrl('lightning/cmp/c__excelImportPage?c__configName=Account_Contact'), { waitUntil: 'domcontentloaded', timeout: 90000 });
+        await waitDeep(tab, 'c-excel-import >>> .file-input >>> input[type="file"]', { enabled: true, timeout: 90000 });
+        await shoot('Page');
+        await tab.goto(frontdoorUrl('lightning/cmp/c__excelImportPage'), { waitUntil: 'domcontentloaded', timeout: 90000 });
+        await waitDeep(tab, 'c-excel-import >>> .config-error', { timeout: 90000 });
+        const configError = await deepText(tab, 'c-excel-import >>> .config-error');
+        if (!/configName/.test(configError || '')) problems.push(`파라미터 누락 오류 문구가 다름: ${configError}`);
+        await shoot('NoParam');
+
+        // 3) 레코드 Quick Action
+        if (!parentId) throw new Error('테스트용 Account 생성 실패');
+        const back = encodeURIComponent(`/lightning/r/Account/${parentId}/view`);
+        await tab.goto(frontdoorUrl(`lightning/action/quick/Account.Excel_Upload_Contacts?objectApiName=Account&context=RECORD_DETAIL&recordId=${parentId}&backgroundContext=${back}`), { waitUntil: 'domcontentloaded', timeout: 90000 });
+        await waitDeep(tab, 'c-excel-import-action >>> c-excel-import >>> .file-input >>> input[type="file"]', { enabled: true, timeout: 90000 });
+        await (await deepHandle(tab, 'c-excel-import-action >>> c-excel-import >>> .file-input >>> input[type="file"]')).uploadFile(file);
+        await waitDeep(tab, 'c-excel-import-action >>> c-excel-import >>> .preview-summary');
+        const summary = (await deepText(tab, 'c-excel-import-action >>> c-excel-import >>> .preview-summary')).replace(/\s+/g, ' ');
+        if (!summary.includes('업로드 가능 2건 · 오류 1건')) problems.push(`Quick Action 미리보기 집계가 다름: ${summary.trim()}`);
+        await (await deepHandle(tab, 'c-excel-import-action >>> c-excel-import >>> .import-button >>> button')).click();
+        await waitDeep(tab, 'c-excel-import-action >>> c-excel-import >>> .success-count');
+        const success = await deepText(tab, 'c-excel-import-action >>> c-excel-import >>> .success-count');
+        if (success !== '2') problems.push(`Quick Action 업로드 성공 ${success}건 (기대 2)`);
+        await sleep(1500);
+        await shoot('QuickAction');
+    } catch (e) {
+        problems.push(e.message);
+        await shoot('EntryFailure');
+    } finally {
+        await tab.close();
+        const out = runApexFile(cleanup);
+        counts = (out.match(/SMOKE_COUNTS accounts=(\d+) contacts=(\d+)/) || []).slice(1).join('/');
+        if (counts !== '1/2') problems.push(`org 저장 결과가 다름: Account/Contact = ${counts || '확인 불가'} (기대 1/2)`);
+    }
+    return { name, ok: problems.length === 0, problems, state: `org Account/Contact=${counts}`, shot: shots.join(', ') };
 }
 
 async function checkPage(browser, page) {
@@ -300,6 +416,10 @@ async function checkLolBuilder(browser) {
         failed = failed || !upload.ok;
         console.log(`[${upload.ok ? 'PASS' : 'FAIL'}] ${upload.name}  ${upload.result.sizes[0]}  screenshot=${upload.shot}`);
         upload.problems.forEach((p) => console.log(`    - ${p}`));
+        const entry = await checkExcelEntryPoints(browser);
+        failed = failed || !entry.ok;
+        console.log(`[${entry.ok ? 'PASS' : 'FAIL'}] ${entry.name}  ${entry.state}  screenshot=${entry.shot}`);
+        entry.problems.forEach((p) => console.log(`    - ${p}`));
         const lol = await checkLolBuilder(browser);
         failed = failed || !lol.ok;
         console.log(`[${lol.ok ? 'PASS' : 'FAIL'}] ${lol.name}  ${lol.state}  screenshot=${lol.shot}`);

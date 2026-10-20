@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QuickAction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionSubtype>ScreenAction</actionSubtype>
+    <description>Account 하위 Contact를 Excel로 일괄 생성 (Excel Import Config: Record Action Default)</description>
+    <label>Contact Excel 업로드</label>
+    <lightningWebComponent>excelImportAction</lightningWebComponent>
+    <optionsCreateFeedItem>false</optionsCreateFeedItem>
+    <type>LightningWebComponent</type>
+</QuickAction>

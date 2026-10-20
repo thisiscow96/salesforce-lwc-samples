@@ -7,7 +7,8 @@ module.exports = {
     testPathIgnorePatterns: ['/node_modules/', '/__tests__/data/'],
     moduleNameMapper: {
         ...jestConfig.moduleNameMapper,
-        '^lightning/modal$': '<rootDir>/jest-mocks/lightning/modal'
+        '^lightning/modal$': '<rootDir>/jest-mocks/lightning/modal',
+        '^lightning/actions$': '<rootDir>/jest-mocks/lightning/actions'
     },
     setupFilesAfterEnv: ['<rootDir>/jest.setup.js']
 };

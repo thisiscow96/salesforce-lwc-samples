@@ -20,7 +20,7 @@ Step 'ESLint' { npx eslint force-app/main/default/lwc }
 Step 'Jest' { npx sfdx-lwc-jest }
 if (-not $SkipDeploy) {
     Step 'Deploy' { & $sf project deploy start --source-dir force-app --target-org chartjs-dev }
-    Step 'Apex Tests' { & $sf apex run test --class-names SalesDashboardControllerTest --class-names AccountExcelImportControllerTest --class-names LolTeamBuilderControllerTest --code-coverage --result-format human --wait 10 --target-org chartjs-dev }
+    Step 'Apex Tests' { & $sf apex run test --class-names SalesDashboardControllerTest --class-names ExcelImportServiceTest --class-names LolTeamBuilderControllerTest --code-coverage --result-format human --wait 10 --target-org chartjs-dev }
 }
 Step 'Smoke Test (browser)' { node scripts/smoke-test.js }
 Write-Host "`n모든 검증 통과" -ForegroundColor Green

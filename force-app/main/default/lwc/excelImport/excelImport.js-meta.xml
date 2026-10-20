@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Excel Upload (공통)</masterLabel>
+    <description>Excel(.xlsx/.csv) 일괄 업로드 공통 컴포넌트. Excel Import Config(configName)에 따라 열·검증·저장 로직이 바뀜. 설정이 없으면 오류 표시</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__RecordPage</target>
+        <target>lightning__FlowScreen</target>
+    </targets>
+    <targetConfigs>
+        <!-- App Builder: 등록된 설정을 드롭다운으로 선택 (레코드 페이지는 그 Object용 설정만 표시) -->
+        <targetConfig targets="lightning__AppPage,lightning__HomePage,lightning__RecordPage">
+            <property name="configName" type="String" label="Excel Import Config" required="true"
+                datasource="apex://ExcelImportConfigPicklist" description="Setup > Custom Metadata Types > Excel Import Config 의 DeveloperName"/>
+        </targetConfig>
+        <targetConfig targets="lightning__FlowScreen">
+            <property name="configName" type="String" label="Excel Import Config (DeveloperName)" role="inputOnly"/>
+            <property name="recordId" type="String" label="Record Id (Parent Object가 있는 설정)" role="inputOnly"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

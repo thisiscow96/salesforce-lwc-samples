@@ -1,0 +1,14 @@
+<template>
+    <lightning-quick-action-panel header={header}>
+        <template lwc:if={resolveError}>
+            <div class="resolve-error slds-notify slds-notify_alert slds-alert_error" role="alert">{resolveError}</div>
+        </template>
+        <template lwc:if={configName}>
+            <c-excel-import config-name={configName} record-id={recordId} onconfigload={handleConfigLoad}
+                onbusychange={handleBusyChange} onimportcomplete={handleImportComplete}></c-excel-import>
+        </template>
+        <div slot="footer">
+            <lightning-button class="close-button" label="닫기" onclick={handleClose} disabled={busy}></lightning-button>
+        </div>
+    </lightning-quick-action-panel>
+</template>

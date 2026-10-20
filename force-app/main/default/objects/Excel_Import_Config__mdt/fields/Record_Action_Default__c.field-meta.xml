@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Record_Action_Default__c</fullName>
+    <description>Parent Object 레코드의 Quick Action(Excel 업로드)이 사용할 기본 설정. Object당 1건만 체크</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <label>Record Action Default</label>
+    <defaultValue>false</defaultValue>
+    <type>Checkbox</type>
+</CustomField>

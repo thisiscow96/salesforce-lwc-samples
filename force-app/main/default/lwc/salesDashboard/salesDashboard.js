@@ -4,7 +4,7 @@ import { refreshApex } from '@salesforce/apex';
 import LOCALE from '@salesforce/i18n/locale';
 import CURRENCY from '@salesforce/i18n/currency';
 import getDashboardData from '@salesforce/apex/SalesDashboardController.getDashboardData';
-import AccountImportModal from 'c/accountImportModal';
+import ExcelImportModal from 'c/excelImportModal';
 import {
     OUTCOME_LABELS,
     NONE_LABEL,
@@ -167,9 +167,9 @@ export default class SalesDashboard extends NavigationMixin(LightningElement) {
         });
     }
 
-    // Account Excel 업로드 (표준 LightningModal). 업로드 결과는 모달 안에서 확인하므로 닫힌 뒤 추가 처리 없음
+    // 공통 Excel 업로드 모달에 설정(Account_Contact)만 지정. 결과는 모달 안에서 확인하므로 닫힌 뒤 추가 처리 없음
     handleOpenUpload() {
-        AccountImportModal.open({ size: 'medium', label: 'Account Excel 업로드' });
+        ExcelImportModal.open({ size: 'large', configName: 'Account_Contact', label: 'Account Excel 업로드' });
     }
 
     handleClearFilter() {

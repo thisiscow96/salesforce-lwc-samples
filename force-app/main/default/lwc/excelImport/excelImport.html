@@ -1,0 +1,108 @@
+<template>
+    <div class="uploader">
+        <template lwc:if={libraryError}>
+            <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">{libraryError}</div>
+        </template>
+
+        <!-- 0. 설정 조회 / 설정 오류 (configName 누락·미등록·비활성·권한 없음 등) -->
+        <template lwc:if={isLoading}>
+            <div class="loading slds-is-relative slds-p-vertical_xx-large">
+                <lightning-spinner alternative-text="설정을 불러오는 중" size="small"></lightning-spinner>
+            </div>
+        </template>
+        <template lwc:if={hasConfigError}>
+            <div class="config-error slds-notify slds-notify_alert slds-alert_error" role="alert">
+                <lightning-icon icon-name="utility:error" size="x-small" variant="inverse" class="slds-m-right_x-small"></lightning-icon>
+                <span>{configError}</span>
+            </div>
+        </template>
+
+        <!-- 1. 파일 선택 -->
+        <template lwc:if={isSelect}>
+            <div class="guide slds-box slds-theme_shade slds-m-bottom_medium">
+                <p class="config-label slds-text-title_bold slds-m-bottom_x-small">{config.label}</p>
+                <template lwc:if={config.guide}>
+                    <p class="slds-m-bottom_x-small">{config.guide}</p>
+                </template>
+                <p class="slds-m-bottom_xx-small">첫 행은 헤더입니다. 열 이름:</p>
+                <div class="columns slds-m-bottom_x-small">
+                    <template for:each={columnGuide} for:item="column">
+                        <span key={column.key} class="slds-badge slds-m-right_xx-small slds-m-bottom_xx-small">{column.text}</span>
+                    </template>
+                </div>
+                <p class="slds-text-color_weak">{limitGuide}</p>
+                <lightning-button class="template-button slds-m-top_small" variant="base" icon-name="utility:download"
+                    label="업로드 양식 다운로드" onclick={handleDownloadTemplate} disabled={fileInputDisabled}></lightning-button>
+            </div>
+            <lightning-input class="file-input" type="file" label="Excel 파일" accept=".xlsx,.csv" onchange={handleFileChange}
+                disabled={fileInputDisabled}></lightning-input>
+            <template lwc:if={fileError}>
+                <div class="file-error slds-notify slds-notify_alert slds-alert_error slds-m-top_small" role="alert">
+                    {fileName}: {fileError}
+                </div>
+            </template>
+        </template>
+
+        <!-- 2. 미리보기 -->
+        <template lwc:if={isPreview}>
+            <div class="summary slds-grid slds-wrap slds-grid_vertical-align-center slds-m-bottom_small">
+                <div class="slds-col">
+                    <p class="slds-text-heading_small">{fileName}</p>
+                    <p class="preview-summary slds-text-color_weak">
+                        업로드 가능 <b class="slds-text-color_success">{validCount}</b>건
+                        · 오류 <b class="slds-text-color_error">{invalidCount}</b>건
+                    </p>
+                </div>
+                <lightning-input class="slds-col_bump-left" type="toggle" label="오류 행만 보기" message-toggle-active=""
+                    message-toggle-inactive="" checked={showErrorsOnly} onchange={handleToggleErrors}></lightning-input>
+            </div>
+            <template lwc:if={hasInvalid}>
+                <p class="slds-text-color_error slds-m-bottom_x-small">오류 행은 업로드에서 제외됩니다. 결과 화면에서 오류 목록을 CSV로 받아 고친 뒤 다시 올릴 수 있습니다.</p>
+            </template>
+            <div class="table">
+                <lightning-datatable key-field="rowNumber" data={previewData} columns={previewColumns}
+                    hide-checkbox-column></lightning-datatable>
+            </div>
+            <template lwc:if={previewTruncated}>
+                <p class="slds-text-color_weak slds-m-top_x-small">미리보기는 앞 {previewLimit}행만 표시합니다. 업로드는 전체 행을 처리합니다.</p>
+            </template>
+            <div class="slds-m-top_medium slds-text-align_right">
+                <lightning-button label="다른 파일 선택" onclick={handleReset}></lightning-button>
+                <lightning-button class="import-button slds-m-left_x-small" variant="brand" label={importLabel}
+                    onclick={handleImport} disabled={importDisabled}></lightning-button>
+            </div>
+        </template>
+
+        <!-- 3. 업로드 중 -->
+        <template lwc:if={isImporting}>
+            <div class="slds-p-vertical_large">
+                <p class="slds-m-bottom_small">업로드 중입니다. 창을 닫지 마세요. ({progressLabel})</p>
+                <lightning-progress-bar value={progress} size="large"></lightning-progress-bar>
+            </div>
+        </template>
+
+        <!-- 4. 결과 -->
+        <template lwc:if={isDone}>
+            <div class="result slds-m-bottom_small">
+                <p class="slds-text-heading_small">
+                    성공 <b class="success-count slds-text-color_success">{successCount}</b>건 ·
+                    실패 <b class="failed-count slds-text-color_error">{failedCount}</b>건
+                </p>
+            </div>
+            <template lwc:if={hasFailures}>
+                <div class="table">
+                    <lightning-datatable key-field="rowNumber" data={failedTableData} columns={resultColumns}
+                        hide-checkbox-column></lightning-datatable>
+                </div>
+            </template>
+            <div class="slds-m-top_medium slds-text-align_right">
+                <template lwc:if={hasFailures}>
+                    <lightning-button class="error-csv-button" icon-name="utility:download" label="실패 목록 다운로드 (CSV)"
+                        onclick={handleDownloadErrors}></lightning-button>
+                </template>
+                <lightning-button class="slds-m-left_x-small" variant="brand" label="새 파일 업로드"
+                    onclick={handleReset}></lightning-button>
+            </div>
+        </template>
+    </div>
+</template>

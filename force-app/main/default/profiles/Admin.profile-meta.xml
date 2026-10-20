@@ -7,7 +7,7 @@
         <visible>true</visible>
     </applicationVisibilities>
     <classAccesses>
-        <apexClass>AccountExcelImportController</apexClass>
+        <apexClass>ExcelImportController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

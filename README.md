@@ -128,22 +128,43 @@ powershell -ExecutionPolicy Bypass -File scripts\verify.ps1
 | 4. Apex 테스트 | `sf apex run test` | 집계 정확성(200건 Bulk), 권한 없는 사용자 처리, 커버리지 |
 | 5. 스모크 테스트 | headless Edge + puppeteer-core (`scripts/smoke-test.js`) | 실제 org 화면의 콘솔 오류, 차트 수·크기, 컴포넌트 에러 문구 (스크린샷: `.smoke/`) |
 
-## 8. Account Excel 업로드 (SheetJS, 무료 Apache 2.0)
+## 8. Excel 업로드 공통 컴포넌트 (SheetJS, 무료 Apache 2.0)
 
-Sales Dashboard 상단 **Excel 업로드** 버튼 → 표준 LightningModal에서 .xlsx/.csv를 올려 **Account + Contact**를 생성합니다.
+하나의 공통 LWC `c-excel-import`가 **파라미터 `configName`** 으로 받은 설정(Custom Metadata)에 따라 열·검증·저장 로직을 바꿔 동작합니다. 설정이 없거나(파라미터 누락 포함) 비활성·불완전·권한 없음이면 파일 선택 대신 오류를 표시합니다.
+
+### 구조
+```
+[호출 위치]                         [공통]                               [설정별 분기]
+App/Home/Record Page (App Builder) ┐
+Flow Screen                        │
+버튼 → c-excel-import-modal        ├→ c-excel-import ─→ ExcelImportController ─→ ExcelImportService ─→ Handler_Class__c
+레코드 Quick Action                │   (configName,       (사용자 메시지/로그 분리)  (설정 로드·검증,      ├ ExcelImportGenericInsertHandler (코드 없음)
+  → c-excel-import-action          │    recordId)                                  공통 열 검증,        └ AccountContactImportHandler (업무 로직)
+List View·URL 버튼                 │                                              롤백)                  … ExcelImportHandler 상속으로 추가
+  → c-excel-import-page            ┘
+```
 
 | 항목 | 내용 |
 |---|---|
-| 데이터 모델 | 행마다 Contact 1건(First Name, Last Name, Email), 같은 Account Name은 Account 1건으로 묶음. (org에 Person Account가 꺼져 있어 Business Account + Contact 구조) |
-| 헤더 | `Account Name`(필수), `First Name`, `Last Name`(필수), `Email` — 대소문자·공백 무시, 한글(회사명/이름/성/이메일) 허용. 화면에서 양식 다운로드 가능 |
-| 흐름 | 파일 선택 → 브라우저에서 파싱·검증·미리보기 → 200행씩 Apex 순차 호출(진행률) → 결과 + 실패 목록 CSV |
-| 제한 | 첫 시트, 최대 5,000행·5MB. 그 이상은 Data Loader / Bulk API 권장 |
-| 구성 | Static Resource `sheetjs`(v0.20.3 mini) · LWC `accountExcelImport`(App Builder 단독 배치 가능) · `accountImportModal` · Apex `AccountExcelImportController` |
-| 보안 | `with sharing` + `AccessLevel.USER_MODE` DML, CRUD 사전 확인, 서버 재검증 |
-| 권한 | Permission Set **Account Excel Import User** + Account/Contact Create 권한·FLS |
-| 실패 처리 | 부분 성공(allOrNone=false). Contact 실패로 비게 된 신규 Account는 삭제. 권한·시스템 오류는 즉시 중단 |
+| 설정 | `Excel_Import_Config__mdt` (DeveloperName = configName): Active, Handler Class, Target/Parent Object, Parent Field, Record Action Default, Chunk Size(≤200), Max Rows, Guide |
+| 열 정의 | `Excel_Import_Column__mdt`: Field Key, Column Label, Aliases, Required, Max Length, Data Type(Text/Email/Number/Date/Boolean), Unique In File, Sort Order, Sample Value |
+| 등록된 설정 | `Account_Contact` — Account + Contact 일괄 생성 (AccountContactImportHandler) / `Account_Related_Contact` — Account 레코드 화면에서 하위 Contact 생성 (Generic, Parent Field = AccountId) |
+| 새 업로드 추가 | 단순 Insert: CMDT 레코드만 등록 (Generic Handler). 업무 로직 필요: `ExcelImportHandler` 상속 클래스 작성 → Handler Class에 지정 |
+| 흐름 | 설정 조회 → 파일 선택 → 브라우저에서 파싱·검증·미리보기 → Chunk Size씩 Apex 순차 호출(carryOver로 청크 간 값 전달) → 결과 + 실패 목록 CSV |
+| 오류 표시 | configName 누락 / 미등록 / 비활성 / 열 정의 없음 / Handler 없음·미상속 / 레코드 화면 전용 설정을 다른 곳에서 사용 / Object 불일치 / 레코드 접근 불가 / 대상 필드 없음·권한 없음 |
+| 보안 | 전 클래스 `with sharing`, DML `AccessLevel.USER_MODE`, 서버 재검증, 설정에 정의된 열만 저장(임의 필드 주입 불가), Handler 실패 시 청크 롤백 |
+| 권한 | Permission Set **Excel Import User**(API: Account_Excel_Import_User) + 대상 Object Create 권한·FLS |
 
-스모크 테스트는 실제 org에서 `[SMOKE]` 데이터로 업로드 → 저장 건수 확인 → 삭제(`scripts/apex/delete-smoke-data.apex`)까지 수행합니다.
+### 사용 위치별 설정
+| 위치 | 방법 |
+|---|---|
+| App/Home/Record Page | App Builder에서 **Excel Upload (공통)** 배치 → Excel Import Config 드롭다운 선택 (레코드 페이지는 그 Object용 설정만 표시) |
+| 버튼(LWC 안) | `ExcelImportModal.open({ size: 'large', configName: 'Account_Contact', recordId })` — Sales Dashboard 상단 버튼이 예시 |
+| 레코드 Quick Action | `Account.Excel_Upload_Contacts` (Account Layout). 레코드 Object에 Record Action Default로 지정된 설정 사용 |
+| List View / URL 버튼 | `/lightning/cmp/c__excelImportPage?c__configName=Account_Contact[&c__recordId=...]` — Account List View `Excel 업로드` 버튼(▼ 메뉴)이 예시 |
+| Flow Screen | 화면 구성 요소 Excel Upload (공통), 입력 configName / recordId |
+
+스모크 테스트는 Sales Dashboard 모달 업로드, List View 버튼, URL 페이지(파라미터 누락 오류 포함), Account Quick Action 업로드를 `[SMOKE]` 데이터로 검증하고 삭제(`scripts/apex/delete-smoke-data.apex`)합니다.
 
 ## 9. LoL 팀 조합 분석기 (탭: LoL 팀 조합)
 

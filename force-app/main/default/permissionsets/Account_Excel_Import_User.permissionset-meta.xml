@@ -3,10 +3,10 @@
      Account/Contact Create 권한과 FLS(First Name, Last Name, Email)는 Profile 또는 별도 Permission Set으로 부여 -->
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <classAccesses>
-        <apexClass>AccountExcelImportController</apexClass>
+        <apexClass>ExcelImportController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
-    <description>Account Excel Upload 사용: Apex 컨트롤러 접근. 데이터 권한(Account/Contact Create, FLS)은 별도 부여</description>
+    <description>공통 Excel Upload(c-excel-import) 사용: Apex 컨트롤러 접근. 데이터 권한(대상 Object Create, FLS)은 별도 부여</description>
     <hasActivationRequired>false</hasActivationRequired>
-    <label>Account Excel Import User</label>
+    <label>Excel Import User</label>
 </PermissionSet>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WebLink xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Excel_Upload</fullName>
+    <availability>online</availability>
+    <description>공통 Excel 업로드 화면(c__excelImportPage)을 Account_Contact 설정으로 엶</description>
+    <displayType>massActionButton</displayType>
+    <encodingKey>UTF-8</encodingKey>
+    <linkType>url</linkType>
+    <masterLabel>Excel 업로드</masterLabel>
+    <openType>replace</openType>
+    <protected>false</protected>
+    <requireRowSelection>false</requireRowSelection>
+    <url>/lightning/cmp/c__excelImportPage?c__configName=Account_Contact</url>
+</WebLink>

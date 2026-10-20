@@ -1,0 +1,8 @@
+<template>
+    <lightning-card title="Excel 업로드" icon-name="utility:upload">
+        <lightning-button slot="actions" label="이전 화면으로" icon-name="utility:back" onclick={handleBack}></lightning-button>
+        <div class="slds-p-horizontal_medium">
+            <c-excel-import config-name={configName} record-id={recordId}></c-excel-import>
+        </div>
+    </lightning-card>
+</template>

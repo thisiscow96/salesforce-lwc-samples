@@ -1,0 +1,16 @@
+/* 표가 길어도 컨테이너(모달·카드) 안에서만 스크롤 */
+.table {
+    max-height: 22rem;
+    overflow: auto;
+    border: 1px solid var(--slds-g-color-border-1, #e5e5e5);
+    border-radius: 0.25rem;
+}
+
+.summary {
+    gap: 0.5rem;
+}
+
+.config-error {
+    justify-content: flex-start;
+    text-align: left;
+}

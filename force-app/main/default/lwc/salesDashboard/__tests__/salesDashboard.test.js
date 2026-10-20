@@ -2,7 +2,7 @@ import { createElement } from 'lwc';
 import SalesDashboard from 'c/salesDashboard';
 import { loadScript } from 'lightning/platformResourceLoader';
 import getDashboardData from '@salesforce/apex/SalesDashboardController.getDashboardData';
-import AccountImportModal from 'c/accountImportModal';
+import ExcelImportModal from 'c/excelImportModal';
 
 const realEcharts = require('../../../staticresources/echarts.js');
 const DATA = require('./data/dashboardData.json');
@@ -149,6 +149,6 @@ describe('c-sales-dashboard', () => {
     it('Excel 업로드 버튼은 표준 LightningModal로 업로드 화면을 연다', async () => {
         const el = await mountWithData();
         el.shadowRoot.querySelector('.upload-button').click();
-        expect(AccountImportModal.open).toHaveBeenCalledWith({ size: 'medium', label: 'Account Excel 업로드' });
+        expect(ExcelImportModal.open).toHaveBeenCalledWith({ size: 'large', configName: 'Account_Contact', label: 'Account Excel 업로드' });
     });
 });

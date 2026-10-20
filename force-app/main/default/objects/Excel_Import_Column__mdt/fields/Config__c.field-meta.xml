@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Config__c</fullName>
+    <description>소속 Excel Import Config</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <label>Config</label>
+    <referenceTo>Excel_Import_Config__mdt</referenceTo>
+    <relationshipLabel>Excel Import Columns</relationshipLabel>
+    <relationshipName>Excel_Import_Columns</relationshipName>
+    <required>true</required>
+    <type>MetadataRelationship</type>
+    <unique>false</unique>
+</CustomField>

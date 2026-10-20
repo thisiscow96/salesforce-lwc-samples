@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Excel 업로드 공통 컴포넌트(c-excel-import) 설정. DeveloperName = 화면에서 넘기는 configName 파라미터</description>
+    <label>Excel Import Config</label>
+    <pluralLabel>Excel Import Configs</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>
