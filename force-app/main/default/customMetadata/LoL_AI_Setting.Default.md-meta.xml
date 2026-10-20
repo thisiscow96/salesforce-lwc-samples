@@ -11,8 +11,12 @@
         <value xsi:type="xsd:string">claude-sonnet-5-5</value>
     </values>
     <values>
+        <field>Base_Patch__c</field>
+        <value xsi:type="xsd:string">26.20</value>
+    </values>
+    <values>
         <field>Max_Tokens__c</field>
-        <value xsi:type="xsd:double">6000</value>
+        <value xsi:type="xsd:double">16000</value>
     </values>
     <values>
         <field>Web_Search_Tool__c</field>
@@ -20,7 +24,7 @@
     </values>
     <values>
         <field>Web_Search_Max_Uses__c</field>
-        <value xsi:type="xsd:double">3</value>
+        <value xsi:type="xsd:double">15</value>
     </values>
     <values>
         <field>Timeout_Seconds__c</field>

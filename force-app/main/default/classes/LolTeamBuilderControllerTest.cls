@@ -71,10 +71,36 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(prompt.contains('징크스(Jinx)'), prompt);
         Assert.isTrue(prompt.contains('마스터 500LP'), '티어 라벨 포함');
         Assert.isTrue(prompt.contains('총점 82.4'), prompt);
-        // 코칭 리포트 요구 섹션: 라인별 지침, 정글 동선·갱, 공허 유충·첫 용 운영 (수치는 검색으로 확인하도록)
-        for (String required : new List<String>{ '▶ 탑', '▶ 정글', '▶ 서폿', '정글 동선과 갱킹', '공허 유충', '첫 드래곤 트라이', '등장 시간을 검색' }) {
+        // 리포트 양식: 라인별 빌드, 상대 조합 6유형 + 상대 정글러 대응, 정글 동선, 데이터 기준 / 기준 패치·티어
+        for (String required : new List<String>{
+            '▶ 탑', '▶ 정글', '▶ 서폿', '"- 룬:"', '"- 카운터:"', '■ 상대 조합별 대처법', '▶ 다이브 조합', '▶ 초반 스노우볼 조합',
+            '▶ 상대 정글러별 첫 3분 대응', '▶ 레드 시작', '▶ 블루 시작', '■ 오브젝트 운영', '■ 추천 밴 3개', '■ 데이터 기준',
+            '- 기준 패치: ' + s.Base_Patch__c, '- 기준 티어: 에메랄드+'
+        }) {
             Assert.isTrue(prompt.contains(required), '프롬프트에 "' + required + '" 포함');
         }
+        // 지침: 교차 검색 규칙과 금지 표현 (불확실성은 데이터 기준 섹션에만)
+        String guide = (String) body.get('system');
+        Assert.isTrue(guide.contains('최소 2개 출처를 교차 확인'), guide);
+        Assert.isTrue(guide.contains('[금지 표현]'), guide);
+        Assert.isFalse(guide.contains('"(확인 필요)"로 표시'), '이전 지침(확인 필요 표기) 제거');
+        Assert.areEqual(16000, body.get('max_tokens'));
+    }
+
+    @IsTest
+    static void statBracketFollowsLowestPlayerTier() {
+        Map<String, String> tiers = new Map<String, String>{
+            'TOP' => 'MASTER_0', 'JUNGLE' => 'MASTER_0', 'MID' => 'MASTER_0', 'ADC' => 'MASTER_0', 'SUPPORT' => 'MASTER_0'
+        };
+        LolClaudeAnalysisService.AnalysisRequest req = new LolClaudeAnalysisService.AnalysisRequest();
+        req.tiers = tiers;
+        Assert.areEqual('마스터+', LolClaudeAnalysisService.statBracket(req));
+        tiers.put('ADC', 'DIAMOND_HIGH');
+        Assert.areEqual('다이아+', LolClaudeAnalysisService.statBracket(req));
+        tiers.put('TOP', 'GOLD');
+        Assert.areEqual('골드+', LolClaudeAnalysisService.statBracket(req));
+        tiers.put('MID', 'SILVER');
+        Assert.areEqual('전체 티어', LolClaudeAnalysisService.statBracket(req));
     }
 
     @IsTest

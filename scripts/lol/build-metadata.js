@@ -136,6 +136,7 @@ const TYPES = {
         fields: [
             { name: 'Mode__c', label: 'Mode', description: 'CLAUDE_CODE = 요청 큐를 로컬 Claude Code가 처리(구독 범위), API = Claude API 직접 호출(크레딧 과금)', type: 'Picklist', required: true, values: ['CLAUDE_CODE', 'API'] },
             text('Model__c', 'Model', 'Claude 모델 ID (API 모드)', 80, true),
+            text('Base_Patch__c', 'Base Patch', '분석 통계 기준 패치 (예: 26.20). 비우면 최신 패치를 검색해 사용', 20),
             num('Max_Tokens__c', 'Max Tokens', '최대 출력 토큰', 5, 0),
             text('Web_Search_Tool__c', 'Web Search Tool', '웹 검색 도구 타입 (비우면 검색 안 함)', 40),
             num('Web_Search_Max_Uses__c', 'Web Search Max Uses', '요청당 최대 검색 횟수', 2, 0),
@@ -165,7 +166,9 @@ for (const [type, def] of Object.entries(TYPES)) {
 }
 
 // ---------- 레코드 ----------
-fs.rmSync(RECORDS, { recursive: true, force: true }); // 삭제된 데이터가 남지 않도록 매번 재생성
+// 삭제된 데이터가 남지 않도록 LoL_* 레코드만 매번 재생성 (다른 기능의 CMDT 레코드는 건드리지 않음)
+fs.mkdirSync(RECORDS, { recursive: true });
+fs.readdirSync(RECORDS).filter((f) => f.startsWith('LoL_')).forEach((f) => fs.rmSync(path.join(RECORDS, f)));
 
 function record(type, developerName, label, values) {
     const valueXml = Object.entries(values)
@@ -243,9 +246,10 @@ TIERS.forEach(([name, label, skill], i) => record('LoL_Tier__mdt', name, label, 
 record('LoL_AI_Setting__mdt', 'Default', 'Default', {
     Mode__c: 'CLAUDE_CODE',
     Model__c: 'claude-sonnet-5-5',
-    Max_Tokens__c: 6000,
+    Base_Patch__c: '26.20', // lol-data.js 통계 기준과 동일
+    Max_Tokens__c: 16000, // 리포트 양식 확장(12,000자 이내)에 맞춤
     Web_Search_Tool__c: 'web_search_20250305',
-    Web_Search_Max_Uses__c: 3,
+    Web_Search_Max_Uses__c: 15, // 항목당 2개 출처 교차 확인
     Timeout_Seconds__c: 120,
     Guest_Analysis_Enabled__c: true,
     Guest_Hourly_Limit__c: 10,
