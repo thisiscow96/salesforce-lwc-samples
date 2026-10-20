@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- LoL Team Builder 공개 사이트 게스트: 조합 데이터 조회용 컨트롤러만 허용.
+     분석 요청(submit/startAnalysis)은 컨트롤러가 게스트를 차단하고, 요청 오브젝트 권한도 주지 않음 -->
+<Profile xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses>
+        <apexClass>LolTeamBuilderController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <custom>false</custom>
+    <userLicense>Guest User License</userLicense>
+</Profile>

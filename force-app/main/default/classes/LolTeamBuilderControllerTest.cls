@@ -226,6 +226,40 @@ private class LolTeamBuilderControllerTest {
     }
 
     @IsTest
+    static void guestCanViewButCannotRequestAnalysis() {
+        // Experience Cloud 공개 사이트 게스트: 데이터 조회는 가능, 분석 요청(Claude 실행)은 서버에서 차단
+        List<User> guests = [SELECT Id FROM User WHERE UserType = 'Guest' AND IsActive = true LIMIT 1];
+        Assert.isFalse(guests.isEmpty(), '사이트 게스트 사용자가 있어야 함');
+        LolTeamBuilderController.BuilderData data;
+        List<String> errors = new List<String>();
+        Test.startTest();
+        System.runAs(guests[0]) {
+            data = LolTeamBuilderController.getBuilderData();
+            Assert.isTrue(LolTeamBuilderController.getRecentRequests().isEmpty());
+            for (Integer i = 0; i < 2; i++) {
+                try {
+                    if (i == 0) {
+                        LolTeamBuilderController.submitAnalysisRequest(JSON.serialize(validRequest()));
+                    } else {
+                        LolTeamBuilderController.startAnalysis(JSON.serialize(validRequest()));
+                    }
+                } catch (AuraHandledException e) {
+                    errors.add(e.getMessage());
+                }
+            }
+        }
+        Test.stopTest();
+        Assert.isFalse(data.champions.isEmpty(), '게스트도 챔피언 데이터 조회 가능');
+        Assert.isFalse(data.canRequestAnalysis, '게스트는 분석 버튼 숨김');
+        Assert.areEqual(2, errors.size());
+        for (String message : errors) {
+            Assert.areEqual('분석 요청은 로그인한 사용자만 사용할 수 있습니다.', message);
+        }
+        Assert.areEqual(0, [SELECT COUNT() FROM LoL_Analysis_Request__c]);
+        Assert.isTrue(LolTeamBuilderController.getBuilderData().canRequestAnalysis, '관리자는 요청 가능');
+    }
+
+    @IsTest
     static void promptListsScoreCategoriesInScreenOrder() {
         // 화면(배점 Sort_Order) 순서와 프롬프트 순서가 같아야 함 (CMDT SOQL ORDER BY가 무시되는 문제 회귀 방지)
         List<LoL_Score_Weight__mdt> weights = LolClaudeAnalysisService.sortedWeights();

@@ -87,6 +87,7 @@ export default class LolTeamBuilder extends LightningElement {
     analysisError;
     analyzing = false;
     mode = 'CLAUDE_CODE';
+    canAnalyze = false; // 서버가 알려 준 분석 요청 가능 여부 (Experience Cloud 게스트는 false)
     queued; // Claude Code 모드에서 추적 중인 요청 { id, name, status, composition, processedBy }
     recentRequests = [];
     pollTimer;
@@ -102,7 +103,8 @@ export default class LolTeamBuilder extends LightningElement {
             this.teamGoal = data.teamGoal;
             this.model = data.model;
             this.mode = data.mode || 'CLAUDE_CODE';
-            if (this.isClaudeCodeMode) {
+            this.canAnalyze = data.canRequestAnalysis === true;
+            if (this.isClaudeCodeMode && this.canAnalyze) {
                 this.loadRecent();
             }
             this.loadError = undefined;
@@ -319,8 +321,14 @@ export default class LolTeamBuilder extends LightningElement {
     get noData() {
         return !this.loadError;
     }
+    get showRecent() {
+        return this.isClaudeCodeMode && this.canAnalyze;
+    }
+    get showGuestNote() {
+        return !!this.ctx && !this.canAnalyze;
+    }
     get showAnalysisHint() {
-        return !this.analysis && !this.analyzing && !this.analysisError;
+        return this.canAnalyze && !this.analysis && !this.analyzing && !this.analysisError;
     }
     get analysisSources() {
         return (this.analysis?.sources || []).map((s, i) => ({ key: `src${i}`, ...s }));

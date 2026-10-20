@@ -272,4 +272,20 @@ describe('c-lol-team-builder', () => {
         expect($(el, '.waiting-text')).toBeNull();
         expect($(el, '.analyze-button').disabled).toBe(false);
     });
+
+    it('공개 사이트 게스트: 점수·조합표는 보이고 분석 요청 버튼과 최근 요청은 숨긴다', async () => {
+        const el = createElement('c-lol-team-builder', { is: LolTeamBuilder });
+        document.body.appendChild(el);
+        getBuilderData.emit(builderData('CLAUDE_CODE', false));
+        await flush();
+        await flush();
+
+        expect(Number($(el, '.total').textContent)).toBeGreaterThan(80);
+        expect($(el, '.combo-table').data.length).toBeGreaterThan(0);
+        expect($(el, '.export-button')).not.toBeNull();
+        expect($(el, '.analyze-button')).toBeNull();
+        expect($(el, '.recent')).toBeNull();
+        expect($(el, '.guest-note').textContent).toContain('로그인한 사용자만');
+        expect(getRecentRequests).not.toHaveBeenCalled();
+    });
 });

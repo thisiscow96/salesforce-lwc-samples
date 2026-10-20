@@ -18,6 +18,7 @@ public with sharing class LolTeamBuilderController {
         @AuraEnabled public String teamGoal;
         @AuraEnabled public String model;
         @AuraEnabled public String mode;
+        @AuraEnabled public Boolean canRequestAnalysis; // 화면에서 분석 버튼 표시 여부 (게스트·권한 없는 사용자는 false)
     }
 
     @AuraEnabled(cacheable=true)
@@ -31,12 +32,30 @@ public with sharing class LolTeamBuilderController {
         data.teamGoal = s?.Team_Goal__c;
         data.model = s?.Model__c;
         data.mode = String.isBlank(s?.Mode__c) ? 'CLAUDE_CODE' : s.Mode__c;
+        data.canRequestAnalysis = canRequestAnalysis();
         return data;
+    }
+
+    // Experience Cloud 공개 사이트의 게스트는 조회(점수·조합표·Excel)만 허용.
+    // 분석 요청은 Claude 실행(구독 사용량)을 일으키므로 로그인 사용자만 — 화면 숨김과 별도로 서버에서도 차단
+    static Boolean isGuest() {
+        return UserInfo.getUserType() == 'Guest';
+    }
+
+    static Boolean canRequestAnalysis() {
+        return !isGuest() && Schema.SObjectType.LoL_Analysis_Request__c.isCreateable();
+    }
+
+    static void requireMember() {
+        if (isGuest()) {
+            throw userError('분석 요청은 로그인한 사용자만 사용할 수 있습니다.');
+        }
     }
 
     /** 분석 요청 저장 (Pending). 프롬프트는 서버가 Custom Metadata로 조립 → 워커는 사용자 입력이 아닌 검증된 텍스트만 받음 */
     @AuraEnabled
     public static Id submitAnalysisRequest(String requestJson) {
+        requireMember();
         LolClaudeAnalysisService.AnalysisRequest req;
         try {
             req = (LolClaudeAnalysisService.AnalysisRequest) JSON.deserialize(requestJson, LolClaudeAnalysisService.AnalysisRequest.class);
@@ -68,6 +87,7 @@ public with sharing class LolTeamBuilderController {
     /** 폴링용 (상태가 계속 바뀌므로 cacheable 아님) */
     @AuraEnabled
     public static LoL_Analysis_Request__c getAnalysisRequest(Id requestId) {
+        requireMember();
         List<LoL_Analysis_Request__c> rows = [
             SELECT Id, Name, Status__c, Composition__c, Total_Score__c, Result__c, Sources_JSON__c, Search_Count__c,
                 Error_Message__c, Processed_By__c, CreatedDate, Completed_At__c
@@ -85,6 +105,9 @@ public with sharing class LolTeamBuilderController {
     /** 내 최근 요청 (PC가 꺼져 있던 동안 쌓인 결과 확인용). OWD Private이라 본인 것만 조회됨 */
     @AuraEnabled
     public static List<LoL_Analysis_Request__c> getRecentRequests() {
+        if (isGuest()) {
+            return new List<LoL_Analysis_Request__c>();
+        }
         // 목록에는 결과 본문(Long Text)을 싣지 않음 → 선택 시 getAnalysisRequest로 조회 (응답 크기 절감)
         return [
             SELECT Id, Name, Status__c, Composition__c, Total_Score__c, CreatedDate, Completed_At__c
@@ -98,6 +121,7 @@ public with sharing class LolTeamBuilderController {
 
     @AuraEnabled(continuation=true)
     public static Object startAnalysis(String requestJson) {
+        requireMember();
         LolClaudeAnalysisService.AnalysisRequest req;
         try {
             req = (LolClaudeAnalysisService.AnalysisRequest) JSON.deserialize(requestJson, LolClaudeAnalysisService.AnalysisRequest.class);

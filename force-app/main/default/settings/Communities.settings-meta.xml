@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Digital Experiences(Experience Cloud) 활성화: LoL 팀 조합 공개 사이트용 -->
+<CommunitiesSettings xmlns="http://soap.sforce.com/2006/04/metadata">
+    <enableNetworksEnabled>true</enableNetworksEnabled>
+</CommunitiesSettings>

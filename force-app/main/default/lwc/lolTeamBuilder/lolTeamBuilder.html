@@ -3,8 +3,10 @@
         <div slot="actions" class="actions">
             <lightning-button class="export-button" icon-name="utility:download" label="Excel 다운로드"
                 onclick={handleExport} disabled={exportDisabled}></lightning-button>
-            <lightning-button class="analyze-button" variant="brand" icon-name="utility:einstein" label={analyzeLabel}
-                onclick={handleAnalyze} disabled={analyzeDisabled}></lightning-button>
+            <template lwc:if={canAnalyze}>
+                <lightning-button class="analyze-button" variant="brand" icon-name="utility:einstein" label={analyzeLabel}
+                    onclick={handleAnalyze} disabled={analyzeDisabled}></lightning-button>
+            </template>
         </div>
 
         <div class="slds-p-horizontal_medium">
@@ -144,12 +146,15 @@
                                     <p class="waiting-text">{waitingMessage}</p>
                                 </div>
                             </template>
+                            <template lwc:if={showGuestNote}>
+                                <p class="guest-note slds-text-color_weak">Claude 분석 요청은 로그인한 사용자만 사용할 수 있습니다. 조합 점수·추천 조합표·Excel 다운로드는 누구나 이용할 수 있습니다.</p>
+                            </template>
                             <template lwc:if={showAnalysisHint}>
                                 <p class="slds-text-color_weak">조합을 정한 뒤 [{analyzeLabel}]을 누르면 현재 패치 메타·커뮤니티 의견을 검색해 강점·약점·운영 플랜·밴 추천을 받습니다.</p>
                             </template>
 
                             <!-- Claude Code 모드: 내 최근 요청 (PC가 꺼져 있던 동안 처리된 결과 확인) -->
-                            <template lwc:if={isClaudeCodeMode}>
+                            <template lwc:if={showRecent}>
                                 <div class="recent slds-m-top_medium">
                                     <div class="panel-bar">
                                         <h3 class="slds-text-title_bold">내 최근 요청</h3>
