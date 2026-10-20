@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">86</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Garen</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">Q 침묵 + R 처형 단순 브루저</value>
     </values>

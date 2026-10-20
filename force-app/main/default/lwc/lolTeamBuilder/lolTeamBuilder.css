@@ -393,3 +393,57 @@
 .pool-scroll {
     height: 30rem;
 }
+
+/* 근거 구분 배지: 실제 통계(lol.ps) / 자체 지수(능력치 평가) */
+.kpi-tag {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1.4;
+    padding: 0 0.375rem;
+    border-radius: 0.25rem;
+    margin-right: 0.25rem;
+    vertical-align: middle;
+}
+.kpi-tag.real {
+    color: #0b3b33;
+    background: #00bba3;
+}
+.kpi-tag.index {
+    color: #ffffff;
+    background: #6d4bc4;
+}
+.kpi .kpi-tag {
+    align-self: flex-start;
+    margin-bottom: 0.25rem;
+}
+.dash-grid-wide {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    margin-bottom: 0.5rem;
+}
+.dash-card-title .kpi-tag {
+    margin-right: 0.375rem;
+}
+.dash-method {
+    margin-top: 0.75rem;
+    color: #9e9eb1;
+    font-size: 0.75rem;
+}
+.dash-method summary {
+    cursor: pointer;
+    color: #c8cbe0;
+    font-weight: 600;
+}
+.dash-method ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+    margin-top: 0.375rem;
+}
+.dash-method li {
+    margin-bottom: 0.25rem;
+}
+@media (max-width: 48em) {
+    .dash-grid-wide {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

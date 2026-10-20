@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">43</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Karma</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">라인전 견제, E 팀 보호막·이속</value>
     </values>

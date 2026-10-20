@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">90</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Malzahar</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 지정 제압, 공허충 라인 클리어</value>
     </values>

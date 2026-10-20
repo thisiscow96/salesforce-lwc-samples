@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">910</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Hwei</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">스킬 10종 조합, R 광역 공포 장판</value>
     </values>

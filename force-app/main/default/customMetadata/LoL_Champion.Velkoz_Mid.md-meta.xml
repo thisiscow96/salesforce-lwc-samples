@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">161</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Velkoz</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">고정 피해 포킹 + R 레이저</value>
     </values>

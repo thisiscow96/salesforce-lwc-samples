@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">145</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Kaisa</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">아군의 이동 불가 CC가 패시브 스택을 쌓음 → CC 많은 조합과 시너지</value>
     </values>

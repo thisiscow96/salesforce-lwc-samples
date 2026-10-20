@@ -334,18 +334,27 @@ describe('c-lol-team-builder', () => {
         expect($$(el, '.report-bullet').length).toBe(4);
     });
 
-    it('조합 예측 대시보드: KPI 4개와 차트 5개(오브젝트 게이지·라인 킬·시간대·딜 구성·픽 통계)를 그린다', async () => {
+    it('조합 대시보드: 실제 통계 KPI 2개 + 자체 지수 KPI 2개, 차트 6개를 근거 배지와 함께 그린다', async () => {
         const el = await mount();
-        expect($$(el, '.dash .kpi')).toHaveLength(4);
-        expect($(el, '.dash .kpi-label').textContent).toBe('파워 스파이크');
-        const gauge = $(el, 'c-echart.chart-gauge').option;
-        expect(gauge.series.map((s) => s.data[0].name)).toEqual(['퍼스트 블러드', '공허 유충', '첫 드래곤', '협곡의 전령', '첫 포탑', '첫 바론']);
-        gauge.series.forEach((s) => expect(s.data[0].value).toBeGreaterThanOrEqual(10));
-        expect($(el, 'c-echart.chart-lanes').option.series[0].data).toHaveLength(4);
-        expect($(el, 'c-echart.chart-timeline').option.xAxis.data[0]).toBe(3);
+        const kpis = $$(el, '.dash .kpi');
+        expect(kpis).toHaveLength(4);
+        expect(kpis.map((k) => k.querySelector('.kpi-tag').textContent)).toEqual(['실제 통계', '실제 통계', '자체 지수', '자체 지수']);
+        expect(kpis[0].querySelector('.kpi-value').textContent).toMatch(/^\d+(\.\d)?%$/); // 5픽 평균 승률 (lol.ps)
+        expect(kpis[2].querySelector('.kpi-value').textContent).toMatch(/^(초반형|중반형|후반형)$/);
+
+        const meta = $(el, 'c-echart.chart-meta').option;
+        expect(meta.series.map((s) => s.name)).toEqual(['전체 픽', '우리 조합']);
+        expect(meta.series[1].data).toHaveLength(5);
+        expect(meta.series[1].data[0].symbol).toMatch(/^image:\/\/https:\/\/ddragon\.leagueoflegends\.com\/cdn\/16\.20\.1\/img\/champion\//);
+        expect($(el, 'c-echart.chart-profile').option.radar.indicator.map((i) => i.max)).toEqual(Array(8).fill(10));
+        expect($(el, 'c-echart.chart-objectives').option.yAxis.data).toEqual(['공허 유충', '드래곤', '협곡의 전령', '바론']);
+        expect($(el, 'c-echart.chart-lanes').option.xAxis.max).toBe(10); // 확률(%)이 아닌 0~10 지수
+        expect($(el, 'c-echart.chart-power').option.yAxis.max).toBe(10);
         expect($(el, 'c-echart.chart-damage').option.series[0].type).toBe('pie');
-        expect($(el, 'c-echart.chart-picks').option.series.map((s) => s.name)).toEqual(['승률', '픽률', '밴률']);
-        expect($(el, '.dash-sub').textContent).toContain('자체 모델 추정치');
+
+        const sub = $(el, '.dash-sub').textContent;
+        expect(sub).toContain('승률·확률이 아니며');
+        expect($(el, '.dash-method').textContent).toContain('실제 경기 시간대별 승률이 아닙니다');
     });
 
     it('전체 픽: 선택 목록에 선호(★)·비선호 픽이 모두 있고, 픽 풀 표에 이 자리 점수·픽률을 보여 주며 선호 필터가 동작한다', async () => {

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">7</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Leblanc</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">초중반 순간 폭딜 암살, 후반 영향력 감소</value>
     </values>

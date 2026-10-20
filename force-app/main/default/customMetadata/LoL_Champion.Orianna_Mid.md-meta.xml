@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">61</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Orianna</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 공 광역 끌어당김, 아군 보호막</value>
     </values>

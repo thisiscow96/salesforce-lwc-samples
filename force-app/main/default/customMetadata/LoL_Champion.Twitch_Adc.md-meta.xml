@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">29</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Twitch</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">은신 기습 + R 관통 난사</value>
     </values>

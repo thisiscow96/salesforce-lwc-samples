@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">15</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Sivir</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 팀 이동속도로 교전 개시·이탈, E 주문 방어막</value>
     </values>

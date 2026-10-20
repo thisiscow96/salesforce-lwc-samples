@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">11</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">MasterYi</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">리셋 하이퍼캐리, R 둔화 면역</value>
     </values>

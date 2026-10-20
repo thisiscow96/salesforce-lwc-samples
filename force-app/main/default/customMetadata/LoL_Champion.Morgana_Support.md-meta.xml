@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">25</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Morgana</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">Q 장시간 속박 + E 마법 보호막</value>
     </values>

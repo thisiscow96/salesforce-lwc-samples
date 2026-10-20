@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">150</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Gnar</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">메가 나르 R 벽 기절</value>
     </values>

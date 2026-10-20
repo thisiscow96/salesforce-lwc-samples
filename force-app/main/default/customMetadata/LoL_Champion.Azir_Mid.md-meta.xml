@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">268</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Azir</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 병사 벽 밀어내기, 후반 지속딜</value>
     </values>

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">238</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Zed</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">그림자 순간 폭딜</value>
     </values>

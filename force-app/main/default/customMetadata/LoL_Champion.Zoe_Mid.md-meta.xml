@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">142</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Zoe</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">E 수면 + Q 장거리 폭딜 픽메이커</value>
     </values>

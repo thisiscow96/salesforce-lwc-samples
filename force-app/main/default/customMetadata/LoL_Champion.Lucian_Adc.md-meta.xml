@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">236</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Lucian</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">초반 라인전 강함, 후반 사거리 열세</value>
     </values>

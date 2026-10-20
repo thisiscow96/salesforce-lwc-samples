@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">33</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Rammus</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 도발 + 높은 방어력</value>
     </values>

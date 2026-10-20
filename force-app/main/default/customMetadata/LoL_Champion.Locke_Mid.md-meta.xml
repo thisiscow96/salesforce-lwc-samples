@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">805</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Locke</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">대못 표식 + 순간이동 돌진, R 봉인 처형</value>
     </values>

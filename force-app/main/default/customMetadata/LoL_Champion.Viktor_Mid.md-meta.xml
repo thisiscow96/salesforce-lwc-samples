@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">112</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Viktor</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">진화 레이저 광역 딜</value>
     </values>

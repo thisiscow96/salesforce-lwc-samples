@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">203</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Kindred</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 생존 구역, 표식 스택 성장</value>
     </values>

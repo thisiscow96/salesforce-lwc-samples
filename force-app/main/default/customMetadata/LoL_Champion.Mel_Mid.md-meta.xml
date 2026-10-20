@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">800</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Mel</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">W 투사체 반사 + R 처형</value>
     </values>

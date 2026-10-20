@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">147</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Seraphine</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 광역 매혹 + E 속박, 아군 CC 연계</value>
     </values>

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">412</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Thresh</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">Q 사슬 + 랜턴 구출</value>
     </values>

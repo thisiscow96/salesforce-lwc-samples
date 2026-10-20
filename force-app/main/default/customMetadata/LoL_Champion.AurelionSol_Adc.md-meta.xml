@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">136</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">AurelionSol</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">스택 성장형 광역 메이지</value>
     </values>

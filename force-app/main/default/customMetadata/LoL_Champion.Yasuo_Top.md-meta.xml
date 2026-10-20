@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">157</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Yasuo</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">넉업 연계 R + 바람 장막</value>
     </values>

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">223</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">TahmKench</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">W 아군 삼키기 보호</value>
     </values>

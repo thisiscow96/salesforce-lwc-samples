@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">59</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">JarvanIV</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">EQ 넉업 + R 지형으로 적을 가둬 광역기 연계</value>
     </values>

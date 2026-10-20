@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">240</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Kled</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 돌격 진입, 스캘 탑승</value>
     </values>

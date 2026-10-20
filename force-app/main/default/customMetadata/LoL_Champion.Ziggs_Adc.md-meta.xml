@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">115</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Ziggs</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">포탑 철거 포킹</value>
     </values>

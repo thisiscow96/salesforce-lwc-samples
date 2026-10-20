@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">45</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Veigar</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">E 우리 기절 + 무한 AP 스택</value>
     </values>

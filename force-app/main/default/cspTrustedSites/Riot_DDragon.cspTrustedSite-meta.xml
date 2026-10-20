@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CspTrustedSite xmlns="http://soap.sforce.com/2006/04/metadata">
+    <context>All</context>
+    <description>LoL 팀 조합 분석기: Riot Data Dragon 챔피언 아이콘 이미지 (img-src만 허용)</description>
+    <endpointUrl>https://ddragon.leagueoflegends.com</endpointUrl>
+    <isActive>true</isActive>
+    <isApplicableToConnectSrc>false</isApplicableToConnectSrc>
+    <isApplicableToFontSrc>false</isApplicableToFontSrc>
+    <isApplicableToFrameSrc>false</isApplicableToFrameSrc>
+    <isApplicableToImgSrc>true</isApplicableToImgSrc>
+    <isApplicableToMediaSrc>false</isApplicableToMediaSrc>
+    <isApplicableToStyleSrc>false</isApplicableToStyleSrc>
+</CspTrustedSite>

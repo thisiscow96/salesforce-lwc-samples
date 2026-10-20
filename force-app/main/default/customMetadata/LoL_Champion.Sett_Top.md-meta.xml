@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">875</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Sett</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">E 기절 + R 들어 던지기</value>
     </values>

@@ -17,6 +17,7 @@ public with sharing class LolTeamBuilderController {
         @AuraEnabled public List<LoL_Tier__mdt> tiers;
         @AuraEnabled public String teamGoal;
         @AuraEnabled public String model;
+        @AuraEnabled public String ddragonVersion; // 챔피언 아이콘 이미지 버전
         @AuraEnabled public String mode;
         @AuraEnabled public Boolean canRequestAnalysis; // 화면에서 분석 버튼 표시 여부
         @AuraEnabled public Boolean isGuest; // 공개 사이트 방문자 (최근 요청 목록은 숨김: 모든 방문자가 같은 게스트 계정)
@@ -32,6 +33,7 @@ public with sharing class LolTeamBuilderController {
         LoL_AI_Setting__mdt s = LoL_AI_Setting__mdt.getInstance('Default');
         data.teamGoal = s?.Team_Goal__c;
         data.model = s?.Model__c;
+        data.ddragonVersion = s?.Ddragon_Version__c;
         data.mode = String.isBlank(s?.Mode__c) ? 'CLAUDE_CODE' : s.Mode__c;
         data.canRequestAnalysis = canRequestAnalysis();
         data.isGuest = isGuest();

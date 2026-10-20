@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">429</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Kalista</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R로 서포터를 던져 이니시 → 이니시형 서폿과 시너지, 인챈터와는 약함</value>
     </values>

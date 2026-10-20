@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">16</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Soraka</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">지속 회복, R 글로벌 힐, E 침묵</value>
     </values>

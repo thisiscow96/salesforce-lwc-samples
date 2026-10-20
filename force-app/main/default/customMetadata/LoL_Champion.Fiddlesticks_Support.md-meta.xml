@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">9</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Fiddlesticks</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 광역 공포 매복 이니시</value>
     </values>

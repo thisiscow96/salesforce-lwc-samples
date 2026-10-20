@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">103</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Ahri</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">E 매혹 픽, R 3회 돌진 기동성</value>
     </values>

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">92</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Riven</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">연속 Q 넉업 콤보</value>
     </values>

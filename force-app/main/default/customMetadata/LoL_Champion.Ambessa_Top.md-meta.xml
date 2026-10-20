@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">799</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Ambessa</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">연속 대시 돌진 브루저</value>
     </values>

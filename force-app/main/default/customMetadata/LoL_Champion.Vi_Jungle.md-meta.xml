@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">254</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Vi</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 지정 제압으로 적 핵심 딜러 고정 (SeeMeta 전 티어 기준 S+ 52.6%)</value>
     </values>

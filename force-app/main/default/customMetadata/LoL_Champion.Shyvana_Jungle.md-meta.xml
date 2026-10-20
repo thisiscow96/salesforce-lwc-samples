@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">102</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Shyvana</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">용 처치 스택, 용 형태 광역</value>
     </values>

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">35</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Shaco</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">상자 매복, 은신 교란</value>
     </values>

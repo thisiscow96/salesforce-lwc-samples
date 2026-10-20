@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">233</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Briar</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">광란 돌진 + R 장거리 진입</value>
     </values>

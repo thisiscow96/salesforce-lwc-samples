@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">19</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Warwick</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 제압 + 저체력 추적</value>
     </values>

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">77</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Udyr</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">자세 전환 빠른 정글링</value>
     </values>

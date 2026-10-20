@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">2</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Olaf</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 사용 중 CC 면역 돌진, 초중반 교전 강함</value>
     </values>

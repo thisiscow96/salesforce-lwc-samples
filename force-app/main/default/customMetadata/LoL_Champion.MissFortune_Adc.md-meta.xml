@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">21</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">MissFortune</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 탄막 광역 한타</value>
     </values>

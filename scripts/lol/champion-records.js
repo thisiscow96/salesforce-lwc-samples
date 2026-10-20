@@ -89,6 +89,7 @@ function championRecords() {
             PS_Score__c: e.ps,
             Honey__c: e.honey === true,
             Riot_Key__c: e.riotKey,
+            Ddragon_Id__c: ddIdOf(e.key), // 챔피언 아이콘: ddragon.leagueoflegends.com/cdn/<버전>/img/champion/<id>.png
             Note__c: e.note,
             Source__c: e.source,
             Sort_Order__c: i + 1

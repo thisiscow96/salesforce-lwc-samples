@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">147</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Seraphine</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 관통 매혹 + W 광역 보호막</value>
     </values>

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">267</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Nami</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">Q 거품 + R 해일, 원딜 강화</value>
     </values>

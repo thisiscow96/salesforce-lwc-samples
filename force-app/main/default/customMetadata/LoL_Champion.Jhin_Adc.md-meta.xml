@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">202</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Jhin</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">W가 아군 CC에 맞은 적을 속박 → CC 연계형</value>
     </values>

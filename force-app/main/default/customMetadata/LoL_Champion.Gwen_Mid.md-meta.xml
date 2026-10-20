@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">887</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Gwen</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">W 장막 + R 연속 지속딜</value>
     </values>

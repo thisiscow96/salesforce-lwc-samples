@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">60</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Elise</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">거미 형태 초반 갱 강자</value>
     </values>

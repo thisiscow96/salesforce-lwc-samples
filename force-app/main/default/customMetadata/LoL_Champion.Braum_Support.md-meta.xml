@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">201</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Braum</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">E 투사체 차단 보호</value>
     </values>

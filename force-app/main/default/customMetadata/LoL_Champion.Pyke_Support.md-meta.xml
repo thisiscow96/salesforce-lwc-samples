@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">555</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Pyke</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">Q 갈고리 + R 처형 골드 공유</value>
     </values>

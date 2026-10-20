@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">166</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Akshan</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">근접 원딜, 아군 부활 처형</value>
     </values>

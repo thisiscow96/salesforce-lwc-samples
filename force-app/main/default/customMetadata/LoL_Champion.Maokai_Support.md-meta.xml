@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">57</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Maokai</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">W 지정 속박 + R 광역 속박</value>
     </values>

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">350</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Yuumi</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">아군에 붙어 회복·버프, 단독 영향력 낮음</value>
     </values>

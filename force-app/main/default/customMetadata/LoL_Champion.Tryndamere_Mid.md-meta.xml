@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">23</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Tryndamere</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 불사 스플릿 푸시</value>
     </values>

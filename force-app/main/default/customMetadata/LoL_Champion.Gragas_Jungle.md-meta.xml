@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">79</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Gragas</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">E 돌진 + R 분단</value>
     </values>

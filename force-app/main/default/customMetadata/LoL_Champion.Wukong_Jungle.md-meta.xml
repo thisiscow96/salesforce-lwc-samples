@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">62</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">MonkeyKing</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 광역 넉업 2회 이니시, 26.20 정글 최상위</value>
     </values>

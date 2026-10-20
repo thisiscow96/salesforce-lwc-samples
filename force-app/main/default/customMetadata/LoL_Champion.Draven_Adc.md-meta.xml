@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">119</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Draven</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">도끼 캐치 라인전 최강, 스노우볼</value>
     </values>

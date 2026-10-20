@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">154</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Zac</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">E 장거리 도약 이니시</value>
     </values>

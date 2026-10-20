@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { CHAMPIONS, SYNERGIES, WEIGHTS, TIERS, TIER_SCORE, TEAM_GOAL } = require('./lol-data');
-const { championRecords } = require('./champion-records');
+const { championRecords, STATS } = require('./champion-records');
 
 const ROOT = path.join(__dirname, '..', '..', 'force-app', 'main', 'default');
 const OBJECTS = path.join(ROOT, 'objects');
@@ -111,6 +111,7 @@ const TYPES = {
             num('PS_Score__c', 'PS Score', 'lol.ps PS 점수 (개인 성능: 승률·픽률·밴률 종합, 한국 에메랄드+)', 5, 2),
             { name: 'Honey__c', label: 'Honey', description: 'lol.ps 꿀챔 표시 (현재 패치에서 효율이 좋은 챔피언)', type: 'Checkbox', defaultValue: false },
             num('Riot_Key__c', 'Riot Key', 'Riot 숫자 챔피언 키 (lol.ps 챔피언 페이지 lol.ps/champ/<키>)', 5, 0),
+            text('Ddragon_Id__c', 'Data Dragon Id', 'Riot Data Dragon 챔피언 id (아이콘 이미지 주소용, 예: MonkeyKing)', 40),
             text('Note__c', 'Note', '특징·근거'),
             text('Source__c', 'Source', '통계 출처'),
             num('Sort_Order__c', 'Sort Order', '표시 순서', 4, 0)
@@ -147,6 +148,7 @@ const TYPES = {
             { name: 'Mode__c', label: 'Mode', description: 'CLAUDE_CODE = 요청 큐를 로컬 Claude Code가 처리(구독 범위), API = Claude API 직접 호출(크레딧 과금)', type: 'Picklist', required: true, values: ['CLAUDE_CODE', 'API'] },
             text('Model__c', 'Model', 'Claude 모델 ID (API 모드)', 80, true),
             text('Base_Patch__c', 'Base Patch', '분석 통계 기준 패치 (예: 26.20). 비우면 최신 패치를 검색해 사용', 20),
+            text('Ddragon_Version__c', 'Data Dragon Version', 'Riot Data Dragon 버전 (챔피언 아이콘 주소용, fetch-stats.js가 수집한 값)', 20),
             num('Max_Tokens__c', 'Max Tokens', '최대 출력 토큰', 5, 0),
             text('Web_Search_Tool__c', 'Web Search Tool', '웹 검색 도구 타입 (비우면 검색 안 함)', 40),
             num('Web_Search_Max_Uses__c', 'Web Search Max Uses', '요청당 최대 검색 횟수', 2, 0),
@@ -233,6 +235,7 @@ record('LoL_AI_Setting__mdt', 'Default', 'Default', {
     Mode__c: 'CLAUDE_CODE',
     Model__c: 'claude-sonnet-5-5',
     Base_Patch__c: '26.20', // lol-data.js 통계 기준과 동일
+    Ddragon_Version__c: STATS.ddragon,
     Max_Tokens__c: 24000, // 운영·한타·사이드 섹션 추가로 16,000자 이내 리포트
     Web_Search_Tool__c: 'web_search_20250305',
     Web_Search_Max_Uses__c: 15, // 항목당 2개 출처 교차 확인

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">82</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Mordekaiser</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R로 적 핵심 캐리를 격리해 1:1</value>
     </values>

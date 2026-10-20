@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">22</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Ashe</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 장거리 기절 + 둔화 카이팅</value>
     </values>

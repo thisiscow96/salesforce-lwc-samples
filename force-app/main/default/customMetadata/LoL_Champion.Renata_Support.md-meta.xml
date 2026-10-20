@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">888</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Renata</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 광역 광란, W 부활 보호</value>
     </values>

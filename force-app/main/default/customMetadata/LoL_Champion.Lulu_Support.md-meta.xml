@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">117</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Lulu</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">W 변이·R 거대화 → 하이퍼캐리 보호 최상</value>
     </values>

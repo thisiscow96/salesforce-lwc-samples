@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">893</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Aurora</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 영역으로 적을 가두고 기동성 높은 메이지</value>
     </values>

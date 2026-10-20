@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">105</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Fizz</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 상어 광역 진입, E 무적</value>
     </values>

@@ -11,6 +11,7 @@ function builderData(mode = 'CLAUDE_CODE', canRequestAnalysis = true, isGuest = 
         tiers: D.TIERS.map((t, i) => ({ DeveloperName: t[0], MasterLabel: t[1], Skill__c: t[2], Sort_Order__c: i + 1 })),
         teamGoal: D.TEAM_GOAL,
         model: 'claude-sonnet-5-5',
+        ddragonVersion: '16.20.1',
         mode,
         canRequestAnalysis,
         isGuest

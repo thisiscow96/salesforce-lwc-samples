@@ -56,6 +56,7 @@ export function normalizeData(raw) {
             psScore: c.PS_Score__c ?? null,
             honey: c.Honey__c === true,
             riotKey: c.Riot_Key__c ?? null,
+            ddId: c.Ddragon_Id__c ?? null,
             note: c.Note__c,
             source: c.Source__c,
             order: c.Sort_Order__c ?? 999

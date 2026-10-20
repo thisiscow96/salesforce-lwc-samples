@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">48</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Trundle</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 능력치 흡수 + 기둥, 스플릿</value>
     </values>

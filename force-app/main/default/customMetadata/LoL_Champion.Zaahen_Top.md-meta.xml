@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">904</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Zaahen</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">부활·지속 전투 브루저, 다중 CC. 카이팅·고CC 조합에 약함</value>
     </values>

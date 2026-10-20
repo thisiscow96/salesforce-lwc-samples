@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">163</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Taliyah</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 장벽 분단 로밍</value>
     </values>

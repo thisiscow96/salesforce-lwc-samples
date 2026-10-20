@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">26</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Zilean</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 부활 보호, 이중 폭탄 기절</value>
     </values>

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">58</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Renekton</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">초반 라인전 최강급, 후반 영향력 감소</value>
     </values>

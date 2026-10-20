@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">69</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Cassiopeia</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">독 지속딜 + R 석화</value>
     </values>

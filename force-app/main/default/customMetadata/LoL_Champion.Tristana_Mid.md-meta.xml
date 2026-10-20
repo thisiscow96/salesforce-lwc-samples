@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">18</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Tristana</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">E 폭탄 공성 + W 점프 리셋</value>
     </values>

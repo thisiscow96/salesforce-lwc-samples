@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">81</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Ezreal</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">Q 포킹, 안전한 원딜</value>
     </values>

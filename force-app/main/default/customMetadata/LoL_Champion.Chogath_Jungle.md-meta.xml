@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">31</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Chogath</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">Q 넉업 + W 침묵, 26.20 정글 S+ 상승</value>
     </values>

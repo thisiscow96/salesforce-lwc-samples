@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">75</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Nasus</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">Q 스택 후반 스케일, W 시듦으로 적 원딜 무력화</value>
     </values>

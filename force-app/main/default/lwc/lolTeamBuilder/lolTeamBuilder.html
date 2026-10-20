@@ -153,46 +153,66 @@
                     </lightning-layout-item>
 
                     <template lwc:if={hasResult}>
-                        <!-- 2-1. 조합 예측 대시보드 (자체 모델 추정치) -->
+                        <!-- 2-1. 조합 대시보드: 실제 통계(lol.ps)와 자체 평가 지수를 구분해 표시 -->
                         <lightning-layout-item size="12" padding="around-small">
                             <div class="dash">
                                 <div class="dash-head">
                                     <div>
-                                        <h2 class="dash-title">조합 예측 대시보드</h2>
-                                        <p class="dash-sub">평균 상대(모든 능력치 5) 기준 50%에서 출발하는 자체 모델 추정치입니다. 실제 경기 통계가 아니며, 하단 픽 통계만 Patch 26.20 실제 데이터입니다.</p>
+                                        <h2 class="dash-title">조합 대시보드</h2>
+                                        <p class="dash-sub">
+                                            <span class="kpi-tag real">실제 통계</span> lol.ps 한국 에메랄드+ Patch 26.20 수치 그대로 ·
+                                            <span class="kpi-tag index">자체 지수</span> 챔피언 능력치(0~10, 스킬 구성 기준 평가)의 가중 평균. 승률·확률이 아니며 평균 5 대비 상대적 성향입니다.
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="dash-kpis">
-                                    <template for:each={predictionHighlights} for:item="k">
+                                    <template for:each={dashKpis} for:item="k">
                                         <div key={k.key} class="kpi">
+                                            <span class={k.tagClass}>{k.tag}</span>
                                             <span class="kpi-label">{k.label}</span>
                                             <span class="kpi-value">{k.value}</span>
                                             <span class="kpi-sub">{k.sub}</span>
                                         </div>
                                     </template>
                                 </div>
-                                <div class="dash-card">
-                                    <h3 class="dash-card-title">오브젝트·초반 이벤트 선점 확률</h3>
-                                    <c-echart class="chart-gauge" option={predictionGauge} height="190px"></c-echart>
+                                <div class="dash-grid dash-grid-wide">
+                                    <div class="dash-card">
+                                        <h3 class="dash-card-title"><span class="kpi-tag real">실제 통계</span> 라인별 전체 픽 승률·픽률 분포와 우리 5픽</h3>
+                                        <c-echart class="chart-meta" option={dashMetaOption} height="300px"></c-echart>
+                                    </div>
+                                    <div class="dash-card">
+                                        <h3 class="dash-card-title"><span class="kpi-tag index">자체 지수</span> 조합 성향</h3>
+                                        <c-echart class="chart-profile" option={dashProfileOption} height="300px"></c-echart>
+                                    </div>
                                 </div>
                                 <div class="dash-grid">
                                     <div class="dash-card">
-                                        <h3 class="dash-card-title">라인별 초반 킬 확률 (14분 이전)</h3>
-                                        <c-echart class="chart-lanes" option={predictionLanes} height="210px"></c-echart>
+                                        <h3 class="dash-card-title"><span class="kpi-tag index">자체 지수</span> 오브젝트 장악 (라인 주도권 + 정글 장악력)</h3>
+                                        <c-echart class="chart-objectives" option={dashObjectiveOption} height="190px"></c-echart>
                                     </div>
                                     <div class="dash-card">
-                                        <h3 class="dash-card-title">시간대별 한타 우위</h3>
-                                        <c-echart class="chart-timeline" option={predictionTimeline} height="210px"></c-echart>
+                                        <h3 class="dash-card-title"><span class="kpi-tag index">자체 지수</span> 라인전 킬 압박</h3>
+                                        <c-echart class="chart-lanes" option={dashLaneOption} height="190px"></c-echart>
                                     </div>
                                     <div class="dash-card">
-                                        <h3 class="dash-card-title">딜 구성</h3>
-                                        <c-echart class="chart-damage" option={predictionDamage} height="230px"></c-echart>
+                                        <h3 class="dash-card-title"><span class="kpi-tag index">자체 지수</span> 시간대별 전투력</h3>
+                                        <c-echart class="chart-power" option={dashPowerOption} height="220px"></c-echart>
                                     </div>
                                     <div class="dash-card">
-                                        <h3 class="dash-card-title">선택한 픽의 패치 통계 (Emerald+)</h3>
-                                        <c-echart class="chart-picks" option={predictionPicks} height="230px"></c-echart>
+                                        <h3 class="dash-card-title"><span class="kpi-tag index">자체 지수</span> 딜 구성</h3>
+                                        <c-echart class="chart-damage" option={dashDamageOption} height="220px"></c-echart>
                                     </div>
                                 </div>
+                                <details class="dash-method">
+                                    <summary>지수는 어떻게 계산하나요?</summary>
+                                    <ul>
+                                        <li>모든 지수는 챔피언 능력치(0~10)의 가중 평균입니다. 막대에 마우스를 올리면 어떤 챔피언의 어떤 값이 몇 % 반영됐는지 보입니다.</li>
+                                        <li>오브젝트 장악: 공허 유충 = 탑·미드 주도권 + 정글 오브젝트·초반, 드래곤 = 원딜 주도권 + 서폿 이니시 + 미드 주도권 + 정글 오브젝트, 전령 = 미드·탑 주도권 + 정글 오브젝트, 바론 = 정글 오브젝트 + 이니시 + 미드·원딜 후반.</li>
+                                        <li>시간대별 전투력: 5분에는 각 챔피언의 초반 값, 32분 이후에는 후반 값을 쓰고 그 사이는 시간에 비례해 섞은 5명 평균입니다. 실제 경기 시간대별 승률이 아닙니다.</li>
+                                        <li>능력치는 공식 통계가 아니라 스킬 구성 기준 정성 평가이며 Setup › Custom Metadata Types › LoL Champion에서 수정할 수 있습니다.</li>
+                                        <li>실제 시간대별 승률·오브젝트 획득률은 lol.ps 공개 데이터에 없어 사용하지 않았습니다.</li>
+                                    </ul>
+                                </details>
                             </div>
                         </lightning-layout-item>
 

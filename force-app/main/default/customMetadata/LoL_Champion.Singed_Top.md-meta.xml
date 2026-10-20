@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">27</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Singed</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">E 던지기로 진형 붕괴, 프록시 운영</value>
     </values>

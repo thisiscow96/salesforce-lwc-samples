@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">5</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">XinZhao</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">E 돌진 넉업 + R 밀어내기</value>
     </values>

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">497</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Rakan</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">W 넉업 + R 매혹 진입</value>
     </values>

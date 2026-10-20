@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">56</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Nocturne</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 시야 차단 글로벌 진입</value>
     </values>

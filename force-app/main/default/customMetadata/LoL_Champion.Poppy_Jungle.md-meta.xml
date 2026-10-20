@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">78</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Poppy</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">W 돌진 차단으로 캐리 보호, E 벽꿍 기절</value>
     </values>

@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">420</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Illaoi</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">촉수 + R 다수전 강세</value>
     </values>

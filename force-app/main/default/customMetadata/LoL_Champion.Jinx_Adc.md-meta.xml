@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">222</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Jinx</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">처치 관여 시 리셋, 후반 최고 하이퍼캐리 (보호 필요)</value>
     </values>

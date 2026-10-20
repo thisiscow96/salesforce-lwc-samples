@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">432</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Bard</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">Q 기절 + R 시간 정지, 로밍</value>
     </values>

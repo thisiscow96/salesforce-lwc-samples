@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">64</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">LeeSin</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">Q 진입 + R 인섹 킥</value>
     </values>

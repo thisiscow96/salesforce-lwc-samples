@@ -7,7 +7,7 @@ import submitAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.sub
 import getAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.getAnalysisRequest';
 import getRecentRequests from '@salesforce/apex/LolTeamBuilderController.getRecentRequests';
 import { LANES, LANE_LABELS, CLASS_LABELS, normalizeData, scoreTeam, explain, suggestSwaps, findBestTeams, searchPool, sortPoolRows } from './lolScoring';
-import { predict, gaugeOption, laneKillOption, timelineOption, damageOption, pickStatsOption } from './lolPrediction';
+import { teamProfile, laneIndex, objectiveIndex, powerCurve, realStats, damageSplit, profileOption, indexBarOption, powerOption, damageOption, metaScatterOption } from './lolPrediction';
 import { buildWorkbook } from './lolExcel';
 import { parseReport } from './reportParser';
 
@@ -105,6 +105,7 @@ export default class LolTeamBuilder extends LightningElement {
 
     ctx;
     teamGoal;
+    ddragonVersion; // 챔피언 아이콘 이미지 (Riot Data Dragon)
     model;
     loadError;
     picks = {};
@@ -137,6 +138,7 @@ export default class LolTeamBuilder extends LightningElement {
             this.ctx = normalizeData(data);
             this.teamGoal = data.teamGoal;
             this.model = data.model;
+            this.ddragonVersion = data.ddragonVersion;
             this.mode = data.mode || 'CLAUDE_CODE';
             this.canAnalyze = data.canRequestAnalysis === true;
             this.isGuestUser = data.isGuest === true;
@@ -272,35 +274,63 @@ export default class LolTeamBuilder extends LightningElement {
         return this.poolMode === 'extended';
     }
 
-    // ===== 조합 예측 (자체 모델 추정치, lolPrediction.js) =====
-    get prediction() {
-        return this.result ? predict(this.result.team) : null;
+    // ===== 조합 대시보드 (lolPrediction.js) =====
+    // 실제 통계(lol.ps)는 %로, 조합 성향은 능력치 기반 지수(0~10, 평균 5)로만 표시. 확률로 표현하지 않는다
+    get dashboard() {
+        if (!this.result) return null;
+        const team = this.result.team;
+        return {
+            profile: teamProfile(team),
+            lanes: laneIndex(team),
+            objectives: objectiveIndex(team),
+            curve: powerCurve(team),
+            stats: realStats(team),
+            damage: damageSplit(team)
+        };
     }
-    get predictionGauge() {
-        return this.prediction ? gaugeOption(this.prediction.objectives) : null;
+    get dashMetaOption() {
+        return this.result ? metaScatterOption(this.ctx, this.result.team, this.ddragonVersion) : null;
     }
-    get predictionLanes() {
-        return this.prediction ? laneKillOption(this.prediction.lanes) : null;
+    get dashProfileOption() {
+        return this.dashboard ? profileOption(this.dashboard.profile) : null;
     }
-    get predictionTimeline() {
-        return this.prediction ? timelineOption(this.prediction.timeline, this.prediction.peak) : null;
+    get dashObjectiveOption() {
+        return this.dashboard ? indexBarOption(this.dashboard.objectives) : null;
     }
-    get predictionDamage() {
-        return this.prediction ? damageOption(this.prediction.damage) : null;
+    get dashLaneOption() {
+        return this.dashboard ? indexBarOption(this.dashboard.lanes) : null;
     }
-    get predictionPicks() {
-        return this.result ? pickStatsOption(this.result.team) : null;
+    get dashPowerOption() {
+        return this.dashboard ? powerOption(this.dashboard.curve) : null;
     }
-    get predictionHighlights() {
-        const p = this.prediction;
-        if (!p) return [];
-        const byProb = [...p.objectives].sort((a, b) => b.prob - a.prob);
-        const lane = [...p.lanes].sort((a, b) => b.prob - a.prob)[0];
+    get dashDamageOption() {
+        return this.dashboard ? damageOption(this.dashboard.damage) : null;
+    }
+    get dashKpis() {
+        const d = this.dashboard;
+        if (!d) return [];
+        const sorted = [...d.profile].sort((a, b) => b.value - a.value);
+        const strong = sorted[0];
+        const weak = sorted[sorted.length - 1];
         return [
-            { key: 'peak', label: '파워 스파이크', value: `${p.peak.minute}분`, sub: `한타 우위 ${p.peak.prob}%` },
-            { key: 'best', label: '가장 유리한 오브젝트', value: byProb[0].label, sub: `선점 ${byProb[0].prob}%` },
-            { key: 'worst', label: '내줄 가능성 높은 오브젝트', value: byProb[byProb.length - 1].label, sub: `선점 ${byProb[byProb.length - 1].prob}%` },
-            { key: 'lane', label: '킬 압박이 큰 라인', value: lane.label, sub: `${lane.who} ${lane.prob}%` }
+            {
+                key: 'win',
+                tag: '실제 통계',
+                tagClass: 'kpi-tag real',
+                label: '5픽 평균 승률 (lol.ps)',
+                value: d.stats.avgWin == null ? '-' : `${d.stats.avgWin}%`,
+                sub: d.stats.honey.length ? `꿀챔 ${d.stats.honey.join(', ')}` : '꿀챔 없음'
+            },
+            {
+                key: 'ps',
+                tag: '실제 통계',
+                tagClass: 'kpi-tag real',
+                label: '가장 강한 픽 (PS 점수)',
+                value: d.stats.bestPs ? d.stats.bestPs.name : '-',
+                sub: d.stats.bestPs ? `PS ${d.stats.bestPs.psScore} · 티어 ${d.stats.bestPs.tier}` : '통계 없음'
+            },
+            { key: 'style', tag: '자체 지수', tagClass: 'kpi-tag index', label: '조합 성향', value: d.curve.style, sub: `전투력 지수 정점 ${d.curve.peak.minute}분 (${d.curve.peak.value}/10)` },
+            { key: 'axis', tag: '자체 지수', tagClass: 'kpi-tag index', label: '강점 / 약점', value: `${strong.label} ${strong.value}`, sub: `약점: ${weak.label} ${weak.value}` }
         ];
     }
 

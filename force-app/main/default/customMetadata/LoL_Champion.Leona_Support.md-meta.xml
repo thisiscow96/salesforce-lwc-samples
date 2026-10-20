@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">89</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Leona</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">E 진입 + R 광역 기절</value>
     </values>

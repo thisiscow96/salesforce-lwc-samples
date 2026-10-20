@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">1</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Annie</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">패시브 기절 + R 티버 광역 이니시</value>
     </values>

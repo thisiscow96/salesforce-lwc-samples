@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">76</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Nidalee</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">창 포킹 + 빠른 정글링</value>
     </values>

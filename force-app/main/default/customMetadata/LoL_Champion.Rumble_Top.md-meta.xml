@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">68</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Rumble</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 광역 장판 이퀄라이저</value>
     </values>

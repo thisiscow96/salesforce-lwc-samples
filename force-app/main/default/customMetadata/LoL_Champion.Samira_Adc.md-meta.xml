@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">360</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Samira</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">스타일 등급 R 광역 난사</value>
     </values>

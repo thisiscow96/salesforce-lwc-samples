@@ -107,6 +107,10 @@
         <value xsi:type="xsd:double">17</value>
     </values>
     <values>
+        <field>Ddragon_Id__c</field>
+        <value xsi:type="xsd:string">Teemo</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">실명 견제 + 독버섯 지역 장악</value>
     </values>

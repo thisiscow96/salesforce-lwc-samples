@@ -24,7 +24,7 @@ const PAGES = [
     { name: 'Chart.js', path: 'lightning/n/Chartjs_Sample', tag: 'c-combo-bar-line-chart', minCanvases: 1 },
     { name: 'ECharts', path: 'lightning/n/ECharts_Sample', tag: 'c-echarts-combo-chart', minCanvases: 1 },
     { name: 'Sales Dashboard', path: 'lightning/n/Sales_Dashboard', tag: 'c-sales-dashboard', minCanvases: 7 },
-    { name: 'LoL Team Builder', path: 'lightning/n/LoL_Team_Builder', tag: 'c-lol-team-builder', minCanvases: 6 } // 레이더 1 + 예측 대시보드 5
+    { name: 'LoL Team Builder', path: 'lightning/n/LoL_Team_Builder', tag: 'c-lol-team-builder', minCanvases: 7 } // 점수 레이더 1 + 대시보드 6
 ];
 
 // Lightning 자체가 내는 무관한 콘솔 잡음은 제외 (필요 시 추가)
