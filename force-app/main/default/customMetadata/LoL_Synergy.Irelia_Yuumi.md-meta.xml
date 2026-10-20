@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Yuumi + Irelia</label>
+    <protected>false</protected>
+    <values>
+        <field>Champion_A__c</field>
+        <value xsi:type="xsd:string">Yuumi</value>
+    </values>
+    <values>
+        <field>Champion_B__c</field>
+        <value xsi:type="xsd:string">Irelia</value>
+    </values>
+    <values>
+        <field>Score__c</field>
+        <value xsi:type="xsd:double">-1</value>
+    </values>
+    <values>
+        <field>Reason__c</field>
+        <value xsi:type="xsd:string">근접 캐리가 아닌 원딜을 버프해야 하는 서폿 특성상 분산</value>
+    </values>
+</CustomMetadata>

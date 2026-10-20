@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlexiPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <flexiPageRegions>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>cardTitle</name>
+                    <value>LoL 팀 조합 분석기</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>defaultTiers</name>
+                    <value>TOP=EMERALD_LOW;JUNGLE=DIAMOND_LOW;MID=MASTER_500;ADC=MASTER_500;SUPPORT=MASTER_0</value>
+                </componentInstanceProperties>
+                <componentName>lolTeamBuilder</componentName>
+                <identifier>c_lolTeamBuilder</identifier>
+            </componentInstance>
+        </itemInstances>
+        <name>main</name>
+        <type>Region</type>
+    </flexiPageRegions>
+    <masterLabel>LoL Team Builder</masterLabel>
+    <template>
+        <name>flexipage:defaultAppHomeTemplate</name>
+    </template>
+    <type>AppPage</type>
+</FlexiPage>

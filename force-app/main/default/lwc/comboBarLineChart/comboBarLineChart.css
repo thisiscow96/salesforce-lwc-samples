@@ -1,0 +1,6 @@
+/* maintainAspectRatio:false 와 함께 사용: 컨테이너 높이가 차트 높이가 됨 */
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}

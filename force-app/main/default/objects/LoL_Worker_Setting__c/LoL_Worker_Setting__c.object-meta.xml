@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 클라우드 워커 API 키의 SHA-256 해시만 보관 (원문 미보관). Protected: 관리 패키지가 아니면 일반 사용자 UI에서 숨김 효과는 제한적이므로 해시만 저장 -->
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customSettingsType>Hierarchy</customSettingsType>
+    <description>LoL 클라우드 워커 API 인증 설정 (키 해시)</description>
+    <enableFeeds>false</enableFeeds>
+    <label>LoL Worker Setting</label>
+    <visibility>Protected</visibility>
+</CustomObject>

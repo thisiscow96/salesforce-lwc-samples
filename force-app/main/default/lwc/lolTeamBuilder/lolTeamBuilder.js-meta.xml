@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>LoL Team Builder</masterLabel>
+    <description>라인별 챔피언·실력 선택 → 조합 점수/근거/교체 추천, 전체 조합 탐색표, Excel, Claude 실시간 분석</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage,lightning__HomePage">
+            <property name="cardTitle" type="String" label="카드 제목" default="LoL 팀 조합 분석기"/>
+            <property name="defaultTiers" type="String" label="라인별 기본 실력"
+                default="TOP=EMERALD_LOW;JUNGLE=DIAMOND_LOW;MID=MASTER_500;ADC=MASTER_500;SUPPORT=MASTER_0"
+                description="LANE=LoL Tier DeveloperName 을 ;로 구분 (IRON~CHALLENGER, EMERALD_LOW, MASTER_500 등)"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>재사용 ECharts 래퍼 (option만 받아 렌더링, chartclick 이벤트 제공)</description>
+</LightningComponentBundle>

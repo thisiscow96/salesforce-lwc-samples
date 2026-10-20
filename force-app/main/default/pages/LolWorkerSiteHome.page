@@ -1,0 +1,2 @@
+<!-- LoL_Worker Site의 필수 인덱스 페이지. 이 사이트는 Apex REST(/services/apexrest/lol/queue)만 쓰며 화면은 제공하지 않음 -->
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" applyHtmlTag="false" contentType="text/plain">LoL worker endpoint</apex:page>

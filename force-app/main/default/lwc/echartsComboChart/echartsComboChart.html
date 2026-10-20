@@ -1,0 +1,58 @@
+<template>
+    <lightning-card title="ECharts Combined Line/Bar Chart" icon-name="standard:report">
+        <!-- Chart.js 샘플과 같은 Actions 버튼 5개 -->
+        <div class="slds-p-horizontal_medium">
+            <lightning-button-group>
+                <lightning-button label="Randomize" onclick={handleRandomize} disabled={isNotReady}></lightning-button>
+                <lightning-button label="Add Dataset" onclick={handleAddDataset} disabled={isNotReady}></lightning-button>
+                <lightning-button label="Add Data" onclick={handleAddData} disabled={isNotReady}></lightning-button>
+                <lightning-button label="Remove Dataset" onclick={handleRemoveDataset} disabled={isNotReady}></lightning-button>
+                <lightning-button label="Remove Data" onclick={handleRemoveData} disabled={isNotReady}></lightning-button>
+            </lightning-button-group>
+        </div>
+
+        <!-- 애니메이션 설정 패널 (ECharts animation 옵션) -->
+        <div class="slds-p-around_medium">
+            <div class="slds-box slds-box_x-small slds-theme_shade">
+                <p class="slds-text-title_bold slds-m-bottom_x-small">Animation</p>
+                <lightning-layout multiple-rows vertical-align="end">
+                    <lightning-layout-item size="12" small-device-size="6" medium-device-size="2" padding="horizontal-small">
+                        <lightning-input type="toggle" label="애니메이션" checked={animationEnabled}
+                            message-toggle-active="On" message-toggle-inactive="Off"
+                            onchange={handleAnimationToggle}></lightning-input>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="12" small-device-size="6" medium-device-size="3" padding="horizontal-small">
+                        <lightning-combobox label="Easing" value={easing} options={easingOptions}
+                            disabled={isAnimationOff} onchange={handleEasingChange}></lightning-combobox>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="12" small-device-size="6" medium-device-size="3" padding="horizontal-small">
+                        <lightning-slider label="Duration (ms)" min="0" max="5000" step="250" value={duration}
+                            disabled={isAnimationOff} onchange={handleDurationChange}></lightning-slider>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="6" medium-device-size="2" padding="horizontal-small">
+                        <lightning-input type="toggle" label="순차 등장 (delay)" checked={progressive}
+                            message-toggle-active="On" message-toggle-inactive="Off"
+                            disabled={isAnimationOff} onchange={handleProgressiveToggle}></lightning-input>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="6" medium-device-size="2" padding="horizontal-small">
+                        <lightning-input type="toggle" label="확대·축소 (dataZoom)" checked={zoomEnabled}
+                            message-toggle-active="On" message-toggle-inactive="Off"
+                            onchange={handleZoomToggle}></lightning-input>
+                    </lightning-layout-item>
+                </lightning-layout>
+                <div class="slds-m-top_small slds-p-horizontal_small">
+                    <lightning-button label="애니메이션 다시 재생" icon-name="utility:refresh"
+                        onclick={handleReplay} disabled={isReplayDisabled}></lightning-button>
+                </div>
+            </div>
+        </div>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={errorMessage}>
+                <div class="slds-text-color_error slds-p-around_small">{errorMessage}</div>
+            </template>
+            <!-- ECharts가 내부에 canvas를 직접 추가하므로 lwc:dom="manual" 필요 -->
+            <div class="chart-container" lwc:dom="manual"></div>
+        </div>
+    </lightning-card>
+</template>

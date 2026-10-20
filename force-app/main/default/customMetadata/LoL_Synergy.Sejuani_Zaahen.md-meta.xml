@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Sejuani + Zaahen</label>
+    <protected>false</protected>
+    <values>
+        <field>Champion_A__c</field>
+        <value xsi:type="xsd:string">Sejuani</value>
+    </values>
+    <values>
+        <field>Champion_B__c</field>
+        <value xsi:type="xsd:string">Zaahen</value>
+    </values>
+    <values>
+        <field>Score__c</field>
+        <value xsi:type="xsd:double">3</value>
+    </values>
+    <values>
+        <field>Reason__c</field>
+        <value xsi:type="xsd:string">세주아니 서리 스택을 근접 아군이 쌓아 기절 연계</value>
+    </values>
+</CustomMetadata>

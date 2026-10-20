@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Seraphine + Sivir</label>
+    <protected>false</protected>
+    <values>
+        <field>Champion_A__c</field>
+        <value xsi:type="xsd:string">Seraphine</value>
+    </values>
+    <values>
+        <field>Champion_B__c</field>
+        <value xsi:type="xsd:string">Sivir</value>
+    </values>
+    <values>
+        <field>Score__c</field>
+        <value xsi:type="xsd:double">2</value>
+    </values>
+    <values>
+        <field>Reason__c</field>
+        <value xsi:type="xsd:string">시비르 R 이속 + 세라핀 R로 한타 개시</value>
+    </values>
+</CustomMetadata>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- LoL_Worker 사이트 게스트 프로필: 큐 API 클래스만 허용 (오브젝트 권한 없음 → 표준 API·레코드 직접 접근 불가) -->
+<Profile xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses>
+        <apexClass>LolWorkerApi</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <custom>false</custom>
+    <userLicense>Guest User License</userLicense>
+</Profile>

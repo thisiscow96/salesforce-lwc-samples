@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 클라우드 Claude Code 워커용 큐 API 전용 사이트. 화면은 없고 /services/apexrest/lol/queue 만 사용.
+     게스트 접근이지만 LolWorkerApi가 X-LoL-Worker-Key(해시 비교)로 인증하며, 그 외 기능은 모두 비활성 -->
+<CustomSite xmlns="http://soap.sforce.com/2006/04/metadata">
+    <active>true</active>
+    <allowGuestPaymentsApi>false</allowGuestPaymentsApi>
+    <allowHomePage>false</allowHomePage>
+    <allowStandardAnswersPages>false</allowStandardAnswersPages>
+    <allowStandardIdeasPages>false</allowStandardIdeasPages>
+    <allowStandardLookups>false</allowStandardLookups>
+    <allowStandardPortalPages>false</allowStandardPortalPages>
+    <allowStandardSearch>false</allowStandardSearch>
+    <browserXssProtection>true</browserXssProtection>
+    <clickjackProtectionLevel>SameOriginOnly</clickjackProtectionLevel>
+    <contentSniffingProtection>true</contentSniffingProtection>
+    <enableAuraRequests>false</enableAuraRequests>
+    <indexPage>LolWorkerSiteHome</indexPage>
+    <masterLabel>LoL Worker</masterLabel>
+    <redirectToCustomDomain>false</redirectToCustomDomain>
+    <referrerPolicyOriginWhenCrossOrigin>true</referrerPolicyOriginWhenCrossOrigin>
+    <siteAdmin>thisiscow.0b4d203586c6@agentforce.com</siteAdmin>
+    <siteType>Visualforce</siteType>
+    <urlPathPrefix>lolworker</urlPathPrefix>
+</CustomSite>

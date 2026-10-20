@@ -1,0 +1,223 @@
+<template>
+    <lightning-card title={cardTitle} icon-name="standard:team_member">
+        <div slot="actions" class="actions">
+            <lightning-button class="export-button" icon-name="utility:download" label="Excel 다운로드"
+                onclick={handleExport} disabled={exportDisabled}></lightning-button>
+            <lightning-button class="analyze-button" variant="brand" icon-name="utility:einstein" label={analyzeLabel}
+                onclick={handleAnalyze} disabled={analyzeDisabled}></lightning-button>
+        </div>
+
+        <div class="slds-p-horizontal_medium">
+            <template lwc:if={loadError}>
+                <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">{loadError}</div>
+            </template>
+            <template lwc:if={teamGoal}>
+                <p class="goal slds-text-color_weak slds-m-bottom_small">팀 목표: {teamGoal}</p>
+            </template>
+
+            <template lwc:if={isReady}>
+                <lightning-layout multiple-rows>
+                    <!-- 1. 라인별 선택 -->
+                    <lightning-layout-item size="12" large-device-size="7" padding="around-small">
+                        <div class="panel">
+                            <h2 class="panel-title">조합 입력</h2>
+                            <template for:each={laneRows} for:item="row">
+                                <div key={row.lane} class="lane-row">
+                                    <div class="lane-label">{row.label}</div>
+                                    <lightning-combobox class="pick" data-lane={row.lane} label="챔피언" variant="label-hidden"
+                                        placeholder="챔피언 선택" options={row.options} value={row.value}
+                                        onchange={handlePickChange}></lightning-combobox>
+                                    <lightning-combobox class="tier" data-lane={row.lane} label="실력" variant="label-hidden"
+                                        options={row.tierOptions} value={row.tier} onchange={handleTierChange}></lightning-combobox>
+                                    <lightning-input class="lock" data-lane={row.lane} type="checkbox" label="고정"
+                                        checked={row.locked} onchange={handleLockChange}></lightning-input>
+                                    <div class="lane-info slds-text-color_weak">{row.info}</div>
+                                </div>
+                            </template>
+                            <template lwc:if={duplicateChampion}>
+                                <p class="slds-text-color_error slds-m-top_x-small">{duplicateChampion}이(가) 두 라인에 선택되었습니다.</p>
+                            </template>
+                        </div>
+                    </lightning-layout-item>
+
+                    <!-- 2. 점수 -->
+                    <lightning-layout-item size="12" large-device-size="5" padding="around-small">
+                        <div class="panel">
+                            <h2 class="panel-title">조합 점수</h2>
+                            <template lwc:if={hasResult}>
+                                <div class="score-head">
+                                    <span class="total">{total}</span><span class="slds-text-color_weak"> / 100</span>
+                                    <span class={gradeClass}>{grade}</span>
+                                </div>
+                                <c-echart class="radar" option={radarOption} height="260px"></c-echart>
+                            </template>
+                        </div>
+                    </lightning-layout-item>
+
+                    <template lwc:if={hasResult}>
+                        <!-- 3. 항목별 근거 -->
+                        <lightning-layout-item size="12" large-device-size="7" padding="around-small">
+                            <div class="panel">
+                                <h2 class="panel-title">항목별 점수와 근거</h2>
+                                <template for:each={categories} for:item="c">
+                                    <div key={c.key} class="category" title={c.description}>
+                                        <div class="category-head">
+                                            <span>{c.label}</span>
+                                            <span class="category-points">{c.points} / {c.max}</span>
+                                        </div>
+                                        <div class="bar"><div class="bar-fill" style={c.barStyle}></div></div>
+                                        <div class="category-detail slds-text-color_weak">{c.detail}</div>
+                                    </div>
+                                </template>
+                            </div>
+                        </lightning-layout-item>
+
+                        <!-- 4. 왜 좋은가 / 약점 / 교체 -->
+                        <lightning-layout-item size="12" large-device-size="5" padding="around-small">
+                            <div class="panel">
+                                <h2 class="panel-title">이 조합이 좋은 이유</h2>
+                                <ul class="reasons strengths">
+                                    <template for:each={strengths} for:item="s">
+                                        <li key={s.key}>{s.text}</li>
+                                    </template>
+                                </ul>
+                                <h2 class="panel-title slds-m-top_small">약점·주의</h2>
+                                <template lwc:if={hasWeaknesses}>
+                                    <ul class="reasons weaknesses">
+                                        <template for:each={weaknesses} for:item="w">
+                                            <li key={w.key}>{w.text}</li>
+                                        </template>
+                                    </ul>
+                                </template>
+                                <template lwc:else>
+                                    <p class="slds-text-color_weak">두드러진 약점 없음</p>
+                                </template>
+                                <h2 class="panel-title slds-m-top_small">운영 플랜</h2>
+                                <p class="plan">{plan}</p>
+                                <h2 class="panel-title slds-m-top_small">점수를 올리는 교체</h2>
+                                <template lwc:if={hasSwaps}>
+                                    <template for:each={swapItems} for:item="x">
+                                        <div key={x.key} class="swap">
+                                            <span>{x.text} <b class="slds-text-color_success">{x.delta}</b></span>
+                                            <lightning-button variant="base" label="적용" data-lane={x.lane} data-id={x.id}
+                                                onclick={handleSwap}></lightning-button>
+                                        </div>
+                                    </template>
+                                </template>
+                                <template lwc:else>
+                                    <p class="slds-text-color_weak">후보 풀 안에서 더 높은 단일 교체 없음</p>
+                                </template>
+                            </div>
+                        </lightning-layout-item>
+                    </template>
+
+                    <!-- 5. Claude 실시간 분석 -->
+                    <lightning-layout-item size="12" padding="around-small">
+                        <div class="panel analysis">
+                            <h2 class="panel-title">{analysisTitle}</h2>
+                            <template lwc:if={analyzing}>
+                                <div class="analyzing">
+                                    <lightning-spinner alternative-text="분석 중" size="small"></lightning-spinner>
+                                    <p class="slds-p-left_xx-large">최신 메타를 검색하며 분석 중입니다. 최대 2분 걸릴 수 있습니다.</p>
+                                </div>
+                            </template>
+                            <template lwc:if={analysisError}>
+                                <div class="analysis-error slds-notify slds-notify_alert slds-alert_error" role="alert">{analysisError}</div>
+                            </template>
+                            <template lwc:if={analysis}>
+                                <p class="analysis-meta slds-text-color_weak">{analysisMeta}</p>
+                                <div class="analysis-text">{analysis.text}</div>
+                                <template lwc:if={hasSources}>
+                                    <h3 class="slds-text-title_bold slds-m-top_small">출처</h3>
+                                    <ol class="sources">
+                                        <template for:each={analysisSources} for:item="src">
+                                            <li key={src.key}><a href={src.url} target="_blank" rel="noopener noreferrer">{src.title}</a></li>
+                                        </template>
+                                    </ol>
+                                </template>
+                            </template>
+                            <template lwc:if={showWaiting}>
+                                <div class="waiting slds-box slds-theme_shade">
+                                    <template lwc:if={isWaiting}>
+                                        <lightning-spinner alternative-text="처리 대기" size="small"></lightning-spinner>
+                                    </template>
+                                    <p class="waiting-text">{waitingMessage}</p>
+                                </div>
+                            </template>
+                            <template lwc:if={showAnalysisHint}>
+                                <p class="slds-text-color_weak">조합을 정한 뒤 [{analyzeLabel}]을 누르면 현재 패치 메타·커뮤니티 의견을 검색해 강점·약점·운영 플랜·밴 추천을 받습니다.</p>
+                            </template>
+
+                            <!-- Claude Code 모드: 내 최근 요청 (PC가 꺼져 있던 동안 처리된 결과 확인) -->
+                            <template lwc:if={isClaudeCodeMode}>
+                                <div class="recent slds-m-top_medium">
+                                    <div class="panel-bar">
+                                        <h3 class="slds-text-title_bold">내 최근 요청</h3>
+                                        <lightning-button-icon class="refresh-recent" icon-name="utility:refresh" variant="bare"
+                                            alternative-text="새로고침" title="새로고침" onclick={handleRefreshRecent}></lightning-button-icon>
+                                    </div>
+                                    <template lwc:if={hasRecent}>
+                                        <ul class="recent-list">
+                                            <template for:each={recentRows} for:item="r">
+                                                <li key={r.id} class="recent-item">
+                                                    <span class={r.statusClass}>{r.status}</span>
+                                                    <span class="recent-name">{r.name}</span>
+                                                    <span class="recent-comp">{r.composition}</span>
+                                                    <span class="slds-text-color_weak">{r.created}</span>
+                                                    <lightning-button class="open-request" variant="base" label="보기" data-id={r.id}
+                                                        onclick={handleOpenRequest}></lightning-button>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </template>
+                                    <template lwc:else>
+                                        <p class="slds-text-color_weak">아직 요청이 없습니다.</p>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-layout-item>
+
+                    <!-- 6. 조합표 -->
+                    <lightning-layout-item size="12" padding="around-small">
+                        <div class="panel">
+                            <div class="panel-bar">
+                                <h2 class="panel-title">추천 조합표 <span class="search-summary slds-text-color_weak">{searchSummary}</span></h2>
+                                <div class="panel-bar-actions">
+                                    <lightning-input class="structure-toggle" type="toggle" label="1탱+1브루저만" message-toggle-active=""
+                                        message-toggle-inactive="" checked={requireStructure} onchange={handleStructureToggle}></lightning-input>
+                                    <lightning-button class="search-button" icon-name="utility:search" label="최적 조합 찾기 (고정 라인 유지)"
+                                        onclick={handleSearch}></lightning-button>
+                                    <lightning-button class="apply-best-button" label="1위 적용" onclick={handleApplyBest}></lightning-button>
+                                </div>
+                            </div>
+                            <div class="table">
+                                <lightning-datatable class="combo-table" key-field="id" data={comboRows} columns={comboColumns}
+                                    hide-checkbox-column onrowaction={handleComboAction}></lightning-datatable>
+                            </div>
+                        </div>
+                    </lightning-layout-item>
+
+                    <!-- 7. 라인별 픽 풀 -->
+                    <lightning-layout-item size="12" padding="around-small">
+                        <div class="panel">
+                            <h2 class="panel-title">라인별 픽 풀 (Patch 26.20 통계)</h2>
+                            <lightning-tabset>
+                                <template for:each={poolTabs} for:item="tab">
+                                    <lightning-tab key={tab.lane} label={tab.label}>
+                                        <lightning-datatable key-field="id" data={tab.rows} columns={poolColumns}
+                                            hide-checkbox-column></lightning-datatable>
+                                    </lightning-tab>
+                                </template>
+                            </lightning-tabset>
+                            <p class="slds-text-color_weak slds-m-top_x-small">통계: MOBA Trainer(Emerald+), metabot.gg, SeeMeta / 능력치는 스킬 구성 기준 평가. 수정: Setup › Custom Metadata Types › LoL Champion</p>
+                        </div>
+                    </lightning-layout-item>
+                </lightning-layout>
+            </template>
+            <template lwc:elseif={noData}>
+                <lightning-spinner alternative-text="불러오는 중" size="medium"></lightning-spinner>
+            </template>
+        </div>
+    </lightning-card>
+</template>

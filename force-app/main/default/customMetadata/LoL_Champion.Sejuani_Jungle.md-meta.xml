@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>세주아니</label>
+    <protected>false</protected>
+    <values>
+        <field>Champion_Key__c</field>
+        <value xsi:type="xsd:string">Sejuani</value>
+    </values>
+    <values>
+        <field>English_Name__c</field>
+        <value xsi:type="xsd:string">Sejuani</value>
+    </values>
+    <values>
+        <field>Lane__c</field>
+        <value xsi:type="xsd:string">JUNGLE</value>
+    </values>
+    <values>
+        <field>Role_Class__c</field>
+        <value xsi:type="xsd:string">Tank</value>
+    </values>
+    <values>
+        <field>Damage_Type__c</field>
+        <value xsi:type="xsd:string">AP</value>
+    </values>
+    <values>
+        <field>Meta_Tier__c</field>
+        <value xsi:type="xsd:string">S</value>
+    </values>
+    <values>
+        <field>Win_Rate__c</field>
+        <value xsi:type="xsd:double">53.5</value>
+    </values>
+    <values>
+        <field>Meta_Score__c</field>
+        <value xsi:type="xsd:double">9</value>
+    </values>
+    <values>
+        <field>CC__c</field>
+        <value xsi:type="xsd:double">9</value>
+    </values>
+    <values>
+        <field>Frontline__c</field>
+        <value xsi:type="xsd:double">9</value>
+    </values>
+    <values>
+        <field>Damage__c</field>
+        <value xsi:type="xsd:double">4</value>
+    </values>
+    <values>
+        <field>Late_Game__c</field>
+        <value xsi:type="xsd:double">7</value>
+    </values>
+    <values>
+        <field>Early_Game__c</field>
+        <value xsi:type="xsd:double">6</value>
+    </values>
+    <values>
+        <field>Engage__c</field>
+        <value xsi:type="xsd:double">9</value>
+    </values>
+    <values>
+        <field>Peel__c</field>
+        <value xsi:type="xsd:double">6</value>
+    </values>
+    <values>
+        <field>Carry__c</field>
+        <value xsi:type="xsd:double">3</value>
+    </values>
+    <values>
+        <field>Difficulty__c</field>
+        <value xsi:type="xsd:double">4</value>
+    </values>
+    <values>
+        <field>Note__c</field>
+        <value xsi:type="xsd:string">아군 근접 챔피언 공격이 서리 스택을 쌓아 기절 연계, R 광역 기절</value>
+    </values>
+    <values>
+        <field>Source__c</field>
+        <value xsi:type="xsd:string">MOBA Trainer 26.20 Emerald+</value>
+    </values>
+    <values>
+        <field>Sort_Order__c</field>
+        <value xsi:type="xsd:double">15</value>
+    </values>
+</CustomMetadata>

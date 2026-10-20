@@ -1,0 +1,134 @@
+<template>
+    <lightning-card title={cardTitle} icon-name="standard:dashboard">
+        <div slot="actions" class="actions">
+            <lightning-combobox class="year-picker" label="연도" variant="label-hidden" value={yearValue}
+                options={yearOptions} onchange={handleYearChange}></lightning-combobox>
+            <lightning-button class="upload-button" icon-name="utility:upload" label="Excel 업로드"
+                onclick={handleOpenUpload}></lightning-button>
+            <lightning-button-icon icon-name="utility:refresh" alternative-text="새로고침" title="새로고침"
+                onclick={handleRefresh}></lightning-button-icon>
+        </div>
+
+        <div class="body slds-p-horizontal_medium">
+            <template lwc:if={isLoading}>
+                <lightning-spinner alternative-text="불러오는 중" size="medium"></lightning-spinner>
+            </template>
+
+            <template lwc:if={errorMessage}>
+                <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">{errorMessage}</div>
+            </template>
+
+            <template lwc:if={isEmpty}>
+                <div class="empty slds-text-align_center slds-p-around_large">
+                    <p class="slds-text-heading_small">{yearValue}년 Opportunity 데이터가 없습니다.</p>
+                    <p class="slds-text-color_weak slds-m-top_x-small">다른 연도를 선택하거나 데모 데이터 스크립트(scripts/apex/seed-demo-data.apex)를 실행하세요.</p>
+                </div>
+            </template>
+
+            <template lwc:if={hasData}>
+                <!-- KPI -->
+                <div class="kpi-row">
+                    <template for:each={kpis} for:item="tile">
+                        <div key={tile.key} class={tile.className}>
+                            <div class="kpi-label">{tile.label}</div>
+                            <div class="kpi-value">{tile.value}</div>
+                            <div class="kpi-sub">{tile.sub}</div>
+                        </div>
+                    </template>
+                </div>
+
+                <lightning-layout multiple-rows class="slds-m-top_x-small">
+                    <lightning-layout-item size="12" large-device-size="8" padding="around-small">
+                        <div class="chart-card">
+                            <div class="chart-head">
+                                <h2>월별 수주 · 파이프라인 vs 목표</h2>
+                                <p>막대를 클릭하면 해당 월 기회가 아래 목록에 표시됩니다</p>
+                            </div>
+                            <c-echart data-id="monthly" option={options.monthly} height="330px"
+                                onchartclick={handleMonthlyClick}></c-echart>
+                        </div>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="12" large-device-size="4" padding="around-small">
+                        <div class="chart-card">
+                            <div class="chart-head">
+                                <h2>연간 목표 달성률</h2>
+                                <p>안쪽: 수주 실적 · 바깥 연한 색: 예상 착지(가중 파이프라인 포함)</p>
+                            </div>
+                            <c-echart data-id="gauge" option={options.gauge} height="330px"></c-echart>
+                        </div>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="12" large-device-size="5" padding="around-small">
+                        <div class="chart-card">
+                            <div class="chart-head">
+                                <h2>파이프라인 퍼널 (진행 중)</h2>
+                                <p>단계를 클릭하면 해당 단계 기회만 표시</p>
+                            </div>
+                            <c-echart data-id="funnel" option={options.funnel} height="340px"
+                                onchartclick={handleFunnelClick}></c-echart>
+                        </div>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="12" large-device-size="7" padding="around-small">
+                        <div class="chart-card">
+                            <div class="chart-head">
+                                <h2>Lead Source → 결과 흐름</h2>
+                                <p>어느 유입 경로가 수주로 이어지는지 금액 흐름으로 표시 (노드·흐름 클릭 가능)</p>
+                            </div>
+                            <c-echart data-id="sankey" option={options.sankey} height="340px"
+                                onchartclick={handleSankeyClick}></c-echart>
+                        </div>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="12" large-device-size="5" padding="around-small">
+                        <div class="chart-card">
+                            <div class="chart-head">
+                                <h2>산업 · 거래처별 수주 구성</h2>
+                                <p>산업을 클릭하면 거래처 단위로 확대 (하단 경로로 복귀)</p>
+                            </div>
+                            <c-echart data-id="treemap" option={options.treemap} height="360px"
+                                onchartclick={handleTreemapClick}></c-echart>
+                        </div>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="12" large-device-size="7" padding="around-small">
+                        <div class="chart-card">
+                            <div class="chart-head">
+                                <h2>딜 분포 (마감일 × 금액, 점 크기 = 확률)</h2>
+                                <p>휠·하단 슬라이더로 기간 확대, 점을 클릭하면 Opportunity 레코드로 이동</p>
+                            </div>
+                            <c-echart data-id="scatter" option={options.scatter} height="360px"
+                                onchartclick={handleScatterClick}></c-echart>
+                        </div>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="12" padding="around-small">
+                        <div class="chart-card">
+                            <div class="chart-head">
+                                <h2>일별 수주 캘린더</h2>
+                                <p>진할수록 수주 금액이 큰 날 · 날짜를 클릭하면 그날 수주 건 표시</p>
+                            </div>
+                            <c-echart data-id="calendar" option={options.calendar} height="210px"
+                                onchartclick={handleCalendarClick}></c-echart>
+                        </div>
+                    </lightning-layout-item>
+                </lightning-layout>
+
+                <!-- 드릴다운 목록 -->
+                <div class="chart-card slds-m-around_x-small slds-m-bottom_medium">
+                    <div class="table-head">
+                        <h2>{tableTitle}</h2>
+                        <template lwc:if={filter}>
+                            <lightning-pill label={filter.label} onremove={handleClearFilter}></lightning-pill>
+                        </template>
+                    </div>
+                    <template lwc:if={data.truncated}>
+                        <p class="slds-text-color_weak slds-m-bottom_x-small">상세 목록은 금액 상위 2,000건까지만 표시됩니다 (차트 집계는 전체 기준).</p>
+                    </template>
+                    <div class="table-wrap">
+                        <lightning-datatable key-field="id" data={rows} columns={columns} hide-checkbox-column
+                            sorted-by={sortedBy} sorted-direction={sortDirection} onsort={handleSort}></lightning-datatable>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

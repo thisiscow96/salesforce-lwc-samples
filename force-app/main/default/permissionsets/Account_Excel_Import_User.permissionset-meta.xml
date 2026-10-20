@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Excel 업로드 사용자에게 부여. 쓰기 기능이라 조회용(Sales Dashboard User)과 분리.
+     Account/Contact Create 권한과 FLS(First Name, Last Name, Email)는 Profile 또는 별도 Permission Set으로 부여 -->
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <classAccesses>
+        <apexClass>AccountExcelImportController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <description>Account Excel Upload 사용: Apex 컨트롤러 접근. 데이터 권한(Account/Contact Create, FLS)은 별도 부여</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Account Excel Import User</label>
+</PermissionSet>

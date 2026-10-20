@@ -1,0 +1,5 @@
+# 배포·조회에서 제외할 파일
+package.xml
+**/jsconfig.json
+**/.eslintrc.json
+**/__tests__/**

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 관리자 외 사용자에게 대시보드를 열어 줄 때 부여. 데이터는 사용자의 Opportunity/Account 조회 권한과 Sharing 범위만 표시됨 -->
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <applicationVisibilities>
+        <application>Chart_Samples</application>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <classAccesses>
+        <apexClass>SalesDashboardController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <description>Sales Dashboard(ECharts) 사용: 앱, Apex 컨트롤러, 탭 접근. Opportunity/Account 조회 권한은 Profile 또는 별도 Permission Set으로 부여</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Sales Dashboard User</label>
+    <tabSettings>
+        <tab>Sales_Dashboard</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+</PermissionSet>

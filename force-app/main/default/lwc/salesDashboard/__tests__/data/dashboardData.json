@@ -1,0 +1,50 @@
+{
+    "year": 2026,
+    "truncated": false,
+    "months": [
+        { "month": 1, "wonAmount": 300000, "lostAmount": 120000, "openAmount": 0, "wonCount": 6, "lostCount": 3, "openCount": 0 },
+        { "month": 2, "wonAmount": 420000, "lostAmount": 90000, "openAmount": 0, "wonCount": 7, "lostCount": 2, "openCount": 0 },
+        { "month": 3, "wonAmount": 510000, "lostAmount": 150000, "openAmount": 20000, "wonCount": 9, "lostCount": 4, "openCount": 1 },
+        { "month": 4, "wonAmount": 380000, "lostAmount": 60000, "openAmount": 0, "wonCount": 6, "lostCount": 2, "openCount": 0 },
+        { "month": 5, "wonAmount": 610000, "lostAmount": 100000, "openAmount": 0, "wonCount": 10, "lostCount": 3, "openCount": 0 },
+        { "month": 6, "wonAmount": 550000, "lostAmount": 80000, "openAmount": 0, "wonCount": 8, "lostCount": 2, "openCount": 0 },
+        { "month": 7, "wonAmount": 700000, "lostAmount": 200000, "openAmount": 0, "wonCount": 11, "lostCount": 5, "openCount": 0 },
+        { "month": 8, "wonAmount": 450000, "lostAmount": 110000, "openAmount": 0, "wonCount": 7, "lostCount": 3, "openCount": 0 },
+        { "month": 9, "wonAmount": 520000, "lostAmount": 90000, "openAmount": 0, "wonCount": 8, "lostCount": 2, "openCount": 0 },
+        { "month": 10, "wonAmount": 260000, "lostAmount": 40000, "openAmount": 380000, "wonCount": 4, "lostCount": 1, "openCount": 6 },
+        { "month": 11, "wonAmount": 0, "lostAmount": 0, "openAmount": 640000, "wonCount": 0, "lostCount": 0, "openCount": 10 },
+        { "month": 12, "wonAmount": 0, "lostAmount": 0, "openAmount": 520000, "wonCount": 0, "lostCount": 0, "openCount": 8 }
+    ],
+    "stages": [
+        { "apiName": "Prospecting", "label": "Prospecting", "amount": 600000, "count": 9 },
+        { "apiName": "Qualification", "label": "Qualification", "amount": 450000, "count": 7 },
+        { "apiName": "Proposal/Price Quote", "label": "Proposal/Price Quote", "amount": 300000, "count": 6 },
+        { "apiName": "Negotiation/Review", "label": "Negotiation/Review", "amount": 210000, "count": 3 }
+    ],
+    "leadSources": [
+        { "source": "Web", "outcome": "WON", "amount": 2000000, "count": 30 },
+        { "source": "Web", "outcome": "LOST", "amount": 600000, "count": 14 },
+        { "source": "Web", "outcome": "OPEN", "amount": 800000, "count": 12 },
+        { "source": "Partner Referral", "outcome": "WON", "amount": 1500000, "count": 20 },
+        { "source": null, "outcome": "LOST", "amount": 200000, "count": 4 },
+        { "source": "Other", "outcome": "WON", "amount": 0, "count": 1 }
+    ],
+    "accounts": [
+        { "accountId": "001000000000001AAA", "accountName": "Acme <Corp>", "industry": "Technology", "amount": 2500000, "count": 40 },
+        { "accountId": "001000000000002AAA", "accountName": "Globex", "industry": "Manufacturing", "amount": 1200000, "count": 20 },
+        { "accountId": null, "accountName": null, "industry": null, "amount": 500000, "count": 16 }
+    ],
+    "daily": [
+        { "day": "2026-01-05", "amount": 50000, "count": 1 },
+        { "day": "2026-03-17", "amount": 180000, "count": 3 },
+        { "day": "2026-07-01", "amount": 90000, "count": 2 }
+    ],
+    "deals": [
+        { "id": "006000000000001AAA", "name": "Big <script>alert(1)</script> Deal", "accountId": "001000000000001AAA", "accountName": "Acme <Corp>", "industry": "Technology", "stage": "Closed Won", "amount": 150000, "probability": 100, "closeDate": "2026-03-17", "status": "WON", "leadSource": "Web" },
+        { "id": "006000000000002AAA", "name": "Globex Expansion", "accountId": "001000000000002AAA", "accountName": "Globex", "industry": "Manufacturing", "stage": "Closed Won", "amount": 90000, "probability": 100, "closeDate": "2026-07-01", "status": "WON", "leadSource": "Partner Referral" },
+        { "id": "006000000000003AAA", "name": "Acme Renewal", "accountId": "001000000000001AAA", "accountName": "Acme <Corp>", "industry": "Technology", "stage": "Closed Lost", "amount": 60000, "probability": 0, "closeDate": "2026-03-02", "status": "LOST", "leadSource": null },
+        { "id": "006000000000004AAA", "name": "New Prospect", "accountId": "001000000000002AAA", "accountName": "Globex", "industry": "Manufacturing", "stage": "Prospecting", "amount": 40000, "probability": 10, "closeDate": "2026-11-20", "status": "OPEN", "leadSource": "Web" },
+        { "id": "006000000000005AAA", "name": "Quote Sent", "accountId": "001000000000001AAA", "accountName": "Acme <Corp>", "industry": "Technology", "stage": "Proposal/Price Quote", "amount": 75000, "probability": 75, "closeDate": "2026-10-28", "status": "OPEN", "leadSource": "Web" },
+        { "id": "006000000000006AAA", "name": "No Account Deal", "accountId": null, "accountName": null, "industry": null, "stage": "Closed Won", "amount": null, "probability": 100, "closeDate": "2026-01-05", "status": "WON", "leadSource": null }
+    ]
+}

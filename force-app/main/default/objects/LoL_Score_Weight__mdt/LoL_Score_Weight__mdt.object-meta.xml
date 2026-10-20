@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>조합 점수 카테고리별 배점 (합계 100 권장)</description>
+    <label>LoL Score Weight</label>
+    <pluralLabel>LoL Score Weights</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>

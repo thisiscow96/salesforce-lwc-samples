@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Composition__c</fullName>
+    <description>라인별 챔피언 (탑 / 정글 / 미드 / 원딜 / 서폿)</description>
+    <label>Composition</label>
+    <length>255</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

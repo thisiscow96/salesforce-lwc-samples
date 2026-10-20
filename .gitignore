@@ -1,0 +1,9 @@
+!.vscode/settings.json
+.localdevserver/
+.sf/
+.sfdx/
+.smoke/
+.vscode/*
+coverage/
+node_modules/
+.lol-worker/

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Default</label>
+    <protected>false</protected>
+    <values>
+        <field>Mode__c</field>
+        <value xsi:type="xsd:string">CLAUDE_CODE</value>
+    </values>
+    <values>
+        <field>Model__c</field>
+        <value xsi:type="xsd:string">claude-sonnet-5-5</value>
+    </values>
+    <values>
+        <field>Max_Tokens__c</field>
+        <value xsi:type="xsd:double">3000</value>
+    </values>
+    <values>
+        <field>Web_Search_Tool__c</field>
+        <value xsi:type="xsd:string">web_search_20250305</value>
+    </values>
+    <values>
+        <field>Web_Search_Max_Uses__c</field>
+        <value xsi:type="xsd:double">3</value>
+    </values>
+    <values>
+        <field>Timeout_Seconds__c</field>
+        <value xsi:type="xsd:double">120</value>
+    </values>
+    <values>
+        <field>Routine_Fire_Path__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Team_Goal__c</field>
+        <value xsi:type="xsd:string">미드·원딜이 캐리 라인(마스터 500LP), 탑(에메랄드 하위)·정글(다이아 하위)이 CC와 앞라인 담당, 서폿 마스터 0LP. 탑·정글은 2탱이 아닌 1탱 + 1브루저 구조를 선호. 후반을 챙길 수 있는 조합을 목표로 한다.</value>
+    </values>
+</CustomMetadata>

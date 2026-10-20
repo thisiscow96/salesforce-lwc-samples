@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Key_Hash__c</fullName>
+    <description>X-LoL-Worker-Key 원문의 SHA-256 (소문자 hex 64자)</description>
+    <externalId>false</externalId>
+    <label>Key Hash</label>
+    <length>64</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,87 @@
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.year-picker {
+    width: 7.5rem;
+}
+
+.body {
+    position: relative;
+    min-height: 120px;
+}
+
+/* KPI 타일: 화면 폭에 따라 자동 줄바꿈 */
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    padding: 0 0.5rem;
+}
+
+.kpi-tile {
+    border-radius: 10px;
+    padding: 12px 16px;
+    background: #f3f6fa;
+    border-left: 4px solid #706e6b;
+}
+
+.kpi-won { border-left-color: #2e844a; }
+.kpi-target { border-left-color: #fe9339; }
+.kpi-rate { border-left-color: #9050e9; }
+.kpi-open { border-left-color: #0176d3; }
+
+.kpi-label {
+    font-size: 12px;
+    color: #5c5c5c;
+}
+
+.kpi-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #181818;
+    line-height: 1.35;
+}
+
+.kpi-sub {
+    font-size: 12px;
+    color: #706e6b;
+}
+
+.chart-card {
+    height: 100%;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.chart-head {
+    margin-bottom: 4px;
+}
+
+.chart-head h2,
+.table-head h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #181818;
+}
+
+.chart-head p {
+    font-size: 12px;
+    color: #706e6b;
+}
+
+.table-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 8px;
+}
+
+.table-wrap {
+    height: 420px;
+}

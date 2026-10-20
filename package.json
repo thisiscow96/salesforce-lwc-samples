@@ -1,0 +1,23 @@
+{
+  "name": "chartjs-lwc-sample",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "lint": "eslint force-app/main/default/lwc",
+    "test": "sfdx-lwc-jest",
+    "verify": "npm run lint && npm run test",
+    "smoke": "node scripts/smoke-test.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/eslint-parser": "^7.29.9",
+    "@lwc/eslint-plugin-lwc": "^3.5.0",
+    "@salesforce/eslint-config-lwc": "^4.1.2",
+    "@salesforce/eslint-plugin-lightning": "^2.0.0",
+    "@salesforce/sfdx-lwc-jest": "^7.9.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jest": "^29.17.0",
+    "puppeteer-core": "^25.14.0"
+  }
+}

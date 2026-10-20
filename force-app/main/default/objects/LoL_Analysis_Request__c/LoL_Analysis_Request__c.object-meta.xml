@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Claude Code(로컬) 분석 요청 큐: LWC가 Pending으로 생성 → 로컬 Claude Code가 처리해 결과 기록.
+     OWD Private: 요청자 본인 것만 조회 (처리 담당 관리자는 Modify All Data로 전체 처리) -->
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>LoL 팀 조합 분석 요청 (Claude Code 로컬 처리 큐)</description>
+    <enableActivities>false</enableActivities>
+    <enableBulkApi>true</enableBulkApi>
+    <enableHistory>false</enableHistory>
+    <enableReports>true</enableReports>
+    <enableSearch>false</enableSearch>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <externalSharingModel>Private</externalSharingModel>
+    <label>LoL Analysis Request</label>
+    <nameField>
+        <displayFormat>LAR-{00000}</displayFormat>
+        <label>Request No</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>LoL Analysis Requests</pluralLabel>
+    <sharingModel>Private</sharingModel>
+    <visibility>Public</visibility>
+</CustomObject>

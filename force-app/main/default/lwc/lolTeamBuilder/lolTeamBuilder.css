@@ -1,0 +1,237 @@
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.panel {
+    height: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--slds-g-color-border-1, #e5e5e5);
+    border-radius: 0.5rem;
+    background: var(--slds-g-color-neutral-base-100, #fff);
+}
+
+.panel-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.panel-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.panel-bar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.search-summary {
+    font-weight: 400;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+}
+
+/* 라인 입력: 라인 | 챔피언 | 실력 | 고정, 아래 줄에 챔피언 정보 */
+.lane-row {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1.6fr) minmax(0, 1fr) 4rem;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px dashed var(--slds-g-color-border-1, #e5e5e5);
+}
+
+.lane-label {
+    font-weight: 700;
+}
+
+.lane-info {
+    grid-column: 2 / -1;
+    font-size: 0.75rem;
+}
+
+.score-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+.total {
+    font-size: 2.25rem;
+    font-weight: 700;
+}
+
+.grade {
+    margin-left: auto;
+    padding: 0.1rem 0.75rem;
+    border-radius: 1rem;
+    font-weight: 700;
+    color: #fff;
+    background: #747474;
+}
+
+.grade-s {
+    background: #c23934;
+}
+
+.grade-a {
+    background: #fe9339;
+}
+
+.grade-b {
+    background: #0176d3;
+}
+
+.grade-c {
+    background: #2e844a;
+}
+
+.category {
+    margin-bottom: 0.6rem;
+}
+
+.category-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+}
+
+.category-points {
+    font-weight: 700;
+}
+
+.bar {
+    height: 0.4rem;
+    border-radius: 0.2rem;
+    background: var(--slds-g-color-neutral-base-90, #e5e5e5);
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: #0176d3;
+}
+
+.category-detail {
+    font-size: 0.72rem;
+}
+
+.reasons {
+    list-style: disc;
+    padding-left: 1.1rem;
+    font-size: 0.8rem;
+}
+
+.strengths li::marker {
+    color: #2e844a;
+}
+
+.weaknesses li::marker {
+    color: #c23934;
+}
+
+.swap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.analyzing {
+    position: relative;
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+}
+
+.analysis-text {
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-size: 0.85rem;
+}
+
+.sources {
+    list-style: decimal;
+    padding-left: 1.25rem;
+    font-size: 0.75rem;
+}
+
+.table {
+    max-height: 26rem;
+    overflow: auto;
+}
+
+@media (max-width: 480px) {
+    .lane-row {
+        grid-template-columns: 2.5rem minmax(0, 1fr) 3.5rem;
+    }
+
+    .lane-row .tier {
+        grid-column: 2 / 3;
+    }
+}
+
+.waiting {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.waiting-text {
+    padding-left: 2.5rem;
+    font-size: 0.85rem;
+}
+
+.recent-list {
+    font-size: 0.8rem;
+}
+
+.recent-item {
+    display: grid;
+    grid-template-columns: 4rem 6rem minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.2rem 0;
+    border-bottom: 1px dashed var(--slds-g-color-border-1, #e5e5e5);
+}
+
+.recent-comp {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.status {
+    padding: 0 0.4rem;
+    border-radius: 0.6rem;
+    text-align: center;
+    color: #fff;
+    background: #747474;
+}
+
+.status-completed {
+    background: #2e844a;
+}
+
+.status-processing {
+    background: #0176d3;
+}
+
+.status-failed {
+    background: #c23934;
+}
+
+@media (max-width: 480px) {
+    .recent-item {
+        grid-template-columns: 4rem minmax(0, 1fr) auto;
+    }
+}

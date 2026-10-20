@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Account Excel Upload</masterLabel>
+    <description>Excel(.xlsx/.csv)로 Account + Contact(First Name, Last Name, Email) 일괄 생성. 미리보기·검증·실패 목록 CSV 제공</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+    </targets>
+</LightningComponentBundle>

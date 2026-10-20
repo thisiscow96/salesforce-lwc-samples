@@ -1,0 +1,7 @@
+<template>
+    <template lwc:if={errorMessage}>
+        <div class="slds-text-color_error slds-p-around_small">{errorMessage}</div>
+    </template>
+    <!-- ECharts가 내부에 canvas를 직접 추가하므로 lwc:dom="manual" 필요 -->
+    <div class="chart" style={containerStyle} lwc:dom="manual"></div>
+</template>
