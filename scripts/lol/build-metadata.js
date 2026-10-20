@@ -233,7 +233,7 @@ record('LoL_AI_Setting__mdt', 'Default', 'Default', {
     Mode__c: 'CLAUDE_CODE',
     Model__c: 'claude-sonnet-5-5',
     Base_Patch__c: '26.20', // lol-data.js 통계 기준과 동일
-    Max_Tokens__c: 16000, // 리포트 양식 확장(12,000자 이내)에 맞춤
+    Max_Tokens__c: 24000, // 운영·한타·사이드 섹션 추가로 16,000자 이내 리포트
     Web_Search_Tool__c: 'web_search_20250305',
     Web_Search_Max_Uses__c: 15, // 항목당 2개 출처 교차 확인
     Timeout_Seconds__c: 120,
