@@ -47,6 +47,12 @@ export function normalizeData(raw) {
             peel: c.Peel__c ?? 0,
             carry: c.Carry__c ?? 0,
             diff: c.Difficulty__c ?? 5,
+            solo: c.Solo_Kill__c ?? 5,
+            prio: c.Lane_Priority__c ?? 5,
+            obj: c.Objective__c ?? 5,
+            pickRate: c.Pick_Rate__c ?? null,
+            banRate: c.Ban_Rate__c ?? null,
+            preferred: c.Preferred__c === true,
             note: c.Note__c,
             source: c.Source__c,
             order: c.Sort_Order__c ?? 999
@@ -241,12 +247,34 @@ export function suggestSwaps(team, skills, ctx, limit = 3) {
     return out.sort((a, b) => b.delta - a.delta).slice(0, limit);
 }
 
+export const EXTENDED_POOL_SIZE = 8;
+
 /**
- * 전체 조합 탐색 (라인별 후보의 곱, 같은 챔피언 중복 제외).
- * locked: { lane: champion } 고정 라인, requireStructure: 탑·정글 1탱+1브루저만
+ * 탐색 후보: 라인별 전체 픽은 수십 명이라 모든 조합(수억 개)을 볼 수 없으므로 후보를 줄인다.
+ * - preferred: 팀 선호 픽 (선호 픽이 없는 라인은 메타 상위 EXTENDED_POOL_SIZE명)
+ * - extended: 선호 여부와 무관하게 메타 상위 EXTENDED_POOL_SIZE명 + 선호 픽 중 메타 상위 최대 4명
  */
-export function findBestTeams(ctx, skills, { locked = {}, requireStructure = true, limit = 30 } = {}) {
-    const pools = LANES.map((lane) => (locked[lane] ? [locked[lane]] : ctx.byLane[lane]));
+export function searchPool(ctx, lane, mode = 'preferred') {
+    const all = ctx.byLane[lane];
+    const byMeta = [...all].sort((a, b) => b.meta - a.meta || (b.winRate ?? 0) - (a.winRate ?? 0));
+    const preferred = all.filter((c) => c.preferred);
+    if (mode !== 'extended') {
+        return preferred.length ? preferred : byMeta.slice(0, EXTENDED_POOL_SIZE);
+    }
+    const picked = new Map(byMeta.slice(0, EXTENDED_POOL_SIZE).map((c) => [c.id, c]));
+    preferred
+        .sort((a, b) => b.meta - a.meta)
+        .slice(0, Math.min(4, Math.ceil(preferred.length / 2))) // 라인당 최대 12명 → 탐색 수십만 건 이내
+        .forEach((c) => picked.set(c.id, c));
+    return [...picked.values()];
+}
+
+/**
+ * 조합 탐색 (라인별 후보의 곱, 같은 챔피언 중복 제외).
+ * locked: { lane: champion } 고정 라인, requireStructure: 탑·정글 1탱+1브루저만, poolMode: searchPool 참고
+ */
+export function findBestTeams(ctx, skills, { locked = {}, requireStructure = true, limit = 30, poolMode = 'preferred' } = {}) {
+    const pools = LANES.map((lane) => (locked[lane] ? [locked[lane]] : searchPool(ctx, lane, poolMode)));
     const results = [];
     let evaluated = 0;
     const team = {};

@@ -363,7 +363,8 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(prompt.contains('[라인별 후보 풀]'), prompt);
         Assert.isTrue(prompt.contains('룰루('), '서폿 후보 포함');
         Map<String, List<String>> pool = LolClaudeAnalysisService.lanePool();
-        Assert.areEqual([SELECT COUNT() FROM LoL_Champion__mdt WHERE Lane__c = 'TOP'], pool.get('TOP').size());
+        Assert.areEqual([SELECT COUNT() FROM LoL_Champion__mdt WHERE Lane__c = 'TOP' AND Preferred__c = TRUE], pool.get('TOP').size(), '팀 선호 픽만 후보');
+        Assert.isTrue([SELECT COUNT() FROM LoL_Champion__mdt WHERE Lane__c = 'TOP'] > pool.get('TOP').size(), '전체 픽은 프롬프트에 넣지 않음');
         Integer last = -1;
         for (LoL_Score_Weight__mdt w : weights) {
             Integer at = prompt.indexOf('- ' + w.MasterLabel + ':');

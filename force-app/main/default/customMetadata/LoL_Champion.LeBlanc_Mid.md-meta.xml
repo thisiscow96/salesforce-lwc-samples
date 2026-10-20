@@ -28,7 +28,7 @@
     </values>
     <values>
         <field>Win_Rate__c</field>
-        <value xsi:type="xsd:double">52.3</value>
+        <value xsi:type="xsd:double">52.2</value>
     </values>
     <values>
         <field>Meta_Score__c</field>
@@ -71,6 +71,30 @@
         <value xsi:type="xsd:double">9</value>
     </values>
     <values>
+        <field>Solo_Kill__c</field>
+        <value xsi:type="xsd:double">7</value>
+    </values>
+    <values>
+        <field>Lane_Priority__c</field>
+        <value xsi:type="xsd:double">6</value>
+    </values>
+    <values>
+        <field>Objective__c</field>
+        <value xsi:type="xsd:double">4</value>
+    </values>
+    <values>
+        <field>Pick_Rate__c</field>
+        <value xsi:type="xsd:double">5.29</value>
+    </values>
+    <values>
+        <field>Ban_Rate__c</field>
+        <value xsi:type="xsd:double">16.97</value>
+    </values>
+    <values>
+        <field>Preferred__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">초중반 순간 폭딜 암살, 후반 영향력 감소</value>
     </values>
@@ -80,6 +104,6 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">25</value>
+        <value xsi:type="xsd:double">130</value>
     </values>
 </CustomMetadata>

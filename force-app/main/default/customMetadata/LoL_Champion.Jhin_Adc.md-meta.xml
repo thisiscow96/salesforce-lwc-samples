@@ -28,7 +28,7 @@
     </values>
     <values>
         <field>Win_Rate__c</field>
-        <value xsi:type="xsd:double">51.4</value>
+        <value xsi:type="xsd:double">51.5</value>
     </values>
     <values>
         <field>Meta_Score__c</field>
@@ -71,6 +71,30 @@
         <value xsi:type="xsd:double">6</value>
     </values>
     <values>
+        <field>Solo_Kill__c</field>
+        <value xsi:type="xsd:double">5</value>
+    </values>
+    <values>
+        <field>Lane_Priority__c</field>
+        <value xsi:type="xsd:double">6</value>
+    </values>
+    <values>
+        <field>Objective__c</field>
+        <value xsi:type="xsd:double">6</value>
+    </values>
+    <values>
+        <field>Pick_Rate__c</field>
+        <value xsi:type="xsd:double">17.94</value>
+    </values>
+    <values>
+        <field>Ban_Rate__c</field>
+        <value xsi:type="xsd:double">1.98</value>
+    </values>
+    <values>
+        <field>Preferred__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">W가 아군 CC에 맞은 적을 속박 → CC 연계형</value>
     </values>
@@ -80,6 +104,6 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">32</value>
+        <value xsi:type="xsd:double">185</value>
     </values>
 </CustomMetadata>

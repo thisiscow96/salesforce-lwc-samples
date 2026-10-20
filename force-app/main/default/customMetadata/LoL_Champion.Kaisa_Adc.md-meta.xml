@@ -71,6 +71,30 @@
         <value xsi:type="xsd:double">7</value>
     </values>
     <values>
+        <field>Solo_Kill__c</field>
+        <value xsi:type="xsd:double">6</value>
+    </values>
+    <values>
+        <field>Lane_Priority__c</field>
+        <value xsi:type="xsd:double">5</value>
+    </values>
+    <values>
+        <field>Objective__c</field>
+        <value xsi:type="xsd:double">7</value>
+    </values>
+    <values>
+        <field>Pick_Rate__c</field>
+        <value xsi:type="xsd:double">18.53</value>
+    </values>
+    <values>
+        <field>Ban_Rate__c</field>
+        <value xsi:type="xsd:double">3.37</value>
+    </values>
+    <values>
+        <field>Preferred__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">아군의 이동 불가 CC가 패시브 스택을 쌓음 → CC 많은 조합과 시너지</value>
     </values>
@@ -80,6 +104,6 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">29</value>
+        <value xsi:type="xsd:double">182</value>
     </values>
 </CustomMetadata>

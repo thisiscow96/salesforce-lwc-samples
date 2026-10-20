@@ -71,6 +71,30 @@
         <value xsi:type="xsd:double">5</value>
     </values>
     <values>
+        <field>Solo_Kill__c</field>
+        <value xsi:type="xsd:double">6</value>
+    </values>
+    <values>
+        <field>Lane_Priority__c</field>
+        <value xsi:type="xsd:double">9</value>
+    </values>
+    <values>
+        <field>Objective__c</field>
+        <value xsi:type="xsd:double">7</value>
+    </values>
+    <values>
+        <field>Pick_Rate__c</field>
+        <value xsi:type="xsd:double">15.33</value>
+    </values>
+    <values>
+        <field>Ban_Rate__c</field>
+        <value xsi:type="xsd:double">23.06</value>
+    </values>
+    <values>
+        <field>Preferred__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">긴 사거리 라인전, 덫 + 속박 서폿 연계</value>
     </values>
@@ -80,6 +104,6 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">31</value>
+        <value xsi:type="xsd:double">184</value>
     </values>
 </CustomMetadata>

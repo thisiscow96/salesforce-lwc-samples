@@ -71,6 +71,30 @@
         <value xsi:type="xsd:double">3</value>
     </values>
     <values>
+        <field>Solo_Kill__c</field>
+        <value xsi:type="xsd:double">2</value>
+    </values>
+    <values>
+        <field>Lane_Priority__c</field>
+        <value xsi:type="xsd:double">4</value>
+    </values>
+    <values>
+        <field>Objective__c</field>
+        <value xsi:type="xsd:double">3</value>
+    </values>
+    <values>
+        <field>Pick_Rate__c</field>
+        <value xsi:type="xsd:double">4.95</value>
+    </values>
+    <values>
+        <field>Ban_Rate__c</field>
+        <value xsi:type="xsd:double">2.3</value>
+    </values>
+    <values>
+        <field>Preferred__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">지속 회복, R 글로벌 힐, E 침묵</value>
     </values>
@@ -80,6 +104,6 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">39</value>
+        <value xsi:type="xsd:double">222</value>
     </values>
 </CustomMetadata>

@@ -290,3 +290,82 @@
     left: 0.15rem;
     color: #747474;
 }
+
+/* ===== 조합 예측 대시보드: 전적 사이트 스타일 다크 카드 ===== */
+.dash {
+    background: linear-gradient(180deg, #161a2b 0%, #12141f 100%);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    color: #e5e7f0;
+}
+.dash-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+.dash-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+.dash-sub {
+    color: #9e9eb1;
+    font-size: 0.75rem;
+    margin-top: 0.125rem;
+}
+.dash-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.kpi {
+    display: flex;
+    flex-direction: column;
+    background: #1e2235;
+    border: 1px solid #2c3150;
+    border-left: 3px solid #5383e8;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+}
+.kpi-label {
+    color: #9e9eb1;
+    font-size: 0.75rem;
+}
+.kpi-value {
+    color: #ffffff;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+.kpi-sub {
+    color: #f4c874;
+    font-size: 0.75rem;
+}
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+.dash-card {
+    background: #1e2235;
+    border: 1px solid #2c3150;
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.75rem 0.25rem;
+    margin-bottom: 0.5rem;
+    min-width: 0;
+}
+.dash-grid .dash-card {
+    margin-bottom: 0;
+}
+.dash-card-title {
+    color: #c8cbe0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+@media (max-width: 48em) {
+    .dash-kpis,
+    .dash-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

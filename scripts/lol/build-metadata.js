@@ -6,6 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { CHAMPIONS, SYNERGIES, WEIGHTS, TIERS, TIER_SCORE, TEAM_GOAL } = require('./lol-data');
+const { championRecords } = require('./champion-records');
 
 const ROOT = path.join(__dirname, '..', '..', 'force-app', 'main', 'default');
 const OBJECTS = path.join(ROOT, 'objects');
@@ -101,6 +102,12 @@ const TYPES = {
             num('Peel__c', 'Peel', '아군 보호 0~10'),
             num('Carry__c', 'Carry', '캐리력 0~10'),
             num('Difficulty__c', 'Difficulty', '조작 난이도 0~10'),
+            num('Solo_Kill__c', 'Solo Kill', '라인전 솔킬 능력 0~10 (초반 솔킬 확률 추정에 사용)'),
+            num('Lane_Priority__c', 'Lane Priority', '라인 주도권·웨이브 클리어 0~10 (용·유충 확률 추정에 사용)'),
+            num('Objective__c', 'Objective', '오브젝트 장악(처치 속도·강타 싸움·구역 장악) 0~10'),
+            num('Pick_Rate__c', 'Pick Rate', '현재 패치 픽률(%)', 5, 2),
+            num('Ban_Rate__c', 'Ban Rate', '현재 패치 밴률(%)', 5, 2),
+            { name: 'Preferred__c', label: 'Preferred', description: '팀 선호 픽 (조합 탐색 기본 후보, 화면 ★ 표시)', type: 'Checkbox', defaultValue: false },
             text('Note__c', 'Note', '특징·근거'),
             text('Source__c', 'Source', '통계 출처'),
             num('Sort_Order__c', 'Sort Order', '표시 순서', 4, 0)
@@ -199,34 +206,10 @@ ${valueXml}</CustomMetadata>
     );
 }
 
-const laneSuffix = { TOP: 'Top', JUNGLE: 'Jungle', MID: 'Mid', ADC: 'Adc', SUPPORT: 'Support' };
-const keys = new Set();
-CHAMPIONS.forEach((c, i) => {
-    const [key, ko, en, lane, cls, dmg, tier, wr, cc, front, damage, late, early, engage, peel, carry, diff, note, source] = c;
-    keys.add(key);
-    record('LoL_Champion__mdt', `${key}_${laneSuffix[lane]}`, ko, {
-        Champion_Key__c: key,
-        English_Name__c: en,
-        Lane__c: lane,
-        Role_Class__c: cls,
-        Damage_Type__c: dmg,
-        Meta_Tier__c: tier,
-        Win_Rate__c: wr,
-        Meta_Score__c: TIER_SCORE[tier],
-        CC__c: cc,
-        Frontline__c: front,
-        Damage__c: damage,
-        Late_Game__c: late,
-        Early_Game__c: early,
-        Engage__c: engage,
-        Peel__c: peel,
-        Carry__c: carry,
-        Difficulty__c: diff,
-        Note__c: note,
-        Source__c: source,
-        Sort_Order__c: i + 1
-    });
-});
+// ---------- 챔피언: 팀 선호 픽 + 전체 통계 + 능력치 프로필 (champion-records.js) ----------
+const records = championRecords();
+const keys = new Set(records.map((r) => r.fields.Champion_Key__c));
+records.forEach((r) => record('LoL_Champion__mdt', r.developerName, r.label, r.fields));
 
 const seen = new Set();
 SYNERGIES.forEach(([a, b, score, reason]) => {
@@ -258,4 +241,4 @@ record('LoL_AI_Setting__mdt', 'Default', 'Default', {
     Team_Goal__c: TEAM_GOAL
 });
 
-console.log(`챔피언 ${CHAMPIONS.length}, 시너지 ${SYNERGIES.length}, 배점 ${WEIGHTS.length}, 티어 ${TIERS.length}, AI 설정 1 생성`);
+console.log(`챔피언 ${records.length} (선호 ${CHAMPIONS.length}), 시너지 ${SYNERGIES.length}, 배점 ${WEIGHTS.length}, 티어 ${TIERS.length}, AI 설정 1 생성`);

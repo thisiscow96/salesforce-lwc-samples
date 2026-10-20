@@ -244,7 +244,7 @@ public with sharing class LolClaudeAnalysisService {
         }
     }
 
-    /** 라인 → 챔피언 이름(티어) 목록, 화면과 같은 순서 */
+    /** 라인 → 팀 선호 픽 이름(티어) 목록, 화면과 같은 순서 */
     @TestVisible
     static Map<String, List<String>> lanePool() {
         List<LoL_Champion__mdt> champions = LoL_Champion__mdt.getAll().values();
@@ -254,7 +254,8 @@ public with sharing class LolClaudeAnalysisService {
             pool.put(lane, new List<String>());
         }
         for (LoL_Champion__mdt c : champions) {
-            if (pool.containsKey(c.Lane__c)) {
+            // 전체 픽(260여 건)을 다 넣으면 프롬프트가 길어지므로 팀 선호 픽만 대체 후보로 전달
+            if (pool.containsKey(c.Lane__c) && c.Preferred__c) {
                 pool.get(c.Lane__c).add(c.MasterLabel + '(' + c.Meta_Tier__c + ')');
             }
         }

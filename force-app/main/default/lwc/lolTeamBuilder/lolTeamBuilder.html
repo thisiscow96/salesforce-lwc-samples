@@ -153,6 +153,49 @@
                     </lightning-layout-item>
 
                     <template lwc:if={hasResult}>
+                        <!-- 2-1. 조합 예측 대시보드 (자체 모델 추정치) -->
+                        <lightning-layout-item size="12" padding="around-small">
+                            <div class="dash">
+                                <div class="dash-head">
+                                    <div>
+                                        <h2 class="dash-title">조합 예측 대시보드</h2>
+                                        <p class="dash-sub">평균 상대(모든 능력치 5) 기준 50%에서 출발하는 자체 모델 추정치입니다. 실제 경기 통계가 아니며, 하단 픽 통계만 Patch 26.20 실제 데이터입니다.</p>
+                                    </div>
+                                </div>
+                                <div class="dash-kpis">
+                                    <template for:each={predictionHighlights} for:item="k">
+                                        <div key={k.key} class="kpi">
+                                            <span class="kpi-label">{k.label}</span>
+                                            <span class="kpi-value">{k.value}</span>
+                                            <span class="kpi-sub">{k.sub}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="dash-card">
+                                    <h3 class="dash-card-title">오브젝트·초반 이벤트 선점 확률</h3>
+                                    <c-echart class="chart-gauge" option={predictionGauge} height="190px"></c-echart>
+                                </div>
+                                <div class="dash-grid">
+                                    <div class="dash-card">
+                                        <h3 class="dash-card-title">라인별 초반 킬 확률 (14분 이전)</h3>
+                                        <c-echart class="chart-lanes" option={predictionLanes} height="210px"></c-echart>
+                                    </div>
+                                    <div class="dash-card">
+                                        <h3 class="dash-card-title">시간대별 한타 우위</h3>
+                                        <c-echart class="chart-timeline" option={predictionTimeline} height="210px"></c-echart>
+                                    </div>
+                                    <div class="dash-card">
+                                        <h3 class="dash-card-title">딜 구성</h3>
+                                        <c-echart class="chart-damage" option={predictionDamage} height="230px"></c-echart>
+                                    </div>
+                                    <div class="dash-card">
+                                        <h3 class="dash-card-title">선택한 픽의 패치 통계 (Emerald+)</h3>
+                                        <c-echart class="chart-picks" option={predictionPicks} height="230px"></c-echart>
+                                    </div>
+                                </div>
+                            </div>
+                        </lightning-layout-item>
+
                         <!-- 3. 항목별 근거 -->
                         <lightning-layout-item size="12" large-device-size="7" padding="around-small">
                             <div class="panel">
@@ -217,6 +260,9 @@
                                 <div class="panel-bar-actions">
                                     <lightning-input class="structure-toggle" type="toggle" label="1탱+1브루저만" message-toggle-active=""
                                         message-toggle-inactive="" checked={requireStructure} onchange={handleStructureToggle}></lightning-input>
+                                    <lightning-input class="pool-mode-toggle" type="toggle" label="선호 외 상위 픽 포함" message-toggle-active=""
+                                        message-toggle-inactive="" checked={isExtendedPool} onchange={handlePoolModeToggle}
+                                        field-level-help="끄면 팀 선호 픽(★) 안에서, 켜면 라인별 메타 상위 8명 + 선호 픽 상위 4명까지 탐색"></lightning-input>
                                     <lightning-button class="search-button" icon-name="utility:search" label="최적 조합 찾기 (고정 라인 유지)"
                                         onclick={handleSearch}></lightning-button>
                                     <lightning-button class="apply-best-button" label="1위 적용" onclick={handleApplyBest}></lightning-button>
@@ -232,7 +278,11 @@
                     <!-- 7. 라인별 픽 풀 -->
                     <lightning-layout-item size="12" padding="around-small">
                         <div class="panel">
-                            <h2 class="panel-title">라인별 픽 풀 (Patch 26.20 통계)</h2>
+                            <div class="panel-bar">
+                                <h2 class="panel-title">라인별 전체 픽 (Patch 26.20 통계) <span class="slds-text-color_weak">★ 팀 선호 · 이 자리 점수 = 현재 조합에서 그 라인만 바꿨을 때 총점</span></h2>
+                                <lightning-input class="pool-filter-toggle" type="toggle" label="선호 픽만" message-toggle-active=""
+                                    message-toggle-inactive="" checked={poolPreferredOnly} onchange={handlePoolFilterToggle}></lightning-input>
+                            </div>
                             <lightning-tabset>
                                 <template for:each={poolTabs} for:item="tab">
                                     <lightning-tab key={tab.lane} label={tab.label}>
@@ -241,7 +291,7 @@
                                     </lightning-tab>
                                 </template>
                             </lightning-tabset>
-                            <p class="slds-text-color_weak slds-m-top_x-small">통계: MOBA Trainer(Emerald+), metabot.gg, SeeMeta / 능력치는 스킬 구성 기준 평가. 수정: Setup › Custom Metadata Types › LoL Champion</p>
+                            <p class="slds-text-color_weak slds-m-top_x-small">통계: MOBA Trainer(Emerald+, u.gg·op.gg 병합) Patch 26.20 / 능력치(솔킬·주도권·오브젝트 포함)는 스킬 구성 기준 평가. 수정: Setup › Custom Metadata Types › LoL Champion</p>
                         </div>
                     </lightning-layout-item>
                 </lightning-layout>

@@ -113,7 +113,7 @@ describe('c-lol-team-builder', () => {
         await flush();
         const selectedName = (lane) => {
             const box = pickBox(el, lane);
-            return box.options.find((o) => o.value === box.value).label.split(' · ')[0];
+            return box.options.find((o) => o.value === box.value).label.split(' · ')[0].replace(/^★ /, ''); // 선호 픽은 ★ 표시
         };
         ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT'].forEach((lane) => expect(selectedName(lane)).toBe(rows[2][lane]));
     });
@@ -329,5 +329,53 @@ describe('c-lol-team-builder', () => {
         expect($$(el, '.report-group .report-sub').map((h) => h.textContent)).toEqual(['탑', '정글']);
         expect($$(el, '.report-group')[1].textContent).toContain('첫 갱은 미드');
         expect($$(el, '.report-bullet').length).toBe(4);
+    });
+
+    it('조합 예측 대시보드: KPI 4개와 차트 5개(오브젝트 게이지·라인 킬·시간대·딜 구성·픽 통계)를 그린다', async () => {
+        const el = await mount();
+        expect($$(el, '.dash .kpi')).toHaveLength(4);
+        expect($(el, '.dash .kpi-label').textContent).toBe('파워 스파이크');
+        const gauge = $(el, 'c-echart.chart-gauge').option;
+        expect(gauge.series.map((s) => s.data[0].name)).toEqual(['퍼스트 블러드', '공허 유충', '첫 드래곤', '협곡의 전령', '첫 포탑', '첫 바론']);
+        gauge.series.forEach((s) => expect(s.data[0].value).toBeGreaterThanOrEqual(10));
+        expect($(el, 'c-echart.chart-lanes').option.series[0].data).toHaveLength(4);
+        expect($(el, 'c-echart.chart-timeline').option.xAxis.data[0]).toBe(3);
+        expect($(el, 'c-echart.chart-damage').option.series[0].type).toBe('pie');
+        expect($(el, 'c-echart.chart-picks').option.series.map((s) => s.name)).toEqual(['승률', '픽률', '밴률']);
+        expect($(el, '.dash-sub').textContent).toContain('자체 모델 추정치');
+    });
+
+    it('전체 픽: 선택 목록에 선호(★)·비선호 픽이 모두 있고, 픽 풀 표에 이 자리 점수·픽률을 보여 주며 선호 필터가 동작한다', async () => {
+        const el = await mount();
+        const options = pickBox(el, 'MID').options;
+        expect(options.length).toBeGreaterThan(40);
+        expect(options[0].label.startsWith('★ ')).toBe(true);
+        expect(options.some((o) => !o.label.startsWith('★') && o.label.includes('픽 '))).toBe(true);
+
+        const tables = () => $$(el, 'lightning-tabset lightning-datatable');
+        const topRows = tables()[0].data;
+        expect(topRows.length).toBeGreaterThan(40);
+        expect(topRows.filter((r) => r.star === '★').length).toBe(13); // 팀 선호 탑 픽 13명
+        expect(topRows.find((r) => r.id === 'Malphite_Top').fitScore).toBeGreaterThan(0);
+        expect(topRows.some((r) => r.pickRateLabel.endsWith('%'))).toBe(true);
+
+        const filter = $(el, '.pool-filter-toggle');
+        filter.checked = true;
+        filter.dispatchEvent(new CustomEvent('change'));
+        await flush();
+        expect(tables()[0].data.every((r) => r.star === '★')).toBe(true);
+    });
+
+    it('탐색 후보 확장 토글을 켜면 선호 외 상위 픽까지 더 많은 조합을 평가한다', async () => {
+        const el = await mount();
+        const before = $(el, '.search-summary').textContent;
+        const evaluatedOf = (text) => Number(text.split('개 조합')[0].replace(/,/g, ''));
+        const toggle = $(el, '.pool-mode-toggle');
+        toggle.checked = true;
+        toggle.dispatchEvent(new CustomEvent('change'));
+        await flush();
+        const after = $(el, '.search-summary').textContent;
+        expect(evaluatedOf(after)).toBeGreaterThan(evaluatedOf(before));
+        expect(after).toContain('라인별 후보');
     });
 });

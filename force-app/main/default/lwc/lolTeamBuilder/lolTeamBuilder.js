@@ -6,7 +6,8 @@ import startAnalysis from '@salesforce/apexContinuation/LolTeamBuilderController
 import submitAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.submitAnalysisRequest';
 import getAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.getAnalysisRequest';
 import getRecentRequests from '@salesforce/apex/LolTeamBuilderController.getRecentRequests';
-import { LANES, LANE_LABELS, CLASS_LABELS, normalizeData, scoreTeam, explain, suggestSwaps, findBestTeams } from './lolScoring';
+import { LANES, LANE_LABELS, CLASS_LABELS, normalizeData, scoreTeam, explain, suggestSwaps, findBestTeams, searchPool } from './lolScoring';
+import { predict, gaugeOption, laneKillOption, timelineOption, damageOption, pickStatsOption } from './lolPrediction';
 import { buildWorkbook } from './lolExcel';
 import { parseReport } from './reportParser';
 
@@ -36,11 +37,18 @@ const COMBO_COLUMNS = [
 ];
 
 const POOL_COLUMNS = [
-    { label: '챔피언', fieldName: 'name' },
-    { label: '역할군', fieldName: 'clsLabel', initialWidth: 100 },
-    { label: '딜', fieldName: 'dmgType', initialWidth: 70 },
-    { label: '티어', fieldName: 'tier', initialWidth: 70 },
-    { label: '승률', fieldName: 'winRateLabel', initialWidth: 80 },
+    { label: '선호', fieldName: 'star', initialWidth: 60, cellAttributes: { alignment: 'center' } },
+    { label: '챔피언', fieldName: 'name', initialWidth: 120 },
+    { label: '이 자리 점수', fieldName: 'fitScore', type: 'number', initialWidth: 105, typeAttributes: { minimumFractionDigits: 1 }, cellAttributes: { class: { fieldName: 'fitClass' } } },
+    { label: '역할군', fieldName: 'clsLabel', initialWidth: 95 },
+    { label: '딜', fieldName: 'dmgType', initialWidth: 65 },
+    { label: '티어', fieldName: 'tier', initialWidth: 65 },
+    { label: '승률', fieldName: 'winRateLabel', initialWidth: 75 },
+    { label: '픽률', fieldName: 'pickRateLabel', initialWidth: 75 },
+    { label: '밴률', fieldName: 'banRateLabel', initialWidth: 75 },
+    { label: '솔킬', fieldName: 'solo', type: 'number', initialWidth: 65 },
+    { label: '주도권', fieldName: 'prio', type: 'number', initialWidth: 75 },
+    { label: '오브젝트', fieldName: 'obj', type: 'number', initialWidth: 85 },
     { label: 'CC', fieldName: 'cc', type: 'number', initialWidth: 60 },
     { label: '앞라인', fieldName: 'front', type: 'number', initialWidth: 75 },
     { label: '후반', fieldName: 'late', type: 'number', initialWidth: 65 },
@@ -60,6 +68,16 @@ function parseTierSetting(value) {
             .map((pair) => pair.split('=').map((s) => s.trim()))
             .filter(([lane, tier]) => LANES.includes(lane) && tier)
     );
+}
+
+function percent(value) {
+    return value == null ? '-' : `${value}%`;
+}
+
+// 픽 선택 목록 표시: ★ 선호 · 역할 · 티어 · 승률 · 픽률 (Sort_Order: 선호 픽이 위, 나머지는 티어 순)
+function optionLabel(c) {
+    const tier = c.tier === '-' ? '미집계' : c.tier;
+    return `${c.preferred ? '★ ' : ''}${c.name} · ${CLASS_LABELS[c.cls]} · ${tier} · 승 ${percent(c.winRate)} · 픽 ${percent(c.pickRate)}`;
 }
 
 function errorMessage(error) {
@@ -82,6 +100,8 @@ export default class LolTeamBuilder extends LightningElement {
     tiers = {};
     locks = {};
     requireStructure = true;
+    poolMode = 'preferred'; // 조합 탐색 후보: preferred(팀 선호 픽) | extended(라인별 메타 상위 포함)
+    poolPreferredOnly = false; // 픽 풀 표 필터
     bestTeams = [];
     evaluated = 0;
     analysis;
@@ -167,7 +187,7 @@ export default class LolTeamBuilder extends LightningElement {
 
     search() {
         const locked = Object.fromEntries(LANES.filter((l) => this.locks[l] && this.picks[l]).map((l) => [l, this.ctx.byId.get(this.picks[l])]));
-        const { teams, evaluated } = findBestTeams(this.ctx, this.skills, { locked, requireStructure: this.requireStructure, limit: EXCEL_LIMIT });
+        const { teams, evaluated } = findBestTeams(this.ctx, this.skills, { locked, requireStructure: this.requireStructure, limit: EXCEL_LIMIT, poolMode: this.poolMode });
         this.bestTeams = teams;
         this.evaluated = evaluated;
     }
@@ -189,12 +209,14 @@ export default class LolTeamBuilder extends LightningElement {
             return {
                 lane,
                 label: LANE_LABELS[lane],
-                options: this.ctx.byLane[lane].map((c) => ({ label: `${c.name} · ${CLASS_LABELS[c.cls]} · ${c.tier === '-' ? '미집계' : c.tier}`, value: c.id })),
+                options: this.ctx.byLane[lane].map((c) => ({ label: optionLabel(c), value: c.id })),
                 value: this.picks[lane] || null,
                 tierOptions,
                 tier: this.tiers[lane],
                 locked: !!this.locks[lane],
-                info: champ ? `${CLASS_LABELS[champ.cls]} · ${champ.dmgType} · 승률 ${champ.winRate ?? '미집계'}${champ.winRate ? '%' : ''} · ${champ.note || ''}` : ''
+                info: champ
+                    ? `${champ.preferred ? '★ 팀 선호 · ' : ''}${CLASS_LABELS[champ.cls]} · ${champ.dmgType} · 승률 ${percent(champ.winRate)} · 픽률 ${percent(champ.pickRate)} · 밴률 ${percent(champ.banRate)} · ${champ.note || ''}`
+                    : ''
             };
         });
     }
@@ -233,6 +255,42 @@ export default class LolTeamBuilder extends LightningElement {
         return this.swapItems.length > 0;
     }
 
+    get isExtendedPool() {
+        return this.poolMode === 'extended';
+    }
+
+    // ===== 조합 예측 (자체 모델 추정치, lolPrediction.js) =====
+    get prediction() {
+        return this.result ? predict(this.result.team) : null;
+    }
+    get predictionGauge() {
+        return this.prediction ? gaugeOption(this.prediction.objectives) : null;
+    }
+    get predictionLanes() {
+        return this.prediction ? laneKillOption(this.prediction.lanes) : null;
+    }
+    get predictionTimeline() {
+        return this.prediction ? timelineOption(this.prediction.timeline, this.prediction.peak) : null;
+    }
+    get predictionDamage() {
+        return this.prediction ? damageOption(this.prediction.damage) : null;
+    }
+    get predictionPicks() {
+        return this.result ? pickStatsOption(this.result.team) : null;
+    }
+    get predictionHighlights() {
+        const p = this.prediction;
+        if (!p) return [];
+        const byProb = [...p.objectives].sort((a, b) => b.prob - a.prob);
+        const lane = [...p.lanes].sort((a, b) => b.prob - a.prob)[0];
+        return [
+            { key: 'peak', label: '파워 스파이크', value: `${p.peak.minute}분`, sub: `한타 우위 ${p.peak.prob}%` },
+            { key: 'best', label: '가장 유리한 오브젝트', value: byProb[0].label, sub: `선점 ${byProb[0].prob}%` },
+            { key: 'worst', label: '내줄 가능성 높은 오브젝트', value: byProb[byProb.length - 1].label, sub: `선점 ${byProb[byProb.length - 1].prob}%` },
+            { key: 'lane', label: '킬 압박이 큰 라인', value: lane.label, sub: `${lane.who} ${lane.prob}%` }
+        ];
+    }
+
     get radarOption() {
         if (!this.result) return null;
         const best = this.bestTeams[0];
@@ -265,16 +323,35 @@ export default class LolTeamBuilder extends LightningElement {
         }));
     }
     get searchSummary() {
-        return `${this.evaluated.toLocaleString()}개 조합 평가${this.requireStructure ? ' (탑·정글 1탱+1브루저만)' : ''}`;
+        const size = LANES.map((lane) => searchPool(this.ctx, lane, this.poolMode).length).join('·');
+        return `${this.evaluated.toLocaleString()}개 조합 평가 · 라인별 후보 ${size}명${this.requireStructure ? ' · 탑·정글 1탱+1브루저만' : ''}`;
     }
 
     get poolTabs() {
         if (!this.ctx) return [];
-        return LANES.map((lane) => ({
-            lane,
-            label: `${LANE_LABELS[lane]} (${this.ctx.byLane[lane].length})`,
-            rows: this.ctx.byLane[lane].map((c) => ({ ...c, clsLabel: CLASS_LABELS[c.cls], winRateLabel: c.winRate ? `${c.winRate}%` : '미집계' }))
-        }));
+        const team = this.result ? this.result.team : null;
+        return LANES.map((lane) => {
+            const list = this.ctx.byLane[lane].filter((c) => !this.poolPreferredOnly || c.preferred);
+            return {
+                lane,
+                label: `${LANE_LABELS[lane]} (${list.length})`,
+                rows: list.map((c) => {
+                    // 현재 조합에서 이 라인만 이 챔피언으로 바꿨을 때의 총점 (다른 라인과 같은 챔피언이면 계산 안 함)
+                    const clash = team && LANES.some((l) => l !== lane && team[l].key === c.key);
+                    const fitScore = team && !clash ? scoreTeam({ ...team, [lane]: c }, this.skills, this.ctx).total : null;
+                    return {
+                        ...c,
+                        star: c.preferred ? '★' : '',
+                        clsLabel: CLASS_LABELS[c.cls],
+                        winRateLabel: percent(c.winRate),
+                        pickRateLabel: percent(c.pickRate),
+                        banRateLabel: percent(c.banRate),
+                        fitScore,
+                        fitClass: fitScore != null && fitScore > this.result.total ? 'slds-text-color_success' : ''
+                    };
+                })
+            };
+        });
     }
 
     get analyzeDisabled() {
@@ -373,6 +450,15 @@ export default class LolTeamBuilder extends LightningElement {
 
     handleStructureToggle(event) {
         this.requireStructure = event.target.checked;
+    }
+
+    handlePoolModeToggle(event) {
+        this.poolMode = event.target.checked ? 'extended' : 'preferred';
+        this.search();
+    }
+
+    handlePoolFilterToggle(event) {
+        this.poolPreferredOnly = event.target.checked;
     }
 
     handleSearch() {
