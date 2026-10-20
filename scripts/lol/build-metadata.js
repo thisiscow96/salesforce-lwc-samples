@@ -240,7 +240,7 @@ record('LoL_AI_Setting__mdt', 'Default', 'Default', {
     Web_Search_Tool__c: 'web_search_20250305',
     Web_Search_Max_Uses__c: 3,
     Timeout_Seconds__c: 120,
-    Routine_Fire_Path__c: '',
+    Routine_Fire_Path__c: '/v1/claude_code/routines/trig_016zhLGx3x9QL1KiPxuV8KQm/fire',
     Team_Goal__c: TEAM_GOAL
 });
 
