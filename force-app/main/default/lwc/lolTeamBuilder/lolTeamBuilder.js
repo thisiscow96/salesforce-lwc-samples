@@ -6,7 +6,7 @@ import startAnalysis from '@salesforce/apexContinuation/LolTeamBuilderController
 import submitAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.submitAnalysisRequest';
 import getAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.getAnalysisRequest';
 import getRecentRequests from '@salesforce/apex/LolTeamBuilderController.getRecentRequests';
-import { LANES, LANE_LABELS, CLASS_LABELS, normalizeData, scoreTeam, explain, suggestSwaps, findBestTeams, searchPool } from './lolScoring';
+import { LANES, LANE_LABELS, CLASS_LABELS, normalizeData, scoreTeam, explain, suggestSwaps, findBestTeams, searchPool, sortPoolRows } from './lolScoring';
 import { predict, gaugeOption, laneKillOption, timelineOption, damageOption, pickStatsOption } from './lolPrediction';
 import { buildWorkbook } from './lolExcel';
 import { parseReport } from './reportParser';
@@ -36,26 +36,37 @@ const COMBO_COLUMNS = [
     { type: 'button', initialWidth: 80, typeAttributes: { label: '적용', name: 'apply', variant: 'base' } }
 ];
 
+// 정렬: sortable 열은 헤더 클릭으로 오름/내림차순. 표시용 문자열 열은 SORT_KEYS의 숫자 값으로 정렬
 const POOL_COLUMNS = [
     { label: '선호', fieldName: 'star', initialWidth: 60, cellAttributes: { alignment: 'center' } },
-    { label: '챔피언', fieldName: 'name', initialWidth: 120 },
-    { label: '이 자리 점수', fieldName: 'fitScore', type: 'number', initialWidth: 105, typeAttributes: { minimumFractionDigits: 1 }, cellAttributes: { class: { fieldName: 'fitClass' } } },
+    { label: '챔피언', fieldName: 'name', initialWidth: 120, sortable: true },
+    {
+        label: '이 자리 점수',
+        fieldName: 'fitScore',
+        type: 'number',
+        initialWidth: 135,
+        sortable: true,
+        typeAttributes: { minimumFractionDigits: 1 },
+        cellAttributes: { class: { fieldName: 'fitClass' } }
+    },
+    { label: 'PS 점수', fieldName: 'psScore', type: 'number', initialWidth: 95, sortable: true, typeAttributes: { minimumFractionDigits: 2 } },
+    { label: '꿀챔', fieldName: 'honeyLabel', initialWidth: 70, cellAttributes: { alignment: 'center' } },
     { label: '역할군', fieldName: 'clsLabel', initialWidth: 95 },
     { label: '딜', fieldName: 'dmgType', initialWidth: 65 },
-    { label: '티어', fieldName: 'tier', initialWidth: 65 },
-    { label: '승률', fieldName: 'winRateLabel', initialWidth: 75 },
-    { label: '픽률', fieldName: 'pickRateLabel', initialWidth: 75 },
-    { label: '밴률', fieldName: 'banRateLabel', initialWidth: 75 },
-    { label: '솔킬', fieldName: 'solo', type: 'number', initialWidth: 65 },
-    { label: '주도권', fieldName: 'prio', type: 'number', initialWidth: 75 },
-    { label: '오브젝트', fieldName: 'obj', type: 'number', initialWidth: 85 },
+    { label: '티어', fieldName: 'tier', initialWidth: 70, sortable: true },
+    { label: '승률', fieldName: 'winRateLabel', initialWidth: 80, sortable: true },
+    { label: '픽률', fieldName: 'pickRateLabel', initialWidth: 80, sortable: true },
+    { label: '밴률', fieldName: 'banRateLabel', initialWidth: 80, sortable: true },
+    { label: '솔킬', fieldName: 'solo', type: 'number', initialWidth: 70, sortable: true },
+    { label: '주도권', fieldName: 'prio', type: 'number', initialWidth: 80, sortable: true },
+    { label: '오브젝트', fieldName: 'obj', type: 'number', initialWidth: 90, sortable: true },
     { label: 'CC', fieldName: 'cc', type: 'number', initialWidth: 60 },
     { label: '앞라인', fieldName: 'front', type: 'number', initialWidth: 75 },
     { label: '후반', fieldName: 'late', type: 'number', initialWidth: 65 },
     { label: '이니시', fieldName: 'engage', type: 'number', initialWidth: 75 },
     { label: '보호', fieldName: 'peel', type: 'number', initialWidth: 65 },
     { label: '캐리', fieldName: 'carry', type: 'number', initialWidth: 65 },
-    { label: '특징', fieldName: 'note', wrapText: true }
+    { label: '특징', fieldName: 'note', initialWidth: 280, wrapText: true } // 폭 고정: 열이 많아 좁아지면 줄바꿈으로 행이 길어짐
 ];
 
 // 화면 기본값(App Builder에서 변경 가능): 사용자 팀 실력
@@ -102,6 +113,8 @@ export default class LolTeamBuilder extends LightningElement {
     requireStructure = true;
     poolMode = 'preferred'; // 조합 탐색 후보: preferred(팀 선호 픽) | extended(라인별 메타 상위 포함)
     poolPreferredOnly = false; // 픽 풀 표 필터
+    poolSortBy; // 픽 풀 표 정렬 열 (없으면 기본 순서: 선호 픽 → PS 점수)
+    poolSortDirection = 'desc';
     bestTeams = [];
     evaluated = 0;
     analysis;
@@ -335,7 +348,7 @@ export default class LolTeamBuilder extends LightningElement {
             return {
                 lane,
                 label: `${LANE_LABELS[lane]} (${list.length})`,
-                rows: list.map((c) => {
+                rows: sortPoolRows(list.map((c) => {
                     // 현재 조합에서 이 라인만 이 챔피언으로 바꿨을 때의 총점 (다른 라인과 같은 챔피언이면 계산 안 함)
                     const clash = team && LANES.some((l) => l !== lane && team[l].key === c.key);
                     const fitScore = team && !clash ? scoreTeam({ ...team, [lane]: c }, this.skills, this.ctx).total : null;
@@ -346,10 +359,11 @@ export default class LolTeamBuilder extends LightningElement {
                         winRateLabel: percent(c.winRate),
                         pickRateLabel: percent(c.pickRate),
                         banRateLabel: percent(c.banRate),
+                        honeyLabel: c.honey ? '🍯' : '',
                         fitScore,
                         fitClass: fitScore != null && fitScore > this.result.total ? 'slds-text-color_success' : ''
                     };
-                })
+                }), this.poolSortBy, this.poolSortDirection)
             };
         });
     }
@@ -459,6 +473,12 @@ export default class LolTeamBuilder extends LightningElement {
 
     handlePoolFilterToggle(event) {
         this.poolPreferredOnly = event.target.checked;
+    }
+
+    // 라인 탭 5개가 같은 정렬 기준을 공유 (탭을 옮겨도 같은 기준으로 비교)
+    handlePoolSort(event) {
+        this.poolSortBy = event.detail.fieldName;
+        this.poolSortDirection = event.detail.sortDirection;
     }
 
     handleSearch() {

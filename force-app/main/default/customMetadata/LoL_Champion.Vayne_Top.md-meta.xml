@@ -28,7 +28,7 @@
     </values>
     <values>
         <field>Win_Rate__c</field>
-        <value xsi:type="xsd:double">50</value>
+        <value xsi:type="xsd:double">46.3</value>
     </values>
     <values>
         <field>Meta_Score__c</field>
@@ -84,15 +84,27 @@
     </values>
     <values>
         <field>Pick_Rate__c</field>
-        <value xsi:type="xsd:double">1.33</value>
+        <value xsi:type="xsd:double">1.67</value>
     </values>
     <values>
         <field>Ban_Rate__c</field>
-        <value xsi:type="xsd:double">4.26</value>
+        <value xsi:type="xsd:double">3.24</value>
     </values>
     <values>
         <field>Preferred__c</field>
         <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>PS_Score__c</field>
+        <value xsi:type="xsd:double">42.42</value>
+    </values>
+    <values>
+        <field>Honey__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Riot_Key__c</field>
+        <value xsi:type="xsd:double">67</value>
     </values>
     <values>
         <field>Note__c</field>
@@ -100,10 +112,10 @@
     </values>
     <values>
         <field>Source__c</field>
-        <value xsi:type="xsd:string">MOBA Trainer 26.20 Emerald+</value>
+        <value xsi:type="xsd:string">lol.ps 26.20 한국 에메랄드+</value>
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">57</value>
+        <value xsi:type="xsd:double">63</value>
     </values>
 </CustomMetadata>

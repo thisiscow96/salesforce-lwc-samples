@@ -369,3 +369,27 @@
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/* 픽 풀 표 아래: 점수 기준·지표 출처 */
+.basis {
+    border-top: 1px solid var(--slds-g-color-border-1, #e5e5e5);
+    padding-top: 0.5rem;
+    font-size: 0.8125rem;
+}
+.basis-title {
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+.basis-list {
+    list-style: disc;
+    padding-left: 1.25rem;
+    color: var(--slds-g-color-neutral-base-30, #444);
+}
+.basis-list li {
+    margin-bottom: 0.25rem;
+}
+
+/* 전체 픽 표: 라인당 60여 행이라 표 안에서 스크롤 (헤더 고정) */
+.pool-scroll {
+    height: 30rem;
+}

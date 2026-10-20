@@ -95,6 +95,18 @@
         <value xsi:type="xsd:boolean">false</value>
     </values>
     <values>
+        <field>PS_Score__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Honey__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Riot_Key__c</field>
+        <value xsi:type="xsd:double">910</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">스킬 10종 조합, R 광역 공포 장판</value>
     </values>
@@ -104,6 +116,6 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">193</value>
+        <value xsi:type="xsd:double">225</value>
     </values>
 </CustomMetadata>

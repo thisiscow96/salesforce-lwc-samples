@@ -108,6 +108,9 @@ const TYPES = {
             num('Pick_Rate__c', 'Pick Rate', '현재 패치 픽률(%)', 5, 2),
             num('Ban_Rate__c', 'Ban Rate', '현재 패치 밴률(%)', 5, 2),
             { name: 'Preferred__c', label: 'Preferred', description: '팀 선호 픽 (조합 탐색 기본 후보, 화면 ★ 표시)', type: 'Checkbox', defaultValue: false },
+            num('PS_Score__c', 'PS Score', 'lol.ps PS 점수 (개인 성능: 승률·픽률·밴률 종합, 한국 에메랄드+)', 5, 2),
+            { name: 'Honey__c', label: 'Honey', description: 'lol.ps 꿀챔 표시 (현재 패치에서 효율이 좋은 챔피언)', type: 'Checkbox', defaultValue: false },
+            num('Riot_Key__c', 'Riot Key', 'Riot 숫자 챔피언 키 (lol.ps 챔피언 페이지 lol.ps/champ/<키>)', 5, 0),
             text('Note__c', 'Note', '특징·근거'),
             text('Source__c', 'Source', '통계 출처'),
             num('Sort_Order__c', 'Sort Order', '표시 순서', 4, 0)

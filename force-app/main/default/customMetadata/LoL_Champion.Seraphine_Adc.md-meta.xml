@@ -95,6 +95,18 @@
         <value xsi:type="xsd:boolean">false</value>
     </values>
     <values>
+        <field>PS_Score__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Honey__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Riot_Key__c</field>
+        <value xsi:type="xsd:double">147</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">R 관통 매혹 + W 광역 보호막</value>
     </values>
@@ -104,6 +116,6 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">215</value>
+        <value xsi:type="xsd:double">232</value>
     </values>
 </CustomMetadata>

@@ -11,11 +11,14 @@ const team = (ids) => Object.fromEntries(LANES.map((lane, i) => [lane, pick(ids[
 const average = (lane) => ({ id: `Avg_${lane}`, key: `Avg${lane}`, name: '평균', lane, dmgType: 'Mixed', solo: 5, prio: 5, obj: 5, early: 5, late: 5, engage: 5, peel: 5, damage: 5, cc: 5, front: 5, carry: 5 });
 
 describe('전체 픽 데이터', () => {
-    it('라인별 전체 픽(260건 이상)과 팀 선호 픽 44개, 새 지표가 들어 있다', () => {
-        expect(ctx.champions.length).toBeGreaterThanOrEqual(260);
+    it('라인별 전체 픽(280건 이상, lol.ps 우선)과 팀 선호 픽 44개, 새 지표가 들어 있다', () => {
+        expect(ctx.champions.length).toBeGreaterThanOrEqual(280);
         expect(ctx.champions.filter((c) => c.preferred)).toHaveLength(44);
         const malphiteMid = pick('Malphite_Mid');
-        expect(malphiteMid).toMatchObject({ preferred: false, tier: 'S' });
+        expect(malphiteMid).toMatchObject({ preferred: false, riotKey: 54 });
+        expect(malphiteMid.source).toContain('lol.ps'); // 1순위 출처: 프로관전러 lol.ps
+        expect(malphiteMid.psScore).toBeGreaterThan(0);
+        expect(pick('Malphite_Top').honey).toBe(true);
         expect(malphiteMid.pickRate).toBeGreaterThan(0);
         expect(malphiteMid.banRate).toBeGreaterThan(0);
         ctx.champions.forEach((c) => {

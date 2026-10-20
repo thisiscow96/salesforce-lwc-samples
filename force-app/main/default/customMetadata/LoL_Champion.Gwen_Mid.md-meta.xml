@@ -95,6 +95,18 @@
         <value xsi:type="xsd:boolean">false</value>
     </values>
     <values>
+        <field>PS_Score__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Honey__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Riot_Key__c</field>
+        <value xsi:type="xsd:double">887</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">W 장막 + R 연속 지속딜</value>
     </values>
@@ -104,6 +116,6 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">132</value>
+        <value xsi:type="xsd:double">184</value>
     </values>
 </CustomMetadata>

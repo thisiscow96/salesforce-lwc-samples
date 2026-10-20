@@ -53,6 +53,9 @@ export function normalizeData(raw) {
             pickRate: c.Pick_Rate__c ?? null,
             banRate: c.Ban_Rate__c ?? null,
             preferred: c.Preferred__c === true,
+            psScore: c.PS_Score__c ?? null,
+            honey: c.Honey__c === true,
+            riotKey: c.Riot_Key__c ?? null,
             note: c.Note__c,
             source: c.Source__c,
             order: c.Sort_Order__c ?? 999
@@ -304,4 +307,22 @@ export function findBestTeams(ctx, skills, { locked = {}, requireStructure = tru
     };
     walk(0);
     return { teams: results, evaluated };
+}
+
+const TIER_RANK = { 'S+': 7, S: 6, A: 5, B: 4, C: 3, D: 2, '-': 1 };
+// 표시용 문자열 열(예: "52.3%")은 원래 숫자 필드로 정렬
+const SORT_KEYS = { winRateLabel: 'winRate', pickRateLabel: 'pickRate', banRateLabel: 'banRate' };
+
+/** 픽 풀 표 정렬 (이름은 한글 가나다순). 값이 없는 행(미집계·계산 불가)은 방향과 무관하게 맨 아래 */
+export function sortPoolRows(rows, fieldName, direction) {
+    if (!fieldName) return rows;
+    const key = SORT_KEYS[fieldName] || fieldName;
+    const sign = direction === 'desc' ? -1 : 1;
+    const valueOf = (r) => (key === 'tier' ? TIER_RANK[r.tier] : r[key]);
+    return [...rows].sort((a, b) => {
+        const x = valueOf(a);
+        const y = valueOf(b);
+        if (x == null || y == null) return (x == null) - (y == null);
+        return sign * (typeof x === 'string' ? x.localeCompare(y, 'ko') : x - y);
+    });
 }

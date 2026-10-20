@@ -180,6 +180,9 @@ describe('c-lol-team-builder', () => {
         expect(wb.SheetNames).toEqual(['라인별 픽', '조합 점수', '현재 조합 분석', '점수 기준', '시너지 표']);
         const pool = realXlsx.utils.sheet_to_json(wb.Sheets['라인별 픽'], { header: 1 });
         expect(pool).toHaveLength(builderData().champions.length + 1);
+        expect(pool[0]).toEqual(expect.arrayContaining(['팀 선호', '픽률(%)', '밴률(%)', 'PS 점수', '꿀챔', '솔킬', '주도권', '오브젝트', '통계 출처']));
+        const malphite = pool.find((r) => r[2] === '말파이트' && r[0] === '탑');
+        expect(malphite[pool[0].indexOf('통계 출처')]).toContain('lol.ps');
         const combos = realXlsx.utils.sheet_to_json(wb.Sheets['조합 점수'], { header: 1 });
         expect(combos[1].slice(1, 6)).toEqual(['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT'].map((l) => firstRow[l]));
         expect(combos[1][6]).toBe(firstRow.total);
@@ -377,5 +380,46 @@ describe('c-lol-team-builder', () => {
         const after = $(el, '.search-summary').textContent;
         expect(evaluatedOf(after)).toBeGreaterThan(evaluatedOf(before));
         expect(after).toContain('라인별 후보');
+    });
+
+    it('라인별 전체 픽: 이름(가나다)·이 자리 점수·PS 점수 기준으로 정렬하고, 점수 기준과 지표 출처를 표 아래에 표시한다', async () => {
+        const el = await mount();
+        const table = () => $$(el, 'lightning-tabset lightning-datatable.pool-table')[0];
+        const sortBy = async (fieldName, sortDirection) => {
+            table().dispatchEvent(new CustomEvent('sort', { detail: { fieldName, sortDirection } }));
+            await flush();
+        };
+
+        await sortBy('name', 'asc');
+        const names = table().data.map((r) => r.name);
+        expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b, 'ko')));
+        expect(table().sortedBy).toBe('name');
+        expect(table().sortedDirection).toBe('asc');
+
+        await sortBy('fitScore', 'desc');
+        const fit = table().data.map((r) => r.fitScore).filter((v) => v != null);
+        expect(fit).toEqual([...fit].sort((a, b) => b - a));
+        expect(table().data.at(-1).fitScore == null || fit.length === table().data.length).toBe(true); // 계산 불가 행은 맨 아래
+
+        await sortBy('psScore', 'desc');
+        const ps = table().data.map((r) => r.psScore).filter((v) => v != null);
+        expect(ps).toEqual([...ps].sort((a, b) => b - a));
+
+        await sortBy('winRateLabel', 'asc');
+        const wr = table().data.map((r) => r.winRate).filter((v) => v != null);
+        expect(wr).toEqual([...wr].sort((a, b) => a - b));
+
+        // 정렬 기준은 다른 라인 탭에도 같이 적용
+        const jungle = $$(el, 'lightning-tabset lightning-datatable.pool-table')[1];
+        expect(jungle.sortedBy).toBe('winRateLabel');
+
+        const basis = $(el, '.basis').textContent;
+        expect(basis).toContain('팀 조합 총점');
+        expect(basis).toContain('1탱 + 1브루저');
+        expect(basis).toContain('lol.ps (프로관전러 P.S)');
+        expect(basis).toContain('정성 평가');
+        expect([...el.shadowRoot.querySelectorAll('.sources-list a')].map((a) => a.href)).toEqual(
+            expect.arrayContaining(['https://lol.ps/statistics?tier=2&region=0'])
+        );
     });
 });

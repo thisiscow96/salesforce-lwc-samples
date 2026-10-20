@@ -22,7 +22,10 @@ Salesforce 화면의 [Claude Code 분석 요청] 버튼이 만든 `LoL_Analysis_
 2. 각 요청마다 순서대로:
    1. `node scripts/lol/claude-worker.js claim <id>`
    2. `prompt`의 [지침]·[기준]·[출력 양식]에 따라 분석한다. [지침]의 리서치 규칙·금지 표현이 이 문서보다 우선한다.
-      - 검색은 최소 12회. 항목마다 2개 이상 출처를 교차 확인하고, 답이 안 나오면 검색어를 바꿔(영어/한국어, 챔피언명+build·matchup·counter, 패치 번호) 3번 더 찾는다.
+      - **lol.ps(프로관전러 P.S, 한국 서버 · 에메랄드+)를 항상 1순위로 참조한다.** prompt [우리 조합]의 `lol.ps:` 챔피언 페이지 5개를 WebFetch로 먼저 열어
+        승률·픽률·밴률·PS 점수·카운터·빌드(룬·스킬·아이템)를 확인하고, 통계 수치는 lol.ps 값을 기준으로 쓴다. 상대 정글러 픽률 등 전체 통계는 `https://lol.ps/statistics?tier=2&region=0`.
+        lol.ps 페이지는 `sources`에 반드시 포함한다.
+      - 검색은 최소 12회. 항목마다 2개 이상 출처를 교차 확인하고(lol.ps + 다른 사이트 1곳 이상), 답이 안 나오면 검색어를 바꿔(영어/한국어, 챔피언명+build·matchup·counter, 패치 번호) 3번 더 찾는다.
         검색 결과 요약만으로 부족하면 WebFetch로 페이지를 직접 열어 확인한다 (op.gg, u.gg, lolalytics, mobalytics, deeplol, leagueofgraphs, leagueoflegends.com).
         1. 오브젝트 규칙 전용: 기준 패치의 공식 패치노트·시즌 공지에서 드래곤·공허 유충·전령·바론 등 등장·재생성 시간 (시즌 시작 패치에서 오브젝트가 추가·삭제됨: 예 2026 시즌 아타칸 삭제).
         2. 조합 5명 각각의 기준 패치 빌드: 룬(메인/보조), 스킬 마스터 순서, 시작 아이템, 1~3코어, 상황별 아이템, 상위 카운터.
@@ -34,7 +37,7 @@ Salesforce 화면의 [Claude Code 분석 요청] 버튼이 만든 `LoL_Analysis_
       - 형식: 섹션 `■ 제목`, 소제목 `▶ 이름`, 내용 `- ` 글머리표, 한국어. 표·굵게 표시·본문 URL 금지(출처는 아래 `sources`로). 12,000자 이내.
       - 저장 전에 본문을 다시 읽고 아래를 점검해 걸리는 곳은 검색으로 고친 뒤 저장한다.
         1. 금지 표현("확인 필요" 등), 기준 패치가 아닌 패치 수치, 본문 URL, 본문 속 불확실성 설명("소스 간 차이" 등)이 없다.
-        2. 5명 모두 빌드 출처(op.gg·u.gg·lolalytics 등 빌드/룬 페이지)가 `sources`에 챔피언당 1개 이상 있다. 없으면 그 챔피언 빌드를 다시 찾는다.
+        2. 5명 모두 lol.ps 챔피언 페이지와 다른 빌드 출처(op.gg·u.gg·lolalytics 등) 1개 이상이 `sources`에 있다. 없으면 그 챔피언 빌드를 다시 찾는다.
         3. 아이템·룬 이름이 실제 존재하고 역할에 맞다 (원딜 정복자·스테락·모렐로·도란의 방패 시작 등은 오류).
            한국어 명칭과 룬 트리 소속은 Riot Data Dragon 한국어 데이터로 대조한다 (영어 출처를 직접 번역하지 않는다):
            `https://ddragon.leagueoflegends.com/api/versions.json`의 첫 버전 → `https://ddragon.leagueoflegends.com/cdn/<버전>/data/ko_KR/item.json`, `.../ko_KR/runesReforged.json`.

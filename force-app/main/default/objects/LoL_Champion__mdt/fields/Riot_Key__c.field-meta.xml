@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Riot_Key__c</fullName>
+    <description>Riot 숫자 챔피언 키 (lol.ps 챔피언 페이지 lol.ps/champ/&lt;키&gt;)</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <label>Riot Key</label>
+    <precision>5</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

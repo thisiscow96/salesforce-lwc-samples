@@ -85,6 +85,10 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(guide.contains('[금지 표현]'), guide);
         Assert.isFalse(guide.contains('"(확인 필요)"로 표시'), '이전 지침(확인 필요 표기) 제거');
         Assert.areEqual(16000, body.get('max_tokens'));
+        // 프로관전러(lol.ps)를 항상 1순위로: 지침 + 픽마다 lol.ps 챔피언 페이지(라인 지정)
+        Assert.isTrue(guide.contains('1순위(항상 먼저 참조): lol.ps'), guide);
+        Assert.isTrue(prompt.contains('lol.ps: https://lol.ps/champ/222?tier=2&region=0&lane=3'), '징크스 원딜 lol.ps 페이지');
+        Assert.areEqual('https://lol.ps/champ/516?tier=2&region=0&lane=0', LolClaudeAnalysisService.lolpsChampionUrl(516, 'TOP'));
     }
 
     @IsTest

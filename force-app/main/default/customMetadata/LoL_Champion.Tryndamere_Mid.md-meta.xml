@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>트린다미어</label>
+    <protected>false</protected>
+    <values>
+        <field>Champion_Key__c</field>
+        <value xsi:type="xsd:string">Tryndamere</value>
+    </values>
+    <values>
+        <field>English_Name__c</field>
+        <value xsi:type="xsd:string">Tryndamere</value>
+    </values>
+    <values>
+        <field>Lane__c</field>
+        <value xsi:type="xsd:string">MID</value>
+    </values>
+    <values>
+        <field>Role_Class__c</field>
+        <value xsi:type="xsd:string">Skirmisher</value>
+    </values>
+    <values>
+        <field>Damage_Type__c</field>
+        <value xsi:type="xsd:string">AD</value>
+    </values>
+    <values>
+        <field>Meta_Tier__c</field>
+        <value xsi:type="xsd:string">B</value>
+    </values>
+    <values>
+        <field>Win_Rate__c</field>
+        <value xsi:type="xsd:double">53.2</value>
+    </values>
+    <values>
+        <field>Meta_Score__c</field>
+        <value xsi:type="xsd:double">7</value>
+    </values>
+    <values>
+        <field>CC__c</field>
+        <value xsi:type="xsd:double">2</value>
+    </values>
+    <values>
+        <field>Frontline__c</field>
+        <value xsi:type="xsd:double">3</value>
+    </values>
+    <values>
+        <field>Damage__c</field>
+        <value xsi:type="xsd:double">10</value>
+    </values>
+    <values>
+        <field>Late_Game__c</field>
+        <value xsi:type="xsd:double">8</value>
+    </values>
+    <values>
+        <field>Early_Game__c</field>
+        <value xsi:type="xsd:double">6</value>
+    </values>
+    <values>
+        <field>Engage__c</field>
+        <value xsi:type="xsd:double">4</value>
+    </values>
+    <values>
+        <field>Peel__c</field>
+        <value xsi:type="xsd:double">1</value>
+    </values>
+    <values>
+        <field>Carry__c</field>
+        <value xsi:type="xsd:double">8</value>
+    </values>
+    <values>
+        <field>Difficulty__c</field>
+        <value xsi:type="xsd:double">5</value>
+    </values>
+    <values>
+        <field>Solo_Kill__c</field>
+        <value xsi:type="xsd:double">9</value>
+    </values>
+    <values>
+        <field>Lane_Priority__c</field>
+        <value xsi:type="xsd:double">6</value>
+    </values>
+    <values>
+        <field>Objective__c</field>
+        <value xsi:type="xsd:double">6</value>
+    </values>
+    <values>
+        <field>Pick_Rate__c</field>
+        <value xsi:type="xsd:double">0.51</value>
+    </values>
+    <values>
+        <field>Ban_Rate__c</field>
+        <value xsi:type="xsd:double">1.06</value>
+    </values>
+    <values>
+        <field>Preferred__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>PS_Score__c</field>
+        <value xsi:type="xsd:double">50.98</value>
+    </values>
+    <values>
+        <field>Honey__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Riot_Key__c</field>
+        <value xsi:type="xsd:double">23</value>
+    </values>
+    <values>
+        <field>Note__c</field>
+        <value xsi:type="xsd:string">R 불사 스플릿 푸시</value>
+    </values>
+    <values>
+        <field>Source__c</field>
+        <value xsi:type="xsd:string">lol.ps 26.20 한국 에메랄드+</value>
+    </values>
+    <values>
+        <field>Sort_Order__c</field>
+        <value xsi:type="xsd:double">159</value>
+    </values>
+</CustomMetadata>

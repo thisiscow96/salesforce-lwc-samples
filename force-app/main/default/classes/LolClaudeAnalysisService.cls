@@ -127,7 +127,8 @@ public with sharing class LolClaudeAnalysisService {
             '',
             '[리서치 규칙: 반드시 지킬 것]',
             '1) 직접 여러 사이트를 검색해 내용을 채운다. 한 항목당 최소 2개 출처를 교차 확인한다.',
-            '   - 통계·빌드·룬·스킬 순서: op.gg, u.gg, lolalytics, mobalytics, deeplol, leagueofgraphs',
+            '   - 1순위(항상 먼저 참조): lol.ps (프로관전러 P.S, 한국 서버 · 에메랄드+). [우리 조합]에 적힌 lol.ps 챔피언 페이지를 먼저 열어 승률·픽률·밴률·PS 점수·카운터·빌드를 확인하고, 통계 수치는 lol.ps 값을 기준으로 쓴다.',
+            '   - 교차 확인용 통계·빌드·룬·스킬 순서: op.gg, u.gg, lolalytics, mobalytics, deeplol, leagueofgraphs',
             '   - 패치 변경·오브젝트 규칙: leagueoflegends.com 공식 패치노트·시즌 공지',
             '   - 운영·동선·매치업 팁: mobalytics 가이드, 프로·챌린저 가이드, 커뮤니티 공략',
             '2) 첫 검색에서 답이 안 나오면 검색어를 바꿔(영어/한국어, 챔피언명+"build"·"matchup"·"counter", 패치 번호 등) 최소 3번 더 찾는다.',
@@ -149,7 +150,7 @@ public with sharing class LolClaudeAnalysisService {
             '- 아이템·룬은 라인마다 반드시 채운다: 핵심 룬(메인/보조), 스킬 마스터 순서, 시작 아이템, 1~3코어, 상황별 아이템 2개.',
             '- 추천 밴 3개는 반드시 실제 챔피언 이름 3개와 각각의 이유 1줄로 쓴다.',
             '- 정글 동선은 시작 캠프부터 첫 귀환까지 실제 캠프 순서로 쓴다 (레드/블루 시작 각각). 인접 캠프를 이어 도는 순서여야 하고(예: 레드 → 돌거북 → 칼날부리 → 늑대 → 블루 → 심술두꺼비), 동선이 끝나는 레벨·시간과 첫 갱이 서로 맞아야 한다.',
-            '- 룬·스킬 순서·아이템은 챔피언마다 빌드 페이지(op.gg, u.gg, lolalytics 중 2곳)를 직접 확인한 값으로 쓰고, 한국 클라이언트 정식 명칭(Riot Data Dragon ko_KR 기준)을 쓴다. 보조 룬 2개는 같은 트리에 속해야 한다. 카운터는 그 라인에서 실제로 쓰이는 챔피언만 쓴다. 역할에 맞지 않는 선택(예: 원딜 정복자·스테락의 도전·모렐로, 원딜 도란의 방패 시작)은 쓰지 않는다.',
+            '- 룬·스킬 순서·아이템은 챔피언마다 빌드 페이지(lol.ps 챔피언 페이지 + op.gg, u.gg, lolalytics 중 1곳)를 직접 확인한 값으로 쓰고, 한국 클라이언트 정식 명칭(Riot Data Dragon ko_KR 기준)을 쓴다. 보조 룬 2개는 같은 트리에 속해야 한다. 카운터는 그 라인에서 실제로 쓰이는 챔피언만 쓴다. 역할에 맞지 않는 선택(예: 원딜 정복자·스테락의 도전·모렐로, 원딜 도란의 방패 시작)은 쓰지 않는다.',
             '- "상대 조합별 대처법"의 아이템·룬 조정은 해당 챔피언 빌드 페이지의 상황별 선택지 안에서만 고른다.',
             '- 통계 수치는 기준 패치 값만 본문에 쓴다 (예: "26.8 기준 52.4%" 같은 다른 패치 수치 금지). 범위로 쓴 값의 이유(출처 간 차이 등)는 본문에 쓰지 않고 "데이터 기준"에만 쓴다.',
             '- 섹션끼리 서로 모순되지 않게 쓴다 (예: 시너지에서 룰루 R 대상을 말파이트로 썼다면 서폿 섹션도 같은 판단).',
@@ -194,6 +195,11 @@ public with sharing class LolClaudeAnalysisService {
                 c.CC__c, c.Frontline__c, c.Late_Game__c, c.Engage__c, c.Peel__c, c.Carry__c,
                 c.Meta_Tier__c, c.Win_Rate__c == null ? '미집계' : c.Win_Rate__c + '%'
             }));
+            // 분석 시 항상 먼저 열어 볼 lol.ps(프로관전러) 챔피언 페이지. lane 번호는 lol.ps 기준(0 탑 ~ 4 서폿)
+            if (c.Riot_Key__c != null) {
+                lines.add('  lol.ps: ' + lolpsChampionUrl(c.Riot_Key__c.intValue(), lane) +
+                    (c.PS_Score__c == null ? '' : ' (PS 점수 ' + c.PS_Score__c + (c.Honey__c ? ', 꿀챔' : '') + ')'));
+            }
         }
         // 대체 픽을 팀이 실제로 할 수 있는 챔피언 안에서 고르도록 후보 풀을 함께 전달
         lines.add('');
@@ -242,6 +248,12 @@ public with sharing class LolClaudeAnalysisService {
             Decimal y = b.Sort_Order__c == null ? 999 : b.Sort_Order__c;
             return x == y ? 0 : (x < y ? -1 : 1);
         }
+    }
+
+    /** lol.ps 챔피언 페이지 (한국 서버 · 에메랄드+, 라인 지정). 라인 번호는 LANES 순서와 같다 */
+    @TestVisible
+    static String lolpsChampionUrl(Integer riotKey, String lane) {
+        return 'https://lol.ps/champ/' + riotKey + '?tier=2&region=0&lane=' + LANES.indexOf(lane);
     }
 
     /** 라인 → 팀 선호 픽 이름(티어) 목록, 화면과 같은 순서 */

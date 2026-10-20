@@ -95,6 +95,18 @@
         <value xsi:type="xsd:boolean">false</value>
     </values>
     <values>
+        <field>PS_Score__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Honey__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Riot_Key__c</field>
+        <value xsi:type="xsd:double">10</value>
+    </values>
+    <values>
         <field>Note__c</field>
         <value xsi:type="xsd:string">16레벨 원거리 하이퍼캐리, R 무적</value>
     </values>
@@ -104,6 +116,6 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">166</value>
+        <value xsi:type="xsd:double">190</value>
     </values>
 </CustomMetadata>

@@ -286,12 +286,37 @@
                             <lightning-tabset>
                                 <template for:each={poolTabs} for:item="tab">
                                     <lightning-tab key={tab.lane} label={tab.label}>
-                                        <lightning-datatable key-field="id" data={tab.rows} columns={poolColumns}
-                                            hide-checkbox-column></lightning-datatable>
+                                        <div class="pool-scroll">
+                                        <lightning-datatable class="pool-table" key-field="id" data={tab.rows} columns={poolColumns}
+                                            hide-checkbox-column sorted-by={poolSortBy} sorted-direction={poolSortDirection}
+                                            default-sort-direction="desc" onsort={handlePoolSort}></lightning-datatable>
+                                        </div>
                                     </lightning-tab>
                                 </template>
                             </lightning-tabset>
-                            <p class="slds-text-color_weak slds-m-top_x-small">통계: MOBA Trainer(Emerald+, u.gg·op.gg 병합) Patch 26.20 / 능력치(솔킬·주도권·오브젝트 포함)는 스킬 구성 기준 평가. 수정: Setup › Custom Metadata Types › LoL Champion</p>
+                            <!-- 점수 기준과 지표 출처 -->
+                            <div class="basis slds-m-top_small">
+                                <h3 class="basis-title">점수는 어떻게 계산하나요?</h3>
+                                <ul class="basis-list">
+                                    <li><b>이 자리 점수</b> = 현재 조합에서 그 라인만 바꿨을 때의 <b>팀 조합 총점(100점)</b>입니다. 챔피언 개인 성능 순위가 아닙니다.
+                                        배점: 메타 강도 10 · 후반 캐리력 15 · CC(탑·정글 중심) 15 · 앞라인 구조 15 · AD/AP 밸런스 10 · 이니시·보호 10 · 시너지 15 · 실력 적합도 10.</li>
+                                    <li>팀 목표(탑·정글 <b>1탱 + 1브루저</b>, 탑·정글이 CC·앞라인 담당, 후반 지향)를 반영합니다. 그래서 정글이 브루저(예: 오공)일 때 탑 브루저를 넣으면 2브루저가 되어
+                                        앞라인 구조(15점)와 CC(15점)에서 깎이고, 개인 성능이 좋아도 이 자리 점수는 낮게 나옵니다. 정글을 탱커로 바꾸면 탑 브루저 점수가 올라갑니다.</li>
+                                    <li><b>PS 점수</b>는 개인 성능 지표입니다(lol.ps: 승률·픽률·밴률 종합). 솔로랭크에서 그 챔피언 자체가 얼마나 센지는 PS 점수·티어·꿀챔(🍯)으로 보세요.</li>
+                                    <li>배점과 팀 목표는 Setup › Custom Metadata Types › LoL Score Weight / LoL AI Setting에서 바꿀 수 있습니다.</li>
+                                </ul>
+                                <h3 class="basis-title slds-m-top_x-small">지표 출처</h3>
+                                <ul class="basis-list sources-list">
+                                    <li>티어 · 승률 · 픽률 · 밴률 · PS 점수 · 꿀챔:
+                                        <a href="https://lol.ps/statistics?tier=2&amp;region=0" target="_blank" rel="noopener noreferrer">lol.ps (프로관전러 P.S)</a> 한국 서버 · 에메랄드+ · Patch 26.20 (1순위).
+                                        lol.ps에 없는 라인 항목만 <a href="https://www.mobatrainer.com/lol/tier-list" target="_blank" rel="noopener noreferrer">MOBA Trainer</a>(Emerald+, u.gg·op.gg 병합)로 보충 — 행마다 출처는 Excel 픽 풀 시트의 "통계 출처" 열에 기록</li>
+                                    <li>챔피언 이름 · 스킬 정보: <a href="https://ddragon.leagueoflegends.com/cdn/16.20.1/data/ko_KR/champion.json" target="_blank" rel="noopener noreferrer">Riot Data Dragon 16.20.1 (ko_KR)</a></li>
+                                    <li>능력치(CC · 앞라인 · 딜 · 초반 · 후반 · 이니시 · 보호 · 캐리 · 난이도 · 솔킬 · 주도권 · 오브젝트, 0~10): 공식 통계가 아니라 스킬 구성 기준으로 직접 매긴 <b>정성 평가</b>입니다.
+                                        수정: Setup › Custom Metadata Types › LoL Champion</li>
+                                    <li>시너지 점수: 챔피언 쌍별 스킬 연계 기준 정성 평가 (LoL Synergy)</li>
+                                    <li>조합 예측 대시보드: 위 능력치로 계산한 자체 모델 추정치 (평균 상대 기준 50%)</li>
+                                </ul>
+                            </div>
                         </div>
                     </lightning-layout-item>
                 </lightning-layout>
