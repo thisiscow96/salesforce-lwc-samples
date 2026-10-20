@@ -186,3 +186,23 @@ Claude Code 워커: claude-worker.js pending → claim → 웹 검색·분석 �
 - 요청 OWD Private: 요청자는 본인 요청만 조회·생성 (수정·삭제 불가), 결과 기록은 관리자 워커
 - 30분 넘게 Processing에 멈춘 요청은 다음 실행에서 재처리
 - 개인 자동화 용도. 여러 사용자가 상시로 쓰면 API 모드가 정석
+
+### 클라우드 루틴 모드 (PC가 꺼져 있어도 처리)
+
+```
+[분석 요청 저장] ─(즉시)→ LolRoutineFire(Queueable) → Claude_Routine Named Credential → 루틴 /fire
+                                                           (매시간 예약 실행도 함께: 누락분 처리)
+클라우드 루틴(Claude Code) → node scripts/lol/claude-worker.js (LOL_QUEUE_URL 설정 시 큐 API 사용)
+   → https://<site>/lolworker/services/apexrest/lol/queue  (LolWorkerApi, Site: LoL_Worker)
+      인증: X-LoL-Worker-Key 헤더 = 클라우드 환경의 네트워크 시크릿 (Claude는 키를 볼 수 없음)
+            Salesforce에는 키의 SHA-256만 저장 (Custom Setting LoL_Worker_Setting__c)
+```
+
+| 구성 | 위치 |
+|---|---|
+| 큐 API | `classes/LolWorkerApi.cls` (pending / claim(선점, 409) / complete / fail), Site `LoL_Worker`, 게스트 프로필은 이 클래스만 허용 |
+| 즉시 실행 | `classes/LolRoutineFire.cls`, Named Credential `Claude_Routine` (토큰은 External Credential에 직접 입력), CMDT `LoL AI Setting.Routine_Fire_Path__c` |
+| 키 교체 | 새 키 생성 → 해시를 `LoL_Worker_Setting__c.Key_Hash__c`에 저장 → 클라우드 네트워크 시크릿 값 교체 |
+
+- 루틴 예약 실행의 최소 간격은 1시간 → 즉시성은 API 트리거(/fire)로 확보
+- PC 작업 스케줄러 워커와 동시에 켜 두어도 선점(claim)으로 중복 처리되지 않음
