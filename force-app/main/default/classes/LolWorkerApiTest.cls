@@ -58,6 +58,21 @@ private class LolWorkerApiTest {
     }
 
     @IsTest
+    static void acceptsBearerPrefixAndLowercaseHeaderName() {
+        Assert.areEqual(200, call('GET', '/pending', 'Bearer ' + KEY, null).statusCode, 'Bearer 접두사 허용');
+        Assert.areEqual(200, call('GET', '/pending', '  ' + KEY + ' ', null).statusCode, '앞뒤 공백 허용');
+
+        RestRequest req = new RestRequest();
+        req.requestURI = '/services/apexrest/lol/queue/pending';
+        req.httpMethod = 'GET';
+        req.addHeader('x-lol-worker-key', KEY);
+        RestContext.request = req;
+        RestContext.response = new RestResponse();
+        LolWorkerApi.getPending();
+        Assert.areEqual(200, RestContext.response.statusCode, '소문자 헤더 이름 허용');
+    }
+
+    @IsTest
     static void pendingReturnsQueueIncludingStaleWithinLimit() {
         RestResponse res = call('GET', '/pending?limit=10', KEY, null);
         Assert.areEqual(200, res.statusCode);

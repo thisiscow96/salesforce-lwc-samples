@@ -149,12 +149,28 @@ global without sharing class LolWorkerApi {
 
     @TestVisible
     static Boolean authorized() {
-        String key = RestContext.request.headers.get(KEY_HEADER);
-        LoL_Worker_Setting__c setting = LoL_Worker_Setting__c.getOrgDefaults();
-        if (String.isBlank(key) || setting == null || String.isBlank(setting.Key_Hash__c)) {
-            return false;
+        String key = headerIgnoringCase(KEY_HEADER);
+        // 네트워크 시크릿 설정 시 기본 접두사 "Bearer "가 남아 있어도 동작하도록 제거
+        if (key != null) {
+            key = key.trim().removeStartIgnoreCase('Bearer ').trim();
         }
-        return hash(key) == setting.Key_Hash__c.toLowerCase();
+        LoL_Worker_Setting__c setting = LoL_Worker_Setting__c.getOrgDefaults();
+        Boolean ok = String.isNotBlank(key) && setting != null && String.isNotBlank(setting.Key_Hash__c) && hash(key) == setting.Key_Hash__c.toLowerCase();
+        if (!ok) {
+            // 진단용: 값은 남기지 않고 헤더 이름·존재 여부·길이만 기록
+            System.debug(LoggingLevel.WARN, 'LolWorkerApi 401: headers=' + RestContext.request.headers.keySet() + ' keyPresent=' + (key != null) + ' keyLength=' + (key == null ? 0 : key.length()));
+        }
+        return ok;
+    }
+
+    // 프록시가 헤더 이름을 소문자로 바꿔 보낼 수 있으므로 대소문자 무시
+    static String headerIgnoringCase(String name) {
+        for (String headerName : RestContext.request.headers.keySet()) {
+            if (headerName.equalsIgnoreCase(name)) {
+                return RestContext.request.headers.get(headerName);
+            }
+        }
+        return null;
     }
 
     @TestVisible
