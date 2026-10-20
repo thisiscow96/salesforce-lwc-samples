@@ -75,6 +75,8 @@ private class LolTeamBuilderControllerTest {
         for (String required : new List<String>{
             '▶ 탑', '▶ 정글', '▶ 서폿', '"- 룬:"', '"- 카운터:"', '■ 상대 조합별 대처법', '▶ 다이브 조합', '▶ 초반 스노우볼 조합',
             '▶ 상대 정글러별 첫 3분 대응', '▶ 레드 시작', '▶ 블루 시작', '■ 오브젝트 운영', '■ 추천 밴 3개', '■ 데이터 기준',
+            // 운영: 등장 시간 나열 대신 상황(우세·비등·열세)별 행동 지침
+            '"- 준비(60~90초 전):', '"- 우세일 때:', '"- 열세일 때:', '"- 상대 조합별:', '"- 우세 시:", "- 열세 시:", "- 라인별 역할:"', '등장 시간은 쓰지 않는다',
             '- 기준 패치: ' + s.Base_Patch__c, '- 기준 티어: 에메랄드+'
         }) {
             Assert.isTrue(prompt.contains(required), '프롬프트에 "' + required + '" 포함');
@@ -83,6 +85,8 @@ private class LolTeamBuilderControllerTest {
         String guide = (String) body.get('system');
         Assert.isTrue(guide.contains('최소 2개 출처를 교차 확인'), guide);
         Assert.isTrue(guide.contains('[금지 표현]'), guide);
+        Assert.isTrue(guide.contains('[운영 작성 원칙'), guide);
+        Assert.isTrue(guide.contains('나쁜 예: "트라이 조건'), '일반론 트라이 조건을 나쁜 예로 명시');
         Assert.isFalse(guide.contains('"(확인 필요)"로 표시'), '이전 지침(확인 필요 표기) 제거');
         Assert.areEqual(16000, body.get('max_tokens'));
         // 프로관전러(lol.ps)를 항상 1순위로: 지침 + 픽마다 lol.ps 챔피언 페이지(라인 지정)
