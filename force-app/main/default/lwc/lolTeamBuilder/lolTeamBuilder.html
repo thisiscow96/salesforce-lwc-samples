@@ -19,6 +19,102 @@
 
             <template lwc:if={isReady}>
                 <lightning-layout multiple-rows>
+                    <!-- Claude 분석: 분석 요청 버튼 바로 아래 (화면 맨 위) -->
+                    <lightning-layout-item size="12" padding="around-small">
+                        <div class="panel analysis">
+                            <h2 class="panel-title">{analysisTitle}</h2>
+                            <template lwc:if={analyzing}>
+                                <div class="analyzing">
+                                    <lightning-spinner alternative-text="분석 중" size="small"></lightning-spinner>
+                                    <p class="slds-p-left_xx-large">최신 메타를 검색하며 분석 중입니다. 최대 2분 걸릴 수 있습니다.</p>
+                                </div>
+                            </template>
+                            <template lwc:if={analysisError}>
+                                <div class="analysis-error slds-notify slds-notify_alert slds-alert_error" role="alert">{analysisError}</div>
+                            </template>
+                            <template lwc:if={analysis}>
+                                <p class="analysis-meta slds-text-color_weak">{analysisMeta}</p>
+                                <div class="analysis-text">
+                                    <template for:each={analysisSections} for:item="sec">
+                                        <section key={sec.key} class="report-section">
+                                            <template lwc:if={sec.title}>
+                                                <h3 class="report-title">{sec.title}</h3>
+                                            </template>
+                                            <template for:each={sec.lines} for:item="ln">
+                                                <p key={ln.key} class={ln.cls}>{ln.text}</p>
+                                            </template>
+                                            <template lwc:if={sec.hasGroups}>
+                                                <div class="report-groups">
+                                                    <template for:each={sec.groups} for:item="g">
+                                                        <div key={g.key} class="report-group">
+                                                            <h4 class="report-sub">{g.title}</h4>
+                                                            <template for:each={g.lines} for:item="ln">
+                                                                <p key={ln.key} class={ln.cls}>{ln.text}</p>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </section>
+                                    </template>
+                                </div>
+                                <template lwc:if={hasSources}>
+                                    <h3 class="slds-text-title_bold slds-m-top_small">출처</h3>
+                                    <ol class="sources">
+                                        <template for:each={analysisSources} for:item="src">
+                                            <li key={src.key}><a href={src.url} target="_blank" rel="noopener noreferrer">{src.title}</a></li>
+                                        </template>
+                                    </ol>
+                                </template>
+                            </template>
+                            <template lwc:if={showWaiting}>
+                                <div class="waiting slds-box slds-theme_shade">
+                                    <template lwc:if={isWaiting}>
+                                        <lightning-spinner alternative-text="처리 대기" size="small"></lightning-spinner>
+                                    </template>
+                                    <p class="waiting-text">{waitingMessage}</p>
+                                </div>
+                            </template>
+                            <template lwc:if={showGuestNote}>
+                                <p class="guest-note slds-text-color_weak">{guestNoteText}</p>
+                            </template>
+                            <template lwc:if={showGuestInfo}>
+                                <p class="guest-info slds-text-color_weak slds-m-bottom_x-small">공개 사이트 안내: 같은 조합은 최근 분석 결과를 함께 보여 주며, 새 분석 요청은 시간당 횟수가 제한됩니다. 분석에는 1~2분 정도 걸립니다.</p>
+                            </template>
+                            <template lwc:if={showAnalysisHint}>
+                                <p class="slds-text-color_weak">조합을 정한 뒤 [{analyzeLabel}]을 누르면 롤 코치 관점의 리포트를 받습니다: 라인별 해야 할 것·주의사항, 정글 동선·갱 대상, 공허 유충·첫 드래곤 타이밍(현재 패치 검색), 시간대별 운영, 밴·대체 픽.</p>
+                            </template>
+
+                            <!-- Claude Code 모드: 내 최근 요청 (PC가 꺼져 있던 동안 처리된 결과 확인) -->
+                            <template lwc:if={showRecent}>
+                                <div class="recent slds-m-top_medium">
+                                    <div class="panel-bar">
+                                        <h3 class="slds-text-title_bold">내 최근 요청</h3>
+                                        <lightning-button-icon class="refresh-recent" icon-name="utility:refresh" variant="bare"
+                                            alternative-text="새로고침" title="새로고침" onclick={handleRefreshRecent}></lightning-button-icon>
+                                    </div>
+                                    <template lwc:if={hasRecent}>
+                                        <ul class="recent-list">
+                                            <template for:each={recentRows} for:item="r">
+                                                <li key={r.id} class="recent-item">
+                                                    <span class={r.statusClass}>{r.status}</span>
+                                                    <span class="recent-name">{r.name}</span>
+                                                    <span class="recent-comp">{r.composition}</span>
+                                                    <span class="slds-text-color_weak">{r.created}</span>
+                                                    <lightning-button class="open-request" variant="base" label="보기" data-id={r.id}
+                                                        onclick={handleOpenRequest}></lightning-button>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </template>
+                                    <template lwc:else>
+                                        <p class="slds-text-color_weak">아직 요청이 없습니다.</p>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-layout-item>
+
                     <!-- 1. 라인별 선택 -->
                     <lightning-layout-item size="12" large-device-size="7" padding="around-small">
                         <div class="panel">
@@ -112,79 +208,6 @@
                             </div>
                         </lightning-layout-item>
                     </template>
-
-                    <!-- 5. Claude 실시간 분석 -->
-                    <lightning-layout-item size="12" padding="around-small">
-                        <div class="panel analysis">
-                            <h2 class="panel-title">{analysisTitle}</h2>
-                            <template lwc:if={analyzing}>
-                                <div class="analyzing">
-                                    <lightning-spinner alternative-text="분석 중" size="small"></lightning-spinner>
-                                    <p class="slds-p-left_xx-large">최신 메타를 검색하며 분석 중입니다. 최대 2분 걸릴 수 있습니다.</p>
-                                </div>
-                            </template>
-                            <template lwc:if={analysisError}>
-                                <div class="analysis-error slds-notify slds-notify_alert slds-alert_error" role="alert">{analysisError}</div>
-                            </template>
-                            <template lwc:if={analysis}>
-                                <p class="analysis-meta slds-text-color_weak">{analysisMeta}</p>
-                                <div class="analysis-text">{analysis.text}</div>
-                                <template lwc:if={hasSources}>
-                                    <h3 class="slds-text-title_bold slds-m-top_small">출처</h3>
-                                    <ol class="sources">
-                                        <template for:each={analysisSources} for:item="src">
-                                            <li key={src.key}><a href={src.url} target="_blank" rel="noopener noreferrer">{src.title}</a></li>
-                                        </template>
-                                    </ol>
-                                </template>
-                            </template>
-                            <template lwc:if={showWaiting}>
-                                <div class="waiting slds-box slds-theme_shade">
-                                    <template lwc:if={isWaiting}>
-                                        <lightning-spinner alternative-text="처리 대기" size="small"></lightning-spinner>
-                                    </template>
-                                    <p class="waiting-text">{waitingMessage}</p>
-                                </div>
-                            </template>
-                            <template lwc:if={showGuestNote}>
-                                <p class="guest-note slds-text-color_weak">{guestNoteText}</p>
-                            </template>
-                            <template lwc:if={showGuestInfo}>
-                                <p class="guest-info slds-text-color_weak slds-m-bottom_x-small">공개 사이트 안내: 같은 조합은 최근 분석 결과를 함께 보여 주며, 새 분석 요청은 시간당 횟수가 제한됩니다. 분석에는 1~2분 정도 걸립니다.</p>
-                            </template>
-                            <template lwc:if={showAnalysisHint}>
-                                <p class="slds-text-color_weak">조합을 정한 뒤 [{analyzeLabel}]을 누르면 현재 패치 메타·커뮤니티 의견을 검색해 강점·약점·운영 플랜·밴 추천을 받습니다.</p>
-                            </template>
-
-                            <!-- Claude Code 모드: 내 최근 요청 (PC가 꺼져 있던 동안 처리된 결과 확인) -->
-                            <template lwc:if={showRecent}>
-                                <div class="recent slds-m-top_medium">
-                                    <div class="panel-bar">
-                                        <h3 class="slds-text-title_bold">내 최근 요청</h3>
-                                        <lightning-button-icon class="refresh-recent" icon-name="utility:refresh" variant="bare"
-                                            alternative-text="새로고침" title="새로고침" onclick={handleRefreshRecent}></lightning-button-icon>
-                                    </div>
-                                    <template lwc:if={hasRecent}>
-                                        <ul class="recent-list">
-                                            <template for:each={recentRows} for:item="r">
-                                                <li key={r.id} class="recent-item">
-                                                    <span class={r.statusClass}>{r.status}</span>
-                                                    <span class="recent-name">{r.name}</span>
-                                                    <span class="recent-comp">{r.composition}</span>
-                                                    <span class="slds-text-color_weak">{r.created}</span>
-                                                    <lightning-button class="open-request" variant="base" label="보기" data-id={r.id}
-                                                        onclick={handleOpenRequest}></lightning-button>
-                                                </li>
-                                            </template>
-                                        </ul>
-                                    </template>
-                                    <template lwc:else>
-                                        <p class="slds-text-color_weak">아직 요청이 없습니다.</p>
-                                    </template>
-                                </div>
-                            </template>
-                        </div>
-                    </lightning-layout-item>
 
                     <!-- 6. 조합표 -->
                     <lightning-layout-item size="12" padding="around-small">

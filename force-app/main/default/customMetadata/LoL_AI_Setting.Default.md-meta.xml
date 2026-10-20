@@ -12,7 +12,7 @@
     </values>
     <values>
         <field>Max_Tokens__c</field>
-        <value xsi:type="xsd:double">3000</value>
+        <value xsi:type="xsd:double">6000</value>
     </values>
     <values>
         <field>Web_Search_Tool__c</field>

@@ -71,6 +71,10 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(prompt.contains('징크스(Jinx)'), prompt);
         Assert.isTrue(prompt.contains('마스터 500LP'), '티어 라벨 포함');
         Assert.isTrue(prompt.contains('총점 82.4'), prompt);
+        // 코칭 리포트 요구 섹션: 라인별 지침, 정글 동선·갱, 공허 유충·첫 용 운영 (수치는 검색으로 확인하도록)
+        for (String required : new List<String>{ '▶ 탑', '▶ 정글', '▶ 서폿', '정글 동선과 갱킹', '공허 유충', '첫 드래곤 트라이', '등장 시간을 검색' }) {
+            Assert.isTrue(prompt.contains(required), '프롬프트에 "' + required + '" 포함');
+        }
     }
 
     @IsTest

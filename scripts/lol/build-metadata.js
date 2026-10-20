@@ -243,7 +243,7 @@ TIERS.forEach(([name, label, skill], i) => record('LoL_Tier__mdt', name, label, 
 record('LoL_AI_Setting__mdt', 'Default', 'Default', {
     Mode__c: 'CLAUDE_CODE',
     Model__c: 'claude-sonnet-5-5',
-    Max_Tokens__c: 3000,
+    Max_Tokens__c: 6000,
     Web_Search_Tool__c: 'web_search_20250305',
     Web_Search_Max_Uses__c: 3,
     Timeout_Seconds__c: 120,

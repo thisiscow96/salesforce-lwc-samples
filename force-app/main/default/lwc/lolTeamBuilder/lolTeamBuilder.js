@@ -8,6 +8,7 @@ import getAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.getAna
 import getRecentRequests from '@salesforce/apex/LolTeamBuilderController.getRecentRequests';
 import { LANES, LANE_LABELS, CLASS_LABELS, normalizeData, scoreTeam, explain, suggestSwaps, findBestTeams } from './lolScoring';
 import { buildWorkbook } from './lolExcel';
+import { parseReport } from './reportParser';
 
 const TOP_LIMIT = 30; // 화면 조합표
 const POLL_INTERVAL_MS = 10000; // Claude Code 처리 상태 확인 주기
@@ -340,6 +341,9 @@ export default class LolTeamBuilder extends LightningElement {
     }
     get showAnalysisHint() {
         return this.canAnalyze && !this.analysis && !this.analyzing && !this.analysisError;
+    }
+    get analysisSections() {
+        return parseReport(this.analysis?.text);
     }
     get analysisSources() {
         return (this.analysis?.sources || []).map((s, i) => ({ key: `src${i}`, ...s }));

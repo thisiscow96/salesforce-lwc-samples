@@ -309,4 +309,25 @@ describe('c-lol-team-builder', () => {
         expect($(el, '.waiting-text').textContent).toContain('LAR-00100 대기 중');
         expect(getRecentRequests).not.toHaveBeenCalled(); // 요청 후에도 목록을 불러오지 않음
     });
+
+    it('분석 패널은 화면 맨 위에 있고, 리포트는 섹션 제목과 라인별 카드로 표시된다', async () => {
+        startAnalysis.mockResolvedValue({
+            text: '■ 한줄 평가\n- 후반 조합\n■ 라인별 해야 할 것 / 주의사항\n▶ 탑\n- R 각 유지\n▶ 정글\n- 첫 갱은 미드\n■ 오브젝트 운영\n- 공허 유충 (확인 필요)',
+            sources: [],
+            searchCount: 3,
+            model: 'claude-sonnet-5-5',
+            truncated: false
+        });
+        const el = await mount('API');
+        const panels = $$(el, '.panel');
+        expect(panels[0].classList.contains('analysis')).toBe(true); // 첫 패널 = Claude 분석
+
+        $(el, '.analyze-button').click();
+        await flush();
+
+        expect($$(el, '.report-title').map((h) => h.textContent)).toEqual(['한줄 평가', '라인별 해야 할 것 / 주의사항', '오브젝트 운영']);
+        expect($$(el, '.report-group .report-sub').map((h) => h.textContent)).toEqual(['탑', '정글']);
+        expect($$(el, '.report-group')[1].textContent).toContain('첫 갱은 미드');
+        expect($$(el, '.report-bullet').length).toBe(4);
+    });
 });
