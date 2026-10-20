@@ -73,7 +73,7 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(prompt.contains('총점 82.4'), prompt);
         // 리포트 양식: 라인별 빌드, 상대 조합 6유형 + 상대 정글러 대응, 정글 동선, 데이터 기준 / 기준 패치·티어
         for (String required : new List<String>{
-            '▶ 탑', '▶ 정글', '▶ 서폿', '"- 룬:"', '"- 카운터:"', '■ 상대 조합별 대처법', '▶ 다이브 조합', '▶ 초반 스노우볼 조합',
+            '▶ 탑', '▶ 정글', '▶ 서폿', '"- 카운터:"', '■ 상대 조합별 대처법', '▶ 다이브 조합', '▶ 초반 스노우볼 조합',
             '▶ 상대 정글러별 첫 3분 대응', '▶ 레드 시작', '▶ 블루 시작', '■ 오브젝트 운영', '■ 추천 밴 3개', '■ 데이터 기준',
             // 운영: 등장 시간 나열 대신 상황(우세·비등·열세)별 행동 지침
             '"- 90초 전:", "- 60초 전:", "- 30초 전:", "- 등장 후:"', '"- 열세:" (맞교환', '■ 한타 포지션', '▶ 역할 분류', '▶ 지형별 포지션', '"- 상대가 여는 경우(받아치기):"',
@@ -94,6 +94,15 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(guide.contains('트라이 조건: 오공 R, 세라핀 R 중 2개 이상이면 시도한다." / "공허 유충 8:00 등장"'), '일반론·등장 시간을 나쁜 예로 명시');
         Assert.isFalse(guide.contains('"(확인 필요)"로 표시'), '이전 지침(확인 필요 표기) 제거');
         Assert.areEqual(24000, body.get('max_tokens'));
+        // 템트리 제거: 출력 양식에 룬·아이템 항목 없음, 지침에서 금지
+        Assert.isFalse(prompt.contains('"- 룬:"'), '라인별 룬 항목 제거');
+        Assert.isFalse(prompt.contains('아이템·룬 조정'), '상대 조합별 아이템 조정 제거');
+        Assert.isTrue(guide.contains('템트리(룬·스킬 마스터 순서·시작 아이템·코어·상황별 아이템)는 쓰지 않는다'), guide);
+        // 운영 사실 점검: 포탑 방패 14분, 14분 전 기본 라인 배치, 궁극기 보유만으로 판단 금지, 영혼·장로 깊이
+        Assert.isTrue(guide.contains('포탑 방패(플레이팅)는 14분에 사라진다'), guide);
+        Assert.isTrue(guide.contains('1-3-1·1-4 같은 웨이브 배치는 첫 포탑이 깨진 뒤'), guide);
+        Assert.isTrue(guide.contains('우리 궁극기 보유 여부만으로 판단하지 않는다'), guide);
+        Assert.isTrue(guide.contains('드래곤 영혼·장로도 다른 오브젝트와 같은 깊이'), guide);
         // 프로관전러(lol.ps)를 항상 1순위로: 지침 + 픽마다 lol.ps 챔피언 페이지(라인 지정)
         Assert.isTrue(guide.contains('1순위(항상 먼저 참조): lol.ps'), guide);
         Assert.isTrue(prompt.contains('lol.ps: https://lol.ps/champ/222?tier=2&region=0&lane=3'), '징크스 원딜 lol.ps 페이지');
