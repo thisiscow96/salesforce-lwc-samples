@@ -15,7 +15,6 @@ public with sharing class LolTeamBuilderController {
         @AuraEnabled public List<LoL_Synergy__mdt> synergies;
         @AuraEnabled public List<LoL_Score_Weight__mdt> weights;
         @AuraEnabled public List<LoL_Tier__mdt> tiers;
-        @AuraEnabled public String teamGoal;
         @AuraEnabled public String model;
         @AuraEnabled public String ddragonVersion; // 챔피언 아이콘 이미지 버전
         @AuraEnabled public String mode;
@@ -31,7 +30,6 @@ public with sharing class LolTeamBuilderController {
         data.weights = LoL_Score_Weight__mdt.getAll().values();
         data.tiers = LoL_Tier__mdt.getAll().values();
         LoL_AI_Setting__mdt s = LoL_AI_Setting__mdt.getInstance('Default');
-        data.teamGoal = s?.Team_Goal__c;
         data.model = s?.Model__c;
         data.ddragonVersion = s?.Ddragon_Version__c;
         data.mode = String.isBlank(s?.Mode__c) ? 'CLAUDE_CODE' : s.Mode__c;

@@ -52,6 +52,6 @@
     </values>
     <values>
         <field>Team_Goal__c</field>
-        <value xsi:type="xsd:string">미드·원딜이 캐리 라인(마스터 500LP), 탑(에메랄드 하위)·정글(다이아 하위)이 CC와 앞라인 담당, 서폿 마스터 0LP. 탑·정글은 2탱이 아닌 1탱 + 1브루저 구조를 선호. 후반을 챙길 수 있는 조합을 목표로 한다.</value>
+        <value xsi:nil="true"/>
     </values>
 </CustomMetadata>

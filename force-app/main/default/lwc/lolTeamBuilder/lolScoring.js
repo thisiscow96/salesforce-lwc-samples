@@ -13,11 +13,9 @@ export const CLASS_LABELS = {
     Enchanter: '인챈터'
 };
 
-const CARRY_LANES = new Set(['MID', 'ADC']);
-// 후반 지수 라인 가중치: 캐리 라인(미드·원딜) 중심
-const LATE_WEIGHTS = { TOP: 0.15, JUNGLE: 0.1, MID: 0.3, ADC: 0.4, SUPPORT: 0.05 };
-// 실력 적합도 라인 가중치
-const SKILL_WEIGHTS = { TOP: 0.15, JUNGLE: 0.2, MID: 0.25, ADC: 0.25, SUPPORT: 0.15 };
+// 개인 성능 환산 구간 (lol.ps 한국 에메랄드+ 분포 기준: 이 구간 밖은 0 또는 1로 고정)
+const WIN_RATE_RANGE = [47, 54];
+const PS_RANGE = [45, 58];
 const AP_FACTOR = { AD: 0, AP: 1, Mixed: 0.5 };
 
 const clamp = (v, min = 0, max = 1) => Math.min(max, Math.max(min, v));
@@ -84,23 +82,6 @@ export function gradeOf(total) {
     return 'D';
 }
 
-const isTank = (c) => c.cls === 'Tank';
-const isBruiser = (c) => c.cls === 'Bruiser' || c.cls === 'Skirmisher';
-const label = (c) => `${c.name}(${CLASS_LABELS[c.cls] || c.cls})`;
-
-/** 탑·정글 앞라인 구조: 1탱 + 1브루저가 목표 */
-export function structureOf(top, jungle) {
-    const pair = [top, jungle];
-    const tanks = pair.filter(isTank).length;
-    const bruisers = pair.filter(isBruiser).length;
-    const desc = `탑 ${label(top)} + 정글 ${label(jungle)}`;
-    if (tanks === 1 && bruisers === 1) return { ratio: 1, ok: true, detail: `${desc} → 1탱 1브루저 구조 충족` };
-    if (tanks === 2) return { ratio: 0.5, ok: false, detail: `${desc} → 2탱 구조 (딜·스플릿 압박 부족)` };
-    if (tanks === 1) return { ratio: 0.4, ok: false, detail: `${desc} → 탱커 1명, 브루저 없음` };
-    if (bruisers === 2) return { ratio: 0.3, ok: false, detail: `${desc} → 탱커 없는 2브루저 (앞라인·CC 부족 위험)` };
-    return { ratio: 0, ok: false, detail: `${desc} → 탱커·브루저 없음` };
-}
-
 export function synergiesOf(team, ctx) {
     const members = LANES.map((lane) => team[lane]);
     const found = [];
@@ -115,70 +96,64 @@ export function synergiesOf(team, ctx) {
     return found.sort((x, y) => y.score - x.score);
 }
 
-/** 카테고리별 비율(0~1)과 설명 */
+/**
+ * 카테고리별 비율(0~1)과 설명. 객관 기준: 특정 팀의 선호(탑·정글 구조, 후반 지향, 라인별 역할 분담, 플레이어 실력)는 쓰지 않는다.
+ * - PICK_STRENGTH: lol.ps 실제 통계(승률·PS 점수). 통계가 없는 픽만 티어(메타 점수)로 대체
+ * - 나머지: 어느 조합에나 적용되는 기본기. 누가(어느 라인이) 맡든 팀 전체에서 상위 능력치로 판단
+ */
+function pickStrength(c) {
+    const parts = [];
+    if (c.winRate != null) parts.push(clamp((c.winRate - WIN_RATE_RANGE[0]) / (WIN_RATE_RANGE[1] - WIN_RATE_RANGE[0])));
+    if (c.psScore != null) parts.push(clamp((c.psScore - PS_RANGE[0]) / (PS_RANGE[1] - PS_RANGE[0])));
+    if (!parts.length) return { ratio: clamp((c.meta - 5) / 5), basis: `티어 ${c.tier}(통계 없음)` };
+    return { ratio: parts.reduce((a, b) => a + b, 0) / parts.length, basis: `승률 ${c.winRate ?? '-'}% · PS ${c.psScore ?? '-'}` };
+}
+
+const topTwo = (members, key) => [...members].sort((a, b) => b[key] - a[key]).slice(0, 2);
+
 function ratios(team, skills, ctx) {
     const members = LANES.map((lane) => team[lane]);
     const sum = (fn) => members.reduce((acc, c) => acc + fn(c), 0);
-    const top = team.TOP;
-    const jungle = team.JUNGLE;
 
-    const metaAvg = sum((c) => c.meta) / members.length;
-    const late = LANES.reduce((acc, lane) => acc + LATE_WEIGHTS[lane] * team[lane].late, 0);
-    const ccTopJg = top.cc + jungle.cc;
+    const strengths = members.map((c) => ({ c, ...pickStrength(c) }));
+    const strengthRatio = strengths.reduce((acc, s) => acc + s.ratio, 0) / members.length;
+    const weakest = strengths.reduce((w, s) => (s.ratio < w.ratio ? s : w), strengths[0]);
+
+    const front = topTwo(members, 'front');
+    const frontSum = front[0].front + front[1].front;
     const ccTeam = sum((c) => c.cc);
-    const structure = structureOf(top, jungle);
+    const engage = topTwo(members, 'engage');
+    const engageValue = engage[0].engage + engage[1].engage / 2;
+    const peel = topTwo(members, 'peel');
+    const peelSum = peel[0].peel + peel[1].peel;
     const damageTotal = sum((c) => c.damage) || 1;
     const apShare = sum((c) => c.damage * (AP_FACTOR[c.dmgType] ?? 0.5)) / damageTotal;
     const apDev = Math.abs(apShare - 0.45);
-    const bestEngage = members.reduce((best, c) => (c.engage > best.engage ? c : best), members[0]);
-    const peel = top.peel + jungle.peel + team.SUPPORT.peel;
+    const damageAvg = sum((c) => c.damage) / members.length;
     const synergies = synergiesOf(team, ctx);
-    const synergyRaw = synergies.reduce((acc, s) => acc + s.score, 0);
-
-    const laneFits = LANES.map((lane) => {
-        const c = team[lane];
-        const skill = skills[lane] ?? 5;
-        const diffFit = clamp(1 - Math.max(0, c.diff - (skill + 1)) / 4);
-        const roleFit = CARRY_LANES.has(lane) ? c.carry / 10 : (c.cc + c.peel + Math.max(c.front, c.engage)) / 30;
-        return { lane, champion: c, skill, diffFit, roleFit, ratio: diffFit * (0.4 + 0.6 * roleFit) };
-    });
-    const skillRatio = laneFits.reduce((acc, f) => acc + SKILL_WEIGHTS[f.lane] * f.ratio, 0);
 
     return {
-        META: { ratio: clamp((metaAvg - 4) / 6), detail: `메타 점수 평균 ${round1(metaAvg)} / 10`, metaAvg },
-        LATE: { ratio: clamp(late / 10), detail: `후반 지수 ${round1(late)} / 10 (미드 ${team.MID.late}, 원딜 ${team.ADC.late})` },
-        CC: {
-            ratio: clamp((ccTopJg / 20) * (2 / 3) + clamp(ccTeam / 40) / 3),
-            detail: `탑·정글 CC ${ccTopJg} / 20, 팀 전체 CC ${ccTeam}`,
-            ccTopJg
+        PICK_STRENGTH: {
+            ratio: clamp(strengthRatio),
+            detail: `lol.ps 5픽 평균 ${Math.round(strengthRatio * 100)}% 수준 (가장 약한 픽: ${weakest.c.name} ${weakest.basis})`,
+            weakest
         },
-        STRUCTURE: { ratio: structure.ratio, detail: structure.detail, ok: structure.ok },
+        FRONTLINE: { ratio: clamp(frontSum / 17), detail: `앞라인 상위 2명: ${front[0].name} ${front[0].front} + ${front[1].name} ${front[1].front} = ${frontSum} / 17`, frontSum },
+        CC: { ratio: clamp(ccTeam / 32), detail: `팀 전체 CC ${ccTeam} / 32` },
+        ENGAGE: { ratio: clamp(engageValue / 14), detail: `이니시: ${engage[0].name} ${engage[0].engage} + ${engage[1].name} ${engage[1].engage}의 절반`, engage: engage[0].engage, initiator: engage[0] },
+        PEEL: { ratio: clamp(peelSum / 16), detail: `보호 상위 2명: ${peel[0].name} ${peel[0].peel} + ${peel[1].name} ${peel[1].peel} = ${peelSum} / 16`, peelSum },
         BALANCE: {
             ratio: apDev <= 0.15 ? 1 : clamp(1 - (apDev - 0.15) / 0.3),
             detail: `딜 기준 AP ${Math.round(apShare * 100)}% / AD ${100 - Math.round(apShare * 100)}%`,
             apShare
         },
-        TEAMFIGHT: {
-            ratio: clamp((bestEngage.engage / 10) * 0.5 + (peel / 30) * 0.5),
-            detail: `메인 이니시 ${bestEngage.name}(${bestEngage.engage}), 탑·정글·서폿 보호 ${peel} / 30`,
-            engage: bestEngage.engage,
-            peel
-        },
-        SYNERGY: {
-            ratio: clamp(0.4 + synergyRaw * 0.05), // 중립 0.4, +1당 +0.05 (상위 조합끼리도 구분되도록 완만하게)
-            detail: synergies.length ? `시너지 ${synergies.length}쌍, 합계 ${synergyRaw > 0 ? '+' : ''}${synergyRaw}` : '등록된 시너지 쌍 없음 (중립)',
-            synergies,
-            raw: synergyRaw
-        },
-        SKILL: {
-            ratio: clamp(skillRatio),
-            detail: laneFits.some((f) => f.diffFit < 1) ? '실력 대비 난이도가 높은 픽 있음' : '모든 라인이 실력에 맞는 난이도',
-            laneFits
-        }
+        DAMAGE: { ratio: clamp((damageAvg - 4) / 4.5), detail: `5명 딜 능력 평균 ${round1(damageAvg)} / 10` },
+        // 시너지는 점수에 넣지 않는다: 시너지 표가 일부 챔피언 쌍(정성 평가)만 있어 그 챔피언들만 유리해지기 때문 → 참고 정보로만 표시
+        SYNERGY_INFO: { synergies }
     };
 }
 
-/** team: { TOP: champion, ... }, skills: { TOP: 6, ... } */
+/** team: { TOP: champion, ... }, skills: 사용하지 않음(객관 기준, 호출 호환용) */
 export function scoreTeam(team, skills, ctx) {
     const r = ratios(team, skills, ctx);
     const categories = ctx.weights.map((w) => {
@@ -186,52 +161,48 @@ export function scoreTeam(team, skills, ctx) {
         return { key: w.key, label: w.label, max: w.max, ratio: item.ratio, points: round1(item.ratio * w.max), detail: item.detail, description: w.description };
     });
     const total = round1(categories.reduce((acc, c) => acc + c.points, 0));
-    return { team, total, grade: gradeOf(total), categories, raw: r, synergies: r.SYNERGY.synergies, structureOk: r.STRUCTURE.ok };
+    return { team, total, grade: gradeOf(total), categories, raw: r, synergies: r.SYNERGY_INFO.synergies };
 }
 
-/** 강점 / 약점 / 운영 포인트 (규칙 기반 설명) */
+/** 강점 / 약점 / 운영 포인트 (규칙 기반 설명, 객관 기준) */
 export function explain(result) {
     const { team, raw, categories } = result;
     const strengths = [];
     const weaknesses = [];
     const byKey = Object.fromEntries(categories.map((c) => [c.key, c]));
     const members = LANES.map((lane) => team[lane]);
+    const good = (key) => byKey[key] && byKey[key].ratio >= 0.75;
+    const bad = (key) => byKey[key] && byKey[key].ratio < 0.5;
 
-    if (raw.STRUCTURE.ok) strengths.push(`앞라인 구조: ${raw.STRUCTURE.detail}`);
-    else weaknesses.push(`앞라인 구조: ${raw.STRUCTURE.detail}`);
+    if (good('PICK_STRENGTH')) strengths.push(`개인 성능: ${raw.PICK_STRENGTH.detail}`);
+    else if (bad('PICK_STRENGTH')) weaknesses.push(`개인 성능: ${raw.PICK_STRENGTH.detail} → 현재 패치 통계상 약한 픽이 많음`);
+    const lowStat = members.filter((c) => c.winRate != null && c.winRate < 49);
+    if (lowStat.length) weaknesses.push(`통계: ${lowStat.map((c) => `${c.name} 승률 ${c.winRate}%`).join(', ')} (lol.ps 기준 50% 미만)`);
 
-    if (byKey.CC?.ratio >= 0.75) strengths.push(`CC: ${raw.CC.detail} → 탑·정글이 CC를 충분히 담당`);
-    else if (byKey.CC?.ratio < 0.55) weaknesses.push(`CC: ${raw.CC.detail} → 이니시 후 묶어 둘 수단 부족`);
-
-    if (byKey.LATE?.ratio >= 0.75) strengths.push(`후반: ${raw.LATE.detail} → 시간이 갈수록 유리`);
-    else if (byKey.LATE?.ratio < 0.55) {
-        const weak = members.filter((c) => c.late <= 5).map((c) => c.name);
-        weaknesses.push(`후반: ${raw.LATE.detail}${weak.length ? ` → 후반 약한 픽: ${weak.join(', ')}` : ''}`);
-    }
-
+    if (good('FRONTLINE')) strengths.push(`앞라인: ${raw.FRONTLINE.detail}`);
+    else if (bad('FRONTLINE')) weaknesses.push(`앞라인: ${raw.FRONTLINE.detail} → 한타에서 버텨 줄 챔피언 부족`);
+    if (good('CC')) strengths.push(`CC: ${raw.CC.detail}`);
+    else if (bad('CC')) weaknesses.push(`CC: ${raw.CC.detail} → 이니시 후 묶어 둘 수단 부족`);
+    if (good('ENGAGE')) strengths.push(`이니시: ${raw.ENGAGE.detail}`);
+    else if (raw.ENGAGE.engage < 7) weaknesses.push(`이니시: 확실한 한타 개시 수단 부족 (${raw.ENGAGE.detail})`);
+    if (good('PEEL')) strengths.push(`캐리 보호: ${raw.PEEL.detail}`);
+    else if (bad('PEEL')) weaknesses.push(`캐리 보호: ${raw.PEEL.detail} → 돌진·암살 조합에 취약`);
     if (byKey.BALANCE?.ratio >= 0.9) strengths.push(`딜 구성: ${raw.BALANCE.detail} → 상대가 한 종류 방어템으로 대응하기 어려움`);
     else if (byKey.BALANCE?.ratio < 0.6) weaknesses.push(`딜 구성: ${raw.BALANCE.detail} → 상대가 ${raw.BALANCE.apShare > 0.5 ? '마법 저항력' : '방어력'}만 올려도 딜 효율 하락`);
+    if (bad('DAMAGE')) weaknesses.push(`딜량: ${byKey.DAMAGE.detail} → 한타 마무리 화력 부족`);
 
-    if (byKey.TEAMFIGHT?.ratio >= 0.75) strengths.push(`한타: ${raw.TEAMFIGHT.detail}`);
-    else if (raw.TEAMFIGHT.engage < 7) weaknesses.push(`한타: 확실한 이니시 수단 부족 (${raw.TEAMFIGHT.detail})`);
-    else if (raw.TEAMFIGHT.peel < 15) weaknesses.push(`한타: 캐리 보호 부족 (${raw.TEAMFIGHT.detail}) → 다이브 조합에 취약`);
-
-    raw.SYNERGY.synergies.filter((s) => s.score > 0).forEach((s) => strengths.push(`시너지 +${s.score}: ${s.nameA} + ${s.nameB} — ${s.reason}`));
-    raw.SYNERGY.synergies.filter((s) => s.score < 0).forEach((s) => weaknesses.push(`상성 ${s.score}: ${s.nameA} + ${s.nameB} — ${s.reason}`));
-
-    const lowMeta = members.filter((c) => c.meta <= 6);
-    if (lowMeta.length) weaknesses.push(`메타: ${lowMeta.map((c) => `${c.name}(${c.tier === '-' ? '미집계' : c.tier})`).join(', ')} — 현재 패치 통계상 약세`);
-
-    raw.SKILL.laneFits
-        .filter((f) => f.diffFit < 1)
-        .forEach((f) => weaknesses.push(`실력: ${LANE_LABELS[f.lane]} ${f.champion.name} 난이도 ${f.champion.diff} — 현재 숙련도(${f.skill}) 대비 어려운 픽`));
+    // 시너지: 점수와 무관한 참고 정보
+    raw.SYNERGY_INFO.synergies.filter((s) => s.score > 0).forEach((s) => strengths.push(`참고 시너지: ${s.nameA} + ${s.nameB} — ${s.reason}`));
+    raw.SYNERGY_INFO.synergies.filter((s) => s.score < 0).forEach((s) => weaknesses.push(`참고 상성: ${s.nameA} + ${s.nameB} — ${s.reason}`));
 
     const earlyAvg = members.reduce((acc, c) => acc + c.early, 0) / members.length;
-    if (earlyAvg < 5) weaknesses.push(`초반: 초반 지수 ${round1(earlyAvg)} / 10 → 상대 초반 조합(인베·다이브)에 스노우볼을 허용할 위험`);
+    const lateAvg = members.reduce((acc, c) => acc + c.late, 0) / members.length;
     const plan =
-        earlyAvg < 5.5
-            ? `초반 지수 ${round1(earlyAvg)} → 라인전은 버티고, 15분 이후 오브젝트(용·전령) 한타 중심으로 운영`
-            : `초반 지수 ${round1(earlyAvg)} → 초반 주도권으로 정글 동선·오브젝트 선점, 스노우볼`;
+        lateAvg - earlyAvg >= 1
+            ? `초반 ${round1(earlyAvg)} < 후반 ${round1(lateAvg)} → 라인전은 버티고, 성장 후 오브젝트 한타 중심으로 운영`
+            : earlyAvg - lateAvg >= 1
+              ? `초반 ${round1(earlyAvg)} > 후반 ${round1(lateAvg)} → 초반 주도권으로 정글 동선·오브젝트를 선점해 일찍 끝내는 운영`
+              : `초반 ${round1(earlyAvg)} · 후반 ${round1(lateAvg)}로 고른 편 → 라인 주도권이 있는 쪽 오브젝트부터 챙기는 운영`;
     return { strengths, weaknesses, plan };
 }
 
@@ -275,9 +246,9 @@ export function searchPool(ctx, lane, mode = 'preferred') {
 
 /**
  * 조합 탐색 (라인별 후보의 곱, 같은 챔피언 중복 제외).
- * locked: { lane: champion } 고정 라인, requireStructure: 탑·정글 1탱+1브루저만, poolMode: searchPool 참고
+ * locked: { lane: champion } 고정 라인, poolMode: searchPool 참고
  */
-export function findBestTeams(ctx, skills, { locked = {}, requireStructure = true, limit = 30, poolMode = 'preferred' } = {}) {
+export function findBestTeams(ctx, skills, { locked = {}, limit = 30, poolMode = 'preferred' } = {}) {
     const pools = LANES.map((lane) => (locked[lane] ? [locked[lane]] : searchPool(ctx, lane, poolMode)));
     const results = [];
     let evaluated = 0;
@@ -298,8 +269,6 @@ export function findBestTeams(ctx, skills, { locked = {}, requireStructure = tru
         const lane = LANES[index];
         for (const c of pools[index]) {
             if (used.has(c.key)) continue;
-            // 탑·정글이 정해지면 바로 구조 검사 → 불필요한 하위 탐색 생략
-            if (requireStructure && lane === 'JUNGLE' && !structureOf(team.TOP, c).ok) continue;
             team[lane] = c;
             used.add(c.key);
             walk(index + 1);

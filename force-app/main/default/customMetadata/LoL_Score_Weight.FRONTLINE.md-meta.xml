@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <label>후반 캐리력</label>
+    <label>앞라인</label>
     <protected>false</protected>
     <values>
         <field>Max_Points__c</field>
-        <value xsi:type="xsd:double">15</value>
+        <value xsi:type="xsd:double">10</value>
     </values>
     <values>
         <field>Sort_Order__c</field>
@@ -12,6 +12,6 @@
     </values>
     <values>
         <field>Description__c</field>
-        <value xsi:type="xsd:string">라인별 가중(미드·원딜 중심) 후반 지수</value>
+        <value xsi:type="xsd:string">앞라인 능력 상위 2명 합 (누가 맡든 무관)</value>
     </values>
 </CustomMetadata>

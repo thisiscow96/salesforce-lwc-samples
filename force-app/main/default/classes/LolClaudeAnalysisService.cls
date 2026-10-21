@@ -239,7 +239,8 @@ public with sharing class LolClaudeAnalysisService {
 
     @TestVisible
     public static String userPrompt(AnalysisRequest req, LoL_AI_Setting__mdt s) {
-        List<String> lines = new List<String>{ '[팀 목표] ' + s.Team_Goal__c, '', '[우리 조합]' };
+        // 특정 팀 목표는 넣지 않는다 (객관 기준 분석). 조합·통계·점수만 전달
+        List<String> lines = new List<String>{ '[우리 조합]' };
         for (String lane : LANES) {
             LoL_Champion__mdt c = LoL_Champion__mdt.getInstance(req.picks.get(lane));
             LoL_Tier__mdt t = LoL_Tier__mdt.getInstance(req.tiers.get(lane));

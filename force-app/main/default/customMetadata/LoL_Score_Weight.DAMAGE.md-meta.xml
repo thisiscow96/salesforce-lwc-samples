@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <label>실력 적합도</label>
+    <label>딜량</label>
     <protected>false</protected>
     <values>
         <field>Max_Points__c</field>
@@ -8,10 +8,10 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">8</value>
+        <value xsi:type="xsd:double">7</value>
     </values>
     <values>
         <field>Description__c</field>
-        <value xsi:type="xsd:string">라인 실력 대비 난이도 + 캐리 라인 캐리력/서브 라인 팀플레이</value>
+        <value xsi:type="xsd:string">5명 딜 능력 평균</value>
     </values>
 </CustomMetadata>

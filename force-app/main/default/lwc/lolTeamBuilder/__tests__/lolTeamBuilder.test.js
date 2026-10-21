@@ -68,15 +68,16 @@ describe('c-lol-team-builder', () => {
         expect(pickBox(el, 'TOP').value).toBeTruthy();
         expect($(el, 'lightning-combobox.tier[data-lane="MID"]').value).toBe('MASTER_500');
         expect($(el, 'lightning-combobox.tier[data-lane="TOP"]').value).toBe('EMERALD_LOW');
-        expect(Number($(el, '.total').textContent)).toBeGreaterThan(80);
-        expect($$(el, '.category')).toHaveLength(8);
+        expect(Number($(el, '.total').textContent)).toBeGreaterThan(70);
+        expect($$(el, '.category')).toHaveLength(7); // 실제 통계 1 + 조합 기본기 6
         expect($$(el, '.strengths li').length).toBeGreaterThan(0);
-        expect($$(el, '.strengths li').map((li) => li.textContent).join('\n')).toContain('1탱 1브루저');
+        expect($$(el, '.category-head')[0].textContent).toContain('개인 성능 (lol.ps)'); // 실제 통계 항목이 첫 줄
 
         const combos = $(el, '.combo-table').data;
         expect(combos).toHaveLength(30);
         expect(combos[0].rank).toBe(1);
-        expect($(el, '.search-summary').textContent).toContain('1탱+1브루저만');
+        expect($(el, '.search-summary').textContent).not.toContain('1탱');
+        expect($(el, '.structure-toggle')).toBeNull(); // 팀 목표 규칙 토글 제거
         expect($(el, 'c-echart.radar').option.series[0].type).toBe('radar');
         expect($$(el, 'lightning-tab')).toHaveLength(5);
     });
@@ -144,7 +145,7 @@ describe('c-lol-team-builder', () => {
         expect(Object.keys(request).sort()).toEqual(['categoryPoints', 'picks', 'tiers', 'totalScore']);
         expect(request.picks.TOP).toMatch(/_Top$/);
         expect(request.tiers.ADC).toBe('MASTER_500');
-        expect(Object.keys(request.categoryPoints)).toHaveLength(8);
+        expect(Object.keys(request.categoryPoints)).toHaveLength(7);
 
         expect($(el, '.analysis-text').textContent).toContain('후반 하이퍼캐리 조합');
         const link = $(el, '.sources a');
@@ -283,7 +284,7 @@ describe('c-lol-team-builder', () => {
         await flush();
         await flush();
 
-        expect(Number($(el, '.total').textContent)).toBeGreaterThan(80);
+        expect(Number($(el, '.total').textContent)).toBeGreaterThan(70);
         expect($(el, '.combo-table').data.length).toBeGreaterThan(0);
         expect($(el, '.export-button')).not.toBeNull();
         expect($(el, '.analyze-button')).toBeNull();
@@ -423,8 +424,9 @@ describe('c-lol-team-builder', () => {
         expect(jungle.sortedBy).toBe('winRateLabel');
 
         const basis = $(el, '.basis').textContent;
-        expect(basis).toContain('팀 조합 총점');
-        expect(basis).toContain('1탱 + 1브루저');
+        expect(basis).toContain('객관 기준');
+        expect(basis).toContain('실제 통계 40점');
+        expect(basis).not.toContain('1탱 + 1브루저');
         expect(basis).toContain('lol.ps (프로관전러 P.S)');
         expect(basis).toContain('정성 평가');
         expect([...el.shadowRoot.querySelectorAll('.sources-list a')].map((a) => a.href)).toEqual(

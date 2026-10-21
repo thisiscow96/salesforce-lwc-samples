@@ -68,7 +68,7 @@ function analysisRows(current, explanation, swaps, tierLabels) {
     ];
 }
 
-function criteriaRows(ctx, teamGoal) {
+function criteriaRows(ctx) {
     return [
         ['점수 기준 (합계 100)'],
         ['항목', '배점', '계산 방식'],
@@ -79,7 +79,7 @@ function criteriaRows(ctx, teamGoal) {
         ['티어', '숙련도(1~10)'],
         ...ctx.tiers.map((t) => [t.label, t.skill]),
         [],
-        ['팀 목표', teamGoal || ''],
+        ['기준', '객관 기준: 실제 통계(lol.ps) 40점 + 조합 기본기 60점. 특정 팀 선호(구조·후반 지향·실력)는 반영하지 않음'],
         [],
         ['통계 출처', 'lol.ps (프로관전러 P.S) 한국 서버 · 에메랄드+ · Patch 26.20 (1순위) https://lol.ps/statistics / lol.ps에 없는 라인 항목만 MOBA Trainer(Emerald+, u.gg·op.gg 병합) 보충'],
         ['챔피언 정보', 'Riot Data Dragon 16.20.1 (ko_KR)'],
@@ -98,14 +98,14 @@ function synergyRows(ctx) {
 }
 
 /** 시트: 라인별 픽 / 조합 점수 / 현재 조합 분석 / 점수 기준 / 시너지 표 */
-export function buildWorkbook(XLSX, { ctx, teams, current, explanation, swaps, tierLabels = {}, teamGoal }) {
+export function buildWorkbook(XLSX, { ctx, teams, current, explanation, swaps, tierLabels = {} }) {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, sheet(XLSX, poolRows(ctx), [6, 7, 10, 12, 10, 8, 9, 8, 8, 8, 8, 6, 9, 5, 7, 5, 5, 5, 7, 5, 5, 7, 5, 7, 8, 50, 28]), '라인별 픽');
     XLSX.utils.book_append_sheet(wb, sheet(XLSX, comboRows(teams, ctx.weights), [6, 10, 10, 10, 10, 10, 7, 6, ...ctx.weights.map(() => 12), 40]), '조합 점수');
     if (current) {
         XLSX.utils.book_append_sheet(wb, sheet(XLSX, analysisRows(current, explanation, swaps, tierLabels), [16, 70, 12, 14]), '현재 조합 분석');
     }
-    XLSX.utils.book_append_sheet(wb, sheet(XLSX, criteriaRows(ctx, teamGoal), [16, 12, 80]), '점수 기준');
+    XLSX.utils.book_append_sheet(wb, sheet(XLSX, criteriaRows(ctx), [16, 12, 80]), '점수 기준');
     XLSX.utils.book_append_sheet(wb, sheet(XLSX, synergyRows(ctx), [12, 12, 6, 60]), '시너지 표');
     return wb;
 }

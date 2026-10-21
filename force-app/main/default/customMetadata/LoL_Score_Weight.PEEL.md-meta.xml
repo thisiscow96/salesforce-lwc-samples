@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <label>이니시·보호</label>
+    <label>캐리 보호</label>
     <protected>false</protected>
     <values>
         <field>Max_Points__c</field>
@@ -8,10 +8,10 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">6</value>
+        <value xsi:type="xsd:double">5</value>
     </values>
     <values>
         <field>Description__c</field>
-        <value xsi:type="xsd:string">최고 이니시 능력 + 탑·정글·서폿 보호 능력</value>
+        <value xsi:type="xsd:string">보호 능력 상위 2명 합 (돌진 조합 대응)</value>
     </values>
 </CustomMetadata>

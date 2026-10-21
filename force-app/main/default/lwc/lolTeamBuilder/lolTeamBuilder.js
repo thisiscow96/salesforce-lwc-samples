@@ -104,14 +104,12 @@ export default class LolTeamBuilder extends LightningElement {
     @api defaultTiers = DEFAULT_TIERS;
 
     ctx;
-    teamGoal;
     ddragonVersion; // 챔피언 아이콘 이미지 (Riot Data Dragon)
     model;
     loadError;
     picks = {};
     tiers = {};
     locks = {};
-    requireStructure = true;
     poolMode = 'preferred'; // 조합 탐색 후보: preferred(팀 선호 픽) | extended(라인별 메타 상위 포함)
     poolPreferredOnly = false; // 픽 풀 표 필터
     poolSortBy; // 픽 풀 표 정렬 열 (없으면 기본 순서: 선호 픽 → PS 점수)
@@ -136,7 +134,6 @@ export default class LolTeamBuilder extends LightningElement {
     wiredData({ data, error }) {
         if (data) {
             this.ctx = normalizeData(data);
-            this.teamGoal = data.teamGoal;
             this.model = data.model;
             this.ddragonVersion = data.ddragonVersion;
             this.mode = data.mode || 'CLAUDE_CODE';
@@ -202,7 +199,7 @@ export default class LolTeamBuilder extends LightningElement {
 
     search() {
         const locked = Object.fromEntries(LANES.filter((l) => this.locks[l] && this.picks[l]).map((l) => [l, this.ctx.byId.get(this.picks[l])]));
-        const { teams, evaluated } = findBestTeams(this.ctx, this.skills, { locked, requireStructure: this.requireStructure, limit: EXCEL_LIMIT, poolMode: this.poolMode });
+        const { teams, evaluated } = findBestTeams(this.ctx, this.skills, { locked, limit: EXCEL_LIMIT, poolMode: this.poolMode });
         this.bestTeams = teams;
         this.evaluated = evaluated;
     }
@@ -367,7 +364,7 @@ export default class LolTeamBuilder extends LightningElement {
     }
     get searchSummary() {
         const size = LANES.map((lane) => searchPool(this.ctx, lane, this.poolMode).length).join('·');
-        return `${this.evaluated.toLocaleString()}개 조합 평가 · 라인별 후보 ${size}명${this.requireStructure ? ' · 탑·정글 1탱+1브루저만' : ''}`;
+        return `${this.evaluated.toLocaleString()}개 조합 평가 · 라인별 후보 ${size}명`;
     }
 
     get poolTabs() {
@@ -492,10 +489,6 @@ export default class LolTeamBuilder extends LightningElement {
         this.locks = { ...this.locks, [event.target.dataset.lane]: event.target.checked };
     }
 
-    handleStructureToggle(event) {
-        this.requireStructure = event.target.checked;
-    }
-
     handlePoolModeToggle(event) {
         this.poolMode = event.target.checked ? 'extended' : 'preferred';
         this.search();
@@ -544,8 +537,7 @@ export default class LolTeamBuilder extends LightningElement {
                 current: this.result,
                 explanation: this.explanation,
                 swaps: this.swaps,
-                tierLabels,
-                teamGoal: this.teamGoal
+                tierLabels
             });
             const base64 = window.XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
             const link = document.createElement('a');

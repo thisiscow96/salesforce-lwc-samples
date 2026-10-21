@@ -9,7 +9,6 @@ function builderData(mode = 'CLAUDE_CODE', canRequestAnalysis = true, isGuest = 
         synergies: D.SYNERGIES.map((s) => ({ Champion_A__c: s[0], Champion_B__c: s[1], Score__c: s[2], Reason__c: s[3] })),
         weights: D.WEIGHTS.map((w) => ({ DeveloperName: w[0], MasterLabel: w[1], Max_Points__c: w[2], Sort_Order__c: w[3], Description__c: w[4] })),
         tiers: D.TIERS.map((t, i) => ({ DeveloperName: t[0], MasterLabel: t[1], Skill__c: t[2], Sort_Order__c: i + 1 })),
-        teamGoal: D.TEAM_GOAL,
         model: 'claude-sonnet-5-5',
         ddragonVersion: '16.20.1',
         mode,

@@ -8,10 +8,10 @@
     </values>
     <values>
         <field>Sort_Order__c</field>
-        <value xsi:type="xsd:double">5</value>
+        <value xsi:type="xsd:double">6</value>
     </values>
     <values>
         <field>Description__c</field>
-        <value xsi:type="xsd:string">딜 가중 AP 비중 30~60% 만점</value>
+        <value xsi:type="xsd:string">딜 가중 AP 비중 30~60% 만점 (한쪽 방어템으로 막히지 않게)</value>
     </values>
 </CustomMetadata>

@@ -9,7 +9,7 @@ private class LolTeamBuilderControllerTest {
             'tiers' => new Map<String, String>{
                 'TOP' => 'EMERALD_LOW', 'JUNGLE' => 'DIAMOND_LOW', 'MID' => 'MASTER_500', 'ADC' => 'MASTER_500', 'SUPPORT' => 'MASTER_0'
             },
-            'categoryPoints' => new Map<String, Object>{ 'SYNERGY' => 12.5, 'STRUCTURE' => 15 },
+            'categoryPoints' => new Map<String, Object>{ 'PICK_STRENGTH' => 30.5, 'FRONTLINE' => 8 },
             'totalScore' => 82.4
         };
     }
@@ -284,7 +284,7 @@ private class LolTeamBuilderControllerTest {
         Assert.areEqual(u.Id, stored.OwnerId);
         Assert.isTrue(stored.Prompt__c.startsWith('[지침]'), '서버가 만든 지침 포함');
         Assert.isTrue(stored.Prompt__c.contains('징크스(Jinx)'));
-        Assert.isTrue(stored.Prompt__c.contains('[팀 목표]'));
+        Assert.isFalse(stored.Prompt__c.contains('[팀 목표]'), '객관 기준: 팀 목표는 프롬프트에 넣지 않음');
         Assert.isTrue(stored.Request_JSON__c.contains('Jinx_Adc'));
     }
 
