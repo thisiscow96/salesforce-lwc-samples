@@ -73,11 +73,11 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(prompt.contains('총점 82.4'), prompt);
         // 리포트 양식: 라인별 빌드, 상대 조합 6유형 + 상대 정글러 대응, 정글 동선, 데이터 기준 / 기준 패치·티어
         for (String required : new List<String>{
-            '▶ 탑', '▶ 정글', '▶ 서폿', '"- 카운터:"', '■ 상대 조합별 대처법', '▶ 다이브 조합', '▶ 초반 스노우볼 조합',
+            '▶ 탑', '▶ 정글', '▶ 서폿', '■ 라인별 가이드', '"- 파워 커브:"', '"- 하드 카운터:"', '"- 정글 케어 요청:"', '■ 상대 조합별 대처법', '▶ 다이브 조합', '▶ 초반 스노우볼 조합',
             '▶ 상대 정글러별 첫 3분 대응', '■ 정글 운영과 갱킹', '▶ 캐리 라인 설정', '▶ 갱킹 우선순위와 호응', '■ 오브젝트 운영', '■ 추천 밴 3개', '■ 데이터 기준',
             // 운영: 등장 시간 나열 대신 상황(우세·비등·열세)별 행동 지침
             '▶ 첫 공허 유충: "- 결론:"', '"- 상대가 강할 때:" 반대편 이득', '▶ 첫 드래곤: "- 결론:"', '"- 포기할 때:" 반대편 이득', '"- 오브젝트:"(14~25분은 전령·드래곤', '■ 한타 포지션', '▶ 역할 분류', '▶ 지형별 포지션', '"- 상대가 여는 경우(받아치기):"',
-            '■ 사이드 운영', '▶ 깊이 기준', '"- 웨이브 배치:"(1-3-1 / 1-4 / 5인 뭉침',
+            '■ 사이드 운영', '▶ 인원 수싸움 공식', '▶ 텔레포트 유무별 위치', '"- 1순위 챔피언: 위협 사유 / 열렸을 때 위험"', '"- 웨이브 배치:"(1-3-1 / 1-4 / 5인 뭉침',
             '- 기준 패치: ' + s.Base_Patch__c, '- 기준 티어: 에메랄드+'
         }) {
             Assert.isTrue(prompt.contains(required), '프롬프트에 "' + required + '" 포함');
@@ -88,8 +88,14 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(guide.contains('[금지 표현]'), guide);
         Assert.isTrue(guide.contains('[운영 작성 규칙'), guide);
         Assert.isTrue(guide.contains('[한타 포지션 작성 규칙]'), guide);
-        Assert.isTrue(guide.contains('[사이드 운영 작성 규칙]'), guide);
+        Assert.isTrue(guide.contains('[사이드 운영 작성 규칙: 중후반 1-4 / 1-1-3 구도와 인원 수싸움]'), guide);
         Assert.isTrue(guide.contains('[작성 후 자체 검수]'), guide);
+        // 라인별 가이드·밴 규칙, 어색한 인원 체크 제거, 주도권 일관성·양식 되풀이 금지
+        Assert.isTrue(guide.contains('[라인별 가이드 작성 규칙]'), guide);
+        Assert.isTrue(guide.contains('[밴 작성 규칙]'), guide);
+        Assert.isFalse(guide.contains('2명 이하가 보일 때 즉시 후퇴'), '기계적인 인원 체크 제거');
+        Assert.isTrue(guide.contains('모든 섹션에서 같게 쓴다'), guide);
+        Assert.isTrue(guide.contains('그대로 옮겨 쓰지 않는다'), guide);
         // 오브젝트: 기본 시간표 대신 판단 3요소 / 정글: 정석 동선 대신 실전 스노우볼링
         Assert.isTrue(guide.contains('2) 오브젝트 판단 3요소'), guide);
         Assert.isTrue(guide.contains('[정글 작성 규칙: 실전 스노우볼링 전략]'), guide);
