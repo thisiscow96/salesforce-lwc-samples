@@ -9,6 +9,7 @@
  *   node scripts/lol/claude-worker.js lolps <챔피언키> <라인>   lol.ps 승률·픽률·밴률·PS 점수·상대하기 어려운/쉬운 챔피언 (JSON)
  *   node scripts/lol/claude-worker.js lolps-tier <라인> [N]    lol.ps 라인별 픽률 상위 N명 (예: JUNGLE 5 = 상대 정글러 후보)
  *        라인 = 0~4 또는 TOP/JUNGLE/MID/ADC/SUPPORT. lol.ps는 수치가 스크립트 데이터에 있어 WebFetch로는 비어 보이므로 이 명령을 쓴다
+ *   node scripts/lol/claude-worker.js spells <DataDragonId>   챔피언 패시브·Q~R 공식 한국어 이름과 설명 (예: Zaahen, MonkeyKing)
  *
  * 연결 방식 (환경 변수로 자동 선택)
  *   - 로컬 PC (기본): sf CLI 로그인(chartjs-dev)으로 REST API 호출. 토큰은 sf CLI가 처리.
@@ -253,9 +254,25 @@ function lolpsTier(lane, limit) {
     return { source: 'lol.ps (프로관전러 P.S) 한국 · 에메랄드+', url, lane: LOLPS_LANES[laneNo], orderedBy: 'pickRate', rows };
 }
 
+// 챔피언 스킬 공식 설명 (Riot Data Dragon ko_KR). 신규·리워크 챔피언 스킬을 추측해 틀리지 않도록 분석 전에 확인한다
+function championSpells(ddId) {
+    if (!/^[A-Za-z]+$/.test(ddId || '')) throw new Error(`잘못된 Data Dragon id: ${ddId} (예: MonkeyKing, Zaahen)`);
+    const version = JSON.parse(curlText('https://ddragon.leagueoflegends.com/api/versions.json'))[0];
+    const data = JSON.parse(curlText(`https://ddragon.leagueoflegends.com/cdn/${version}/data/ko_KR/champion/${ddId}.json`)).data[ddId];
+    const plain = (html) => String(html || '').replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    return {
+        source: `Riot Data Dragon ${version} ko_KR`,
+        champion: data.name,
+        passive: { name: data.passive.name, description: plain(data.passive.description) },
+        spells: data.spells.map((sp, i) => ({ key: ['Q', 'W', 'E', 'R'][i], name: sp.name, description: plain(sp.description) }))
+    };
+}
+
 function main() {
     const [command, arg1, arg2] = process.argv.slice(2);
-    if (command === 'lolps') {
+    if (command === 'spells') {
+        console.log(JSON.stringify(championSpells(arg1), null, 2));
+    } else if (command === 'lolps') {
         console.log(JSON.stringify(lolpsChampion(arg1, arg2), null, 2));
     } else if (command === 'lolps-tier') {
         console.log(JSON.stringify(lolpsTier(arg1, Math.max(1, Math.min(Number(arg2) || 5, 20))), null, 2));
@@ -278,7 +295,7 @@ function main() {
         backend.fail(requireId(arg1), String(arg2 || '처리 실패').slice(0, 255));
         console.log(`failed ${arg1} (${backend.name})`);
     } else {
-        console.log('사용법: pending [N] | claim <Id> | complete <Id> <결과.json> | fail <Id> "사유" | lolps <챔피언키> <라인> | lolps-tier <라인> [N]');
+        console.log('사용법: pending [N] | claim <Id> | complete <Id> <결과.json> | fail <Id> "사유" | lolps <챔피언키> <라인> | lolps-tier <라인> [N] | spells <DataDragonId>');
         process.exitCode = 1;
     }
 }

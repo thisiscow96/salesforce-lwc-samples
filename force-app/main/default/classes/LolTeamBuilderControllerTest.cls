@@ -77,7 +77,7 @@ private class LolTeamBuilderControllerTest {
             '▶ 상대 정글러별 첫 3분 대응', '■ 정글 운영과 갱킹', '▶ 캐리 라인 설정', '▶ 갱킹 우선순위와 호응', '■ 오브젝트 운영', '■ 추천 밴 3개', '■ 데이터 기준',
             // 운영: 등장 시간 나열 대신 상황(우세·비등·열세)별 행동 지침
             '▶ 첫 공허 유충: "- 결론:"', '"- 상대가 강할 때:" 반대편 이득', '▶ 첫 드래곤: "- 결론:"', '"- 포기할 때:" 반대편 이득', '"- 오브젝트:"(14~25분은 전령·드래곤', '■ 한타 포지션', '▶ 역할 분류', '▶ 지형별 포지션', '"- 상대가 여는 경우(받아치기):"',
-            '■ 사이드 운영', '▶ 인원 수싸움 공식', '▶ 텔레포트 유무별 위치', '"- 1순위 챔피언: 위협 사유 / 열렸을 때 위험"', '"- 웨이브 배치:"(1-3-1 / 1-4 / 5인 뭉침',
+            '■ 사이드 운영', '▶ 인원 수싸움 공식', '▶ 텔레포트 유무별 위치', '"- 1순위 챔피언 (위협 유형): 위협 사유 / 열렸을 때 위험"', '"- 웨이브 배치:"(1-3-1 / 1-4 / 5인 뭉침',
             '- 기준 패치: ' + s.Base_Patch__c, '- 기준 티어: 에메랄드+'
         }) {
             Assert.isTrue(prompt.contains(required), '프롬프트에 "' + required + '" 포함');
@@ -93,6 +93,14 @@ private class LolTeamBuilderControllerTest {
         // 라인별 가이드·밴 규칙, 어색한 인원 체크 제거, 주도권 일관성·양식 되풀이 금지
         Assert.isTrue(guide.contains('[라인별 가이드 작성 규칙]'), guide);
         Assert.isTrue(guide.contains('[밴 작성 규칙]'), guide);
+        // 보강: 공식 스킬 확인, 초반 약한 픽 판정, 중후반 위치 배정, 조합 위협 밴, 오브젝트 실전 신호, 숫자 기준
+        Assert.isTrue(guide.contains('[정확성·일관성 보강 규칙]'), guide);
+        Assert.isTrue(guide.contains('Riot Data Dragon 공식 스킬 설명'), guide);
+        Assert.isTrue(guide.contains('3) 중후반 위치 배정'), guide);
+        Assert.isTrue(prompt.contains('▶ 중후반 위치 배정'), prompt);
+        Assert.isTrue(prompt.contains('(위협 유형)'), prompt);
+        Assert.isTrue(prompt.contains('  스킬 확인: Data Dragon id '), prompt);
+        Assert.isTrue(prompt.contains(', 초반 '), '파워 커브 근거: 초반 능력치 포함');
         Assert.isFalse(guide.contains('2명 이하가 보일 때 즉시 후퇴'), '기계적인 인원 체크 제거');
         Assert.isTrue(guide.contains('모든 섹션에서 같게 쓴다'), guide);
         Assert.isTrue(guide.contains('그대로 옮겨 쓰지 않는다'), guide);
