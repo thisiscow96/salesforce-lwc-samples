@@ -358,7 +358,7 @@ private class LolTeamBuilderControllerTest {
                 auraPathError = e.getMessage();
             }
             fetched = LolTeamBuilderController.getAnalysisRequest(first);
-            Assert.isTrue(LolTeamBuilderController.getRecentRequests().isEmpty(), '방문자는 최근 요청 목록 없음');
+            Assert.isTrue(LolTeamBuilderController.getRecentRequests().isEmpty(), '방문자 이력에는 완료 건만 (대기 중 요청은 제외)');
             try {
                 LolTeamBuilderController.startAnalysis(JSON.serialize(validRequest()));
             } catch (AuraHandledException e) {
@@ -504,6 +504,33 @@ private class LolTeamBuilderControllerTest {
             Assert.isTrue(at > last, w.MasterLabel + ' 위치가 순서에 맞지 않음');
             last = at;
         }
+    }
+
+    @IsTest
+    static void guestHistoryShowsOnlyCompletedVisitorRequests() {
+        User guest = siteGuest();
+        User member = userWithProfile('Standard User', true);
+        System.runAs(member) {
+            LolTeamBuilderController.submitAnalysisRequest(JSON.serialize(validRequest())); // 로그인 사용자 요청: 방문자 이력에 없음
+        }
+        List<LoL_Analysis_Request__c> history;
+        LoL_Analysis_Request__c opened;
+        Test.startTest();
+        System.runAs(guest) {
+            insert new List<LoL_Analysis_Request__c>{
+                new LoL_Analysis_Request__c(Status__c = 'Completed', Composition__c = '오른 / 오공 / 요네 / 징크스 / 룰루', Composition_Key__c = 'h1', Result__c = '■ 한줄 평가\n- 지난 분석', Client_Key__c = LolGuestAnalysis.clientKey('203.0.113.9'), Completed_At__c = Datetime.now()),
+                new LoL_Analysis_Request__c(Status__c = 'Failed', Composition__c = 'failed', Composition_Key__c = 'h2', Error_Message__c = '내부 오류')
+            };
+            history = LolTeamBuilderController.getRecentRequests();
+            opened = LolTeamBuilderController.getAnalysisRequest(history[0].Id);
+        }
+        Test.stopTest();
+
+        Assert.areEqual(1, history.size(), '방문자 이력: 방문자가 만든 완료 건만');
+        Assert.areEqual('오른 / 오공 / 요네 / 징크스 / 룰루', history[0].Composition__c);
+        Assert.isFalse(history[0].isSet('Client_Key__c'), 'IP 해시는 조회하지 않음');
+        Assert.isFalse(history[0].isSet('Result__c'), '목록에는 결과 본문을 싣지 않음');
+        Assert.isTrue(opened.Result__c.contains('지난 분석'), '선택하면 결과 본문 조회');
     }
 
     @IsTest

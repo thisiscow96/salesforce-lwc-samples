@@ -126,20 +126,25 @@ public with sharing class LolTeamBuilderController {
         return rows[0];
     }
 
-    /** 내 최근 요청 (PC가 꺼져 있던 동안 쌓인 결과 확인용). OWD Private이라 본인 것만 조회됨 */
+    static final Integer HISTORY_SIZE = 20;
+
+    /**
+     * 분석 이력 (조합 + 결과 다시 보기).
+     * - 로그인 사용자: 사용자 모드로 볼 수 있는 요청 (OWD Private → 보통 본인 것, View All 권한이 있으면 방문자 요청 포함 전체)
+     * - 방문자: 방문자가 만든 완료 요청 (결과는 원래 방문자끼리 공유됨)
+     */
     @AuraEnabled
     public static List<LoL_Analysis_Request__c> getRecentRequests() {
         if (isGuest()) {
-            return new List<LoL_Analysis_Request__c>();
+            return LolGuestAnalysis.enabled(LolClaudeAnalysisService.setting()) ? LolGuestAnalysis.recent(HISTORY_SIZE) : new List<LoL_Analysis_Request__c>();
         }
         // 목록에는 결과 본문(Long Text)을 싣지 않음 → 선택 시 getAnalysisRequest로 조회 (응답 크기 절감)
         return [
             SELECT Id, Name, Status__c, Composition__c, Total_Score__c, CreatedDate, Completed_At__c
             FROM LoL_Analysis_Request__c
-            WHERE CreatedById = :UserInfo.getUserId()
             WITH USER_MODE
             ORDER BY CreatedDate DESC
-            LIMIT 10
+            LIMIT :HISTORY_SIZE
         ];
     }
 

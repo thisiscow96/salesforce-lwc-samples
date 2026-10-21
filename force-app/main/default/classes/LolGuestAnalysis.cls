@@ -110,6 +110,21 @@ public without sharing class LolGuestAnalysis {
         return rows.isEmpty() ? null : rows[0];
     }
 
+    /**
+     * 방문자 분석 이력: 방문자가 만든 완료 요청만 (결과는 원래 방문자끼리 공유되므로 같은 범위).
+     * 대기·실패 건은 오류 문구가 섞일 수 있어 목록에 넣지 않고, IP 해시·프롬프트도 조회하지 않는다.
+     * 결과 본문(Long Text)은 싣지 않음 → 선택 시 get()으로 조회
+     */
+    public static List<LoL_Analysis_Request__c> recent(Integer maxRows) {
+        return [
+            SELECT Id, Name, Status__c, Composition__c, Total_Score__c, CreatedDate, Completed_At__c
+            FROM LoL_Analysis_Request__c
+            WHERE CreatedById = :UserInfo.getUserId() AND Status__c = 'Completed'
+            ORDER BY CreatedDate DESC
+            LIMIT :maxRows
+        ];
+    }
+
     /** 라인 순서대로 챔피언/티어를 이어 붙인 키 (점수는 같은 조합이면 같으므로 제외) */
     public static String compositionKey(LolClaudeAnalysisService.AnalysisRequest req) {
         List<String> parts = new List<String>();

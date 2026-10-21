@@ -82,30 +82,44 @@
                                 <p class="slds-text-color_weak">조합을 정한 뒤 [{analyzeLabel}]을 누르면 롤 코치 관점의 리포트를 받습니다: 라인별 라인전·주의사항·카운터, 상대 조합별 대처법, 정글 운영(캐리 라인·갱킹 우선순위·카정), 첫 유충·첫 드래곤 판단(주도권·시야·결단 조건), 한타 포지션, 사이드 운영, 시간대별 웨이브 배치, 밴·대체 픽. 통계는 lol.ps(프로관전러) 기준.</p>
                             </template>
 
-                            <!-- Claude Code 모드: 내 최근 요청 (PC가 꺼져 있던 동안 처리된 결과 확인) -->
+                            <!-- Claude Code 모드: 분석 이력 (요청한 조합 + 결과 다시 보기). 방문자는 방문자끼리 공유된 완료 분석 -->
                             <template lwc:if={showRecent}>
                                 <div class="recent slds-m-top_medium">
                                     <div class="panel-bar">
-                                        <h3 class="slds-text-title_bold">내 최근 요청</h3>
+                                        <h3 class="recent-title slds-text-title_bold">{recentTitle}</h3>
                                         <lightning-button-icon class="refresh-recent" icon-name="utility:refresh" variant="bare"
                                             alternative-text="새로고침" title="새로고침" onclick={handleRefreshRecent}></lightning-button-icon>
                                     </div>
+                                    <p class="recent-hint slds-text-color_weak">{recentHint}</p>
                                     <template lwc:if={hasRecent}>
                                         <ul class="recent-list">
                                             <template for:each={recentRows} for:item="r">
-                                                <li key={r.id} class="recent-item">
-                                                    <span class={r.statusClass}>{r.status}</span>
-                                                    <span class="recent-name">{r.name}</span>
-                                                    <span class="recent-comp">{r.composition}</span>
-                                                    <span class="slds-text-color_weak">{r.created}</span>
-                                                    <lightning-button class="open-request" variant="base" label="보기" data-id={r.id}
-                                                        onclick={handleOpenRequest}></lightning-button>
+                                                <li key={r.id} class={r.itemClass}>
+                                                    <div class="recent-head">
+                                                        <span class={r.statusClass}>{r.status}</span>
+                                                        <span class="recent-name">{r.name}</span>
+                                                        <span class="recent-score">{r.score}</span>
+                                                        <span class="recent-date slds-text-color_weak">{r.created}</span>
+                                                        <lightning-button class="open-request" variant="base" label="결과 보기" data-id={r.id}
+                                                            onclick={handleOpenRequest}></lightning-button>
+                                                    </div>
+                                                    <div class="recent-comp" title={r.composition}>
+                                                        <template for:each={r.picks} for:item="p">
+                                                            <span key={p.key} class="recent-pick">
+                                                                <template lwc:if={p.icon}>
+                                                                    <img class="recent-icon" src={p.icon} alt={p.name} loading="lazy" />
+                                                                </template>
+                                                                <span class="recent-pick-text"><span class="recent-lane">{p.lane}</span>{p.name}</span>
+                                                            </span>
+                                                        </template>
+                                                        <template lwc:if={r.noPicks}>{r.composition}</template>
+                                                    </div>
                                                 </li>
                                             </template>
                                         </ul>
                                     </template>
                                     <template lwc:else>
-                                        <p class="slds-text-color_weak">아직 요청이 없습니다.</p>
+                                        <p class="slds-text-color_weak">아직 분석 이력이 없습니다.</p>
                                     </template>
                                 </div>
                             </template>

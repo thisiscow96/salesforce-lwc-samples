@@ -7,7 +7,7 @@ import submitAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.sub
 import getAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.getAnalysisRequest';
 import getRecentRequests from '@salesforce/apex/LolTeamBuilderController.getRecentRequests';
 import { LANES, LANE_LABELS, CLASS_LABELS, normalizeData, scoreTeam, explain, suggestSwaps, findBestTeams, searchPool, sortPoolRows } from './lolScoring';
-import { teamProfile, laneIndex, objectiveIndex, powerCurve, realStats, damageSplit, profileOption, indexBarOption, powerOption, damageOption, metaScatterOption } from './lolPrediction';
+import { teamProfile, laneIndex, objectiveIndex, powerCurve, realStats, damageSplit, profileOption, indexBarOption, powerOption, damageOption, metaScatterOption, championIcon } from './lolPrediction';
 import { buildWorkbook } from './lolExcel';
 import { parseReport } from './reportParser';
 
@@ -422,27 +422,49 @@ export default class LolTeamBuilder extends LightningElement {
     get waitingMessage() {
         if (!this.queued) return '';
         if (this.queued.stopped) {
-            return `${this.queued.name || ''} 아직 처리되지 않았습니다. Claude Code 워커가 켜져 있는지 확인하세요. 처리되면 최근 요청에서 볼 수 있습니다.`;
+            return `${this.queued.name || ''} 아직 처리되지 않았습니다. Claude Code 워커가 켜져 있는지 확인하세요. 처리되면 분석 이력에서 볼 수 있습니다.`;
         }
         return this.queued.status === 'Processing'
             ? `${this.queued.name} 분석 중 — ${this.queued.processedBy || 'Claude Code'}가 최신 메타를 검색하고 있습니다.`
-            : this.isGuestUser
-              ? `${this.queued.name || '요청'} 대기 중 — 보통 1~2분 걸립니다. 화면을 닫았다면 같은 조합으로 다시 요청하면 결과를 볼 수 있습니다.`
-              : `${this.queued.name || '요청'} 대기 중 — 보통 1~2분 걸립니다. 화면을 닫아도 결과는 최근 요청에 남습니다.`;
+            : `${this.queued.name || '요청'} 대기 중 — 보통 1~2분 걸립니다. 화면을 닫아도 완료된 결과는 분석 이력에 남습니다.`;
     }
     get hasRecent() {
         return this.recentRequests.length > 0;
     }
     get recentRows() {
-        return this.recentRequests.map((r) => ({
+        const openId = this.queued?.id;
+        return this.recentRequests.map((r) => {
+            const picks = this.compositionPicks(r.Composition__c, r.Id);
+            return {
             id: r.Id,
             name: r.Name,
             composition: r.Composition__c,
-            score: r.Total_Score__c,
+            picks,
+            noPicks: !picks.length,
+            score: r.Total_Score__c == null ? '' : `${Number(r.Total_Score__c).toFixed(1)}점`,
             status: STATUS_LABELS[r.Status__c] || r.Status__c,
             statusClass: `status status-${(r.Status__c || '').toLowerCase()}`,
+            itemClass: r.Id === openId ? 'recent-item recent-item_open' : 'recent-item',
             created: r.CreatedDate ? new Date(r.CreatedDate).toLocaleString() : ''
-        }));
+            };
+        });
+    }
+    // "탑 / 정글 / 미드 / 원딜 / 서폿" 순서의 조합 문자열 → 라인별 챔피언 아이콘 (데이터에 없는 이름은 글자만)
+    compositionPicks(composition, rowId) {
+        const names = (composition || '').split(' / ');
+        if (names.length !== LANES.length) return [];
+        return LANES.map((lane, i) => {
+            const champ = this.ctx?.byLane[lane]?.find((c) => c.name === names[i]) || this.ctx?.champions.find((c) => c.name === names[i]);
+            return { key: `${rowId}-${lane}`, lane: LANE_LABELS[lane], name: names[i], icon: championIcon(this.ddragonVersion, champ?.ddId) };
+        });
+    }
+    get recentTitle() {
+        return this.isGuestUser ? '분석 이력 (공개 사이트)' : '분석 이력';
+    }
+    get recentHint() {
+        return this.isGuestUser
+            ? '방문자들이 요청해 완료된 분석입니다. [결과 보기]를 누르면 Claude 분석 결과를 다시 볼 수 있습니다.'
+            : '[결과 보기]를 누르면 Claude 분석 결과를 다시 볼 수 있습니다. 대기·실패 건은 상태와 사유가 표시됩니다.';
     }
     get exportDisabled() {
         return !this.ctx;
@@ -450,9 +472,9 @@ export default class LolTeamBuilder extends LightningElement {
     get noData() {
         return !this.loadError;
     }
-    // 방문자는 모두 같은 게스트 계정이라 "내 최근 요청"이 의미 없으므로 숨김
+    // 방문자는 모두 같은 게스트 계정 → 방문자끼리 공유된 완료 분석을 보여 줌 (서버가 완료 건만 반환)
     get showRecent() {
-        return this.isClaudeCodeMode && this.canAnalyze && !this.isGuestUser;
+        return this.isClaudeCodeMode && this.canAnalyze;
     }
     get showGuestNote() {
         return !!this.ctx && !this.canAnalyze;
@@ -683,6 +705,8 @@ export default class LolTeamBuilder extends LightningElement {
 
     handleOpenRequest(event) {
         this.watchRequest(event.currentTarget.dataset.id);
+        // 이력은 리포트 아래에 있으므로 연 결과가 보이도록 리포트 위치로 이동
+        this.template.querySelector('.analysis')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
     }
 
     handleRefreshRecent() {

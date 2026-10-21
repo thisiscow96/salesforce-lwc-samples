@@ -237,9 +237,9 @@ describe('c-lol-team-builder', () => {
         expect(getAnalysisRequest).toHaveBeenCalledTimes(3); // 완료 후 폴링 중단
     });
 
-    it('Claude Code 모드: 실패 상태는 사유를 보여 주고, 최근 요청에서 지난 결과를 열 수 있다', async () => {
+    it('Claude Code 모드: 분석 이력에서 조합(라인별 아이콘)과 지난 결과를 보고, 실패 건은 사유를 보여 준다', async () => {
         getRecentRequests.mockResolvedValue([
-            { Id: 'a01OLD', Name: 'LAR-00007', Status__c: 'Completed', Composition__c: '오른 / 세주아니 / 요네 / 징크스 / 룰루', CreatedDate: '2026-10-19T08:00:00.000Z' },
+            { Id: 'a01OLD', Name: 'LAR-00007', Status__c: 'Completed', Composition__c: '오른 / 세주아니 / 요네 / 징크스 / 룰루', Total_Score__c: 81.13, CreatedDate: '2026-10-19T08:00:00.000Z' },
             { Id: 'a01BAD', Name: 'LAR-00008', Status__c: 'Failed', Composition__c: '사이온 / 뽀삐 / 아리 / 칼리스타 / 유미', CreatedDate: '2026-10-19T09:00:00.000Z' }
         ]);
         getAnalysisRequest.mockImplementation(({ requestId }) =>
@@ -256,10 +256,17 @@ describe('c-lol-team-builder', () => {
         expect(items).toHaveLength(2);
         expect(items[0].textContent).toContain('완료');
         expect(items[1].textContent).toContain('실패');
+        expect($(el, '.recent-title').textContent).toBe('분석 이력');
+        // 조합: 라인 순서대로 챔피언 이름 + Data Dragon 아이콘, 점수
+        const picks = [...items[0].querySelectorAll('.recent-pick')];
+        expect(picks.map((p) => p.textContent)).toEqual(['탑오른', '정글세주아니', '미드요네', '원딜징크스', '서폿룰루']);
+        expect(items[0].querySelector('.recent-icon').src).toContain('/img/champion/Ornn.png');
+        expect(items[0].querySelector('.recent-score').textContent).toBe('81.1점');
 
         $$(el, '.open-request')[0].click();
         await flush();
         expect($(el, '.analysis-text').textContent).toBe('지난 분석');
+        expect($$(el, '.recent-item')[0].className).toContain('recent-item_open'); // 지금 열린 이력 표시
 
         $$(el, '.open-request')[1].click();
         await flush();
@@ -293,7 +300,7 @@ describe('c-lol-team-builder', () => {
         expect(getRecentRequests).not.toHaveBeenCalled();
     });
 
-    it('공개 사이트 방문자: Apex REST로 요청하고(IP별 제한), 최근 요청 목록 대신 공유·횟수 제한 안내를 보여 준다', async () => {
+    it('공개 사이트 방문자: Apex REST로 요청하고(IP별 제한), 공유·횟수 제한 안내와 방문자 분석 이력을 보여 준다', async () => {
         global.fetch = jest.fn(() => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ id: 'a01GUEST' }) }));
         getAnalysisRequest.mockResolvedValue({ Id: 'a01GUEST', Name: 'LAR-00100', Status__c: 'Pending', Composition__c: 'x' });
         const el = createElement('c-lol-team-builder', { is: LolTeamBuilder });
@@ -303,9 +310,10 @@ describe('c-lol-team-builder', () => {
         await flush();
 
         expect($(el, '.analyze-button')).not.toBeNull();
-        expect($(el, '.recent')).toBeNull();
+        expect($(el, '.recent-title').textContent).toBe('분석 이력 (공개 사이트)');
+        expect($(el, '.recent-hint').textContent).toContain('방문자들이 요청해 완료된 분석');
         expect($(el, '.guest-info').textContent).toContain('같은 네트워크(IP)당 10분에 5건');
-        expect(getRecentRequests).not.toHaveBeenCalled();
+        expect(getRecentRequests).toHaveBeenCalledTimes(1);
 
         $(el, '.analyze-button').click();
         await flush();
@@ -317,7 +325,7 @@ describe('c-lol-team-builder', () => {
         expect(Object.keys(JSON.parse(init.body))).toEqual(['picks', 'tiers', 'totalScore', 'categoryPoints']); // ID·숫자만 전송
         expect(submitAnalysisRequest).not.toHaveBeenCalled(); // 방문자는 Aura 경로를 쓰지 않음
         expect($(el, '.waiting-text').textContent).toContain('LAR-00100 대기 중');
-        expect(getRecentRequests).not.toHaveBeenCalled(); // 요청 후에도 목록을 불러오지 않음
+        expect(getRecentRequests).toHaveBeenCalledTimes(2); // 요청 후 이력 새로 고침
         delete global.fetch;
     });
 

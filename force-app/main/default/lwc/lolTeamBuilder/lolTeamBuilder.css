@@ -195,19 +195,63 @@
     font-size: 0.8rem;
 }
 
+.recent-hint {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+/* 이력이 길어져도 리포트 영역을 밀어내지 않게 고정 높이 스크롤 */
+.recent-list {
+    max-height: 26rem;
+    overflow-y: auto;
+}
+
 .recent-item {
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px dashed var(--slds-g-color-border-1, #e5e5e5);
+    border-left: 3px solid transparent;
+}
+
+/* 지금 리포트에 열려 있는 이력 */
+.recent-item_open {
+    background: var(--slds-g-color-brand-base-95, #eef4ff);
+    border-left-color: #0176d3;
+}
+
+.recent-head {
     display: grid;
-    grid-template-columns: 4rem 6rem minmax(0, 1fr) auto auto;
+    grid-template-columns: 4rem 6rem 4rem minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.2rem 0;
-    border-bottom: 1px dashed var(--slds-g-color-border-1, #e5e5e5);
+}
+
+.recent-score {
+    font-weight: 700;
 }
 
 .recent-comp {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.recent-pick {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.recent-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+}
+
+.recent-lane {
+    margin-right: 0.2rem;
+    color: var(--slds-g-color-neutral-base-50, #747474);
+    font-size: 0.7rem;
 }
 
 .status {
@@ -231,8 +275,13 @@
 }
 
 @media (max-width: 480px) {
-    .recent-item {
+    .recent-head {
         grid-template-columns: 4rem minmax(0, 1fr) auto;
+    }
+
+    .recent-score,
+    .recent-date {
+        display: none;
     }
 }
 
