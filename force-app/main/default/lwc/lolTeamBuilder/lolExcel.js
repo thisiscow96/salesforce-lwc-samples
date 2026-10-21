@@ -84,7 +84,6 @@ function criteriaRows(ctx) {
         ['통계 출처', 'lol.ps (프로관전러 P.S) 한국 서버 · 에메랄드+ · Patch 26.20 (1순위) https://lol.ps/statistics / lol.ps에 없는 라인 항목만 MOBA Trainer(Emerald+, u.gg·op.gg 병합) 보충'],
         ['챔피언 정보', 'Riot Data Dragon 16.20.1 (ko_KR)'],
         ['능력치·시너지', 'CC·앞라인·솔킬·주도권·오브젝트 등 0~10은 스킬 구성 기준 정성 평가 (공식 통계 아님)'],
-        ['이 자리 점수', '현재 조합에서 그 라인만 바꿨을 때의 팀 조합 총점(100점). 개인 성능은 PS 점수·티어로 판단'],
         ['수정 방법', 'Setup > Custom Metadata Types > LoL Champion / LoL Synergy / LoL Score Weight에서 값 수정 시 즉시 반영']
     ];
 }

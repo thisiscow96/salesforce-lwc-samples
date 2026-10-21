@@ -41,15 +41,6 @@ const COMBO_COLUMNS = [
 const POOL_COLUMNS = [
     { label: '선호', fieldName: 'star', initialWidth: 60, cellAttributes: { alignment: 'center' } },
     { label: '챔피언', fieldName: 'name', initialWidth: 120, sortable: true },
-    {
-        label: '이 자리 점수',
-        fieldName: 'fitScore',
-        type: 'number',
-        initialWidth: 135,
-        sortable: true,
-        typeAttributes: { minimumFractionDigits: 1 },
-        cellAttributes: { class: { fieldName: 'fitClass' } }
-    },
     { label: 'PS 점수', fieldName: 'psScore', type: 'number', initialWidth: 95, sortable: true, typeAttributes: { minimumFractionDigits: 2 } },
     { label: '꿀챔', fieldName: 'honeyLabel', initialWidth: 70, cellAttributes: { alignment: 'center' } },
     { label: '역할군', fieldName: 'clsLabel', initialWidth: 95 },
@@ -410,28 +401,20 @@ export default class LolTeamBuilder extends LightningElement {
 
     get poolTabs() {
         if (!this.ctx) return [];
-        const team = this.result ? this.result.team : null;
         return LANES.map((lane) => {
             const list = this.ctx.byLane[lane].filter((c) => !this.poolPreferredOnly || c.preferred);
             return {
                 lane,
                 label: `${LANE_LABELS[lane]} (${list.length})`,
-                rows: sortPoolRows(list.map((c) => {
-                    // 현재 조합에서 이 라인만 이 챔피언으로 바꿨을 때의 총점 (다른 라인과 같은 챔피언이면 계산 안 함)
-                    const clash = team && LANES.some((l) => l !== lane && team[l].key === c.key);
-                    const fitScore = team && !clash ? scoreTeam({ ...team, [lane]: c }, this.skills, this.ctx).total : null;
-                    return {
-                        ...c,
-                        star: c.preferred ? '★' : '',
-                        clsLabel: CLASS_LABELS[c.cls],
-                        winRateLabel: percent(c.winRate),
-                        pickRateLabel: percent(c.pickRate),
-                        banRateLabel: percent(c.banRate),
-                        honeyLabel: c.honey ? '🍯' : '',
-                        fitScore,
-                        fitClass: fitScore != null && fitScore > this.result.total ? 'delta-up' : ''
-                    };
-                }), this.poolSortBy, this.poolSortDirection)
+                rows: sortPoolRows(list.map((c) => ({
+                    ...c,
+                    star: c.preferred ? '★' : '',
+                    clsLabel: CLASS_LABELS[c.cls],
+                    winRateLabel: percent(c.winRate),
+                    pickRateLabel: percent(c.pickRate),
+                    banRateLabel: percent(c.banRate),
+                    honeyLabel: c.honey ? '🍯' : ''
+                })), this.poolSortBy, this.poolSortDirection)
             };
         });
     }

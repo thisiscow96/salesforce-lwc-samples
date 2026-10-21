@@ -434,7 +434,7 @@ describe('c-lol-team-builder', () => {
         expect($(el, '.dash-method').textContent).toContain('실제 경기 시간대별 승률이 아닙니다');
     });
 
-    it('전체 픽: 선택 목록에 선호(★)·비선호 픽이 모두 있고, 픽 풀 표에 이 자리 점수·픽률을 보여 주며 선호 필터가 동작한다', async () => {
+    it('전체 픽: 선택 목록에 선호(★)·비선호 픽이 모두 있고, 픽 풀 표에 픽률을 보여 주고 "이 자리 점수" 열은 없으며 선호 필터가 동작한다', async () => {
         const el = await mount();
         const options = pickBox(el, 'MID').options;
         expect(options.length).toBeGreaterThan(40);
@@ -445,7 +445,8 @@ describe('c-lol-team-builder', () => {
         const topRows = tables()[0].data;
         expect(topRows.length).toBeGreaterThan(40);
         expect(topRows.filter((r) => r.star === '★').length).toBe(13); // 팀 선호 탑 픽 13명
-        expect(topRows.find((r) => r.id === 'Malphite_Top').fitScore).toBeGreaterThan(0);
+        expect(topRows.every((r) => !('fitScore' in r))).toBe(true);
+        expect(tables()[0].columns.some((c) => c.label === '이 자리 점수')).toBe(false);
         expect(topRows.some((r) => r.pickRateLabel.endsWith('%'))).toBe(true);
 
         const filter = $(el, '.pool-filter-toggle');
@@ -468,7 +469,7 @@ describe('c-lol-team-builder', () => {
         expect(after).toContain('라인별 후보');
     });
 
-    it('라인별 전체 픽: 이름(가나다)·이 자리 점수·PS 점수 기준으로 정렬하고, 점수 기준과 지표 출처를 표 아래에 표시한다', async () => {
+    it('라인별 전체 픽: 이름(가나다)·PS 점수 기준으로 정렬하고, 점수 기준과 지표 출처를 표 아래에 표시한다', async () => {
         const el = await mount();
         const table = () => $$(el, 'lightning-tabset lightning-datatable.pool-table')[0];
         const sortBy = async (fieldName, sortDirection) => {
@@ -481,11 +482,6 @@ describe('c-lol-team-builder', () => {
         expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b, 'ko')));
         expect(table().sortedBy).toBe('name');
         expect(table().sortedDirection).toBe('asc');
-
-        await sortBy('fitScore', 'desc');
-        const fit = table().data.map((r) => r.fitScore).filter((v) => v != null);
-        expect(fit).toEqual([...fit].sort((a, b) => b - a));
-        expect(table().data.at(-1).fitScore == null || fit.length === table().data.length).toBe(true); // 계산 불가 행은 맨 아래
 
         await sortBy('psScore', 'desc');
         const ps = table().data.map((r) => r.psScore).filter((v) => v != null);
