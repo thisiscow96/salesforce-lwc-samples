@@ -106,6 +106,12 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(guide.contains('조합 승리 플랜 파괴자'), guide);
         Assert.isTrue(guide.contains('9) 타임라인 일관성'), guide);
         Assert.isTrue(prompt.contains('궁극기·코어 아이템은 쓰지 않는다'), prompt);
+        // 마지막 디테일: 저지 불가 상호작용, 오브젝트 시점의 성장 단계, 기만 메커니즘 성립 조건
+        Assert.isTrue(guide.contains('10) 상호작용 확인'), guide);
+        Assert.isTrue(guide.contains('말파이트 R은 저지 불가라 뽀삐 W에 막히지 않음'), guide);
+        Assert.isFalse(guide.contains('오공 E·말파이트 R 돌진을 그 자리에서 끊고'), '틀린 밴 예시 제거');
+        Assert.isTrue(guide.contains('첫 드래곤·첫 유충은 라인전 단계라 캐리는 0~1코어'), guide);
+        Assert.isTrue(guide.contains('11) 기만 메커니즘의 성립 조건'), guide);
         Assert.isTrue(prompt.contains('  스킬 확인: Data Dragon id '), prompt);
         Assert.isTrue(prompt.contains(', 초반 '), '파워 커브 근거: 초반 능력치 포함');
         Assert.isFalse(guide.contains('2명 이하가 보일 때 즉시 후퇴'), '기계적인 인원 체크 제거');
