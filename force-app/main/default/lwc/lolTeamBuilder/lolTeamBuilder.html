@@ -1,15 +1,24 @@
 <template>
-    <lightning-card title={cardTitle} icon-name="standard:team_member">
-        <div slot="actions" class="actions">
-            <lightning-button class="export-button" icon-name="utility:download" label="Excel 다운로드"
-                onclick={handleExport} disabled={exportDisabled}></lightning-button>
-            <template lwc:if={canAnalyze}>
-                <lightning-button class="analyze-button" variant="brand" icon-name="utility:einstein" label={analyzeLabel}
-                    onclick={handleAnalyze} disabled={analyzeDisabled}></lightning-button>
-            </template>
-        </div>
+    <!-- 다크 모노크롬 테마: 히어로 헤더 + 카드 그리드. 이펙트(스크롤 페이드인·카드 glow)는 JS가 .reveal/.glow 요소에 적용 -->
+    <div class="app" onpointermove={handlePointerMove}>
+        <header class="hero">
+            <div class="hero-grid" aria-hidden="true"></div>
+            <div class="hero-inner">
+                <p class="hero-eyebrow">League of Legends · Team Composition</p>
+                <h1 class="hero-title">{cardTitle}</h1>
+                <p class="hero-sub">lol.ps 한국 서버 통계와 조합 기본기로 5인 조합을 점수화하고, Claude가 운영·한타·밴까지 코치 관점으로 분석합니다.</p>
+                <div class="actions">
+                    <template lwc:if={canAnalyze}>
+                        <lightning-button class="analyze-button" variant="brand" icon-name="utility:einstein" label={analyzeLabel}
+                            onclick={handleAnalyze} disabled={analyzeDisabled}></lightning-button>
+                    </template>
+                    <lightning-button class="export-button" icon-name="utility:download" label="Excel 다운로드"
+                        onclick={handleExport} disabled={exportDisabled}></lightning-button>
+                </div>
+            </div>
+        </header>
 
-        <div class="slds-p-horizontal_medium">
+        <div class="content">
             <template lwc:if={loadError}>
                 <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">{loadError}</div>
             </template>
@@ -18,7 +27,7 @@
                 <lightning-layout multiple-rows>
                     <!-- Claude 분석: 분석 요청 버튼 바로 아래 (화면 맨 위) -->
                     <lightning-layout-item size="12" padding="around-small">
-                        <div class="panel analysis">
+                        <div class="panel analysis reveal">
                             <h2 class="panel-title">{analysisTitle}</h2>
                             <template lwc:if={analyzing}>
                                 <div class="analyzing">
@@ -128,7 +137,7 @@
 
                     <!-- 1. 라인별 선택 -->
                     <lightning-layout-item size="12" large-device-size="7" padding="around-small">
-                        <div class="panel">
+                        <div class="panel glow reveal">
                             <h2 class="panel-title">조합 입력</h2>
                             <template for:each={laneRows} for:item="row">
                                 <div key={row.lane} class="lane-row">
@@ -151,7 +160,7 @@
 
                     <!-- 2. 점수 -->
                     <lightning-layout-item size="12" large-device-size="5" padding="around-small">
-                        <div class="panel">
+                        <div class="panel glow reveal">
                             <h2 class="panel-title">조합 점수</h2>
                             <template lwc:if={hasResult}>
                                 <div class="score-head">
@@ -166,7 +175,7 @@
                     <template lwc:if={hasResult}>
                         <!-- 2-1. 조합 대시보드: 실제 통계(lol.ps)와 자체 평가 지수를 구분해 표시 -->
                         <lightning-layout-item size="12" padding="around-small">
-                            <div class="dash">
+                            <div class="dash reveal">
                                 <div class="dash-head">
                                     <div>
                                         <h2 class="dash-title">조합 대시보드</h2>
@@ -178,7 +187,7 @@
                                 </div>
                                 <div class="dash-kpis">
                                     <template for:each={dashKpis} for:item="k">
-                                        <div key={k.key} class="kpi">
+                                        <div key={k.key} class="kpi glow">
                                             <span class={k.tagClass}>{k.tag}</span>
                                             <span class="kpi-label">{k.label}</span>
                                             <span class="kpi-value">{k.value}</span>
@@ -187,29 +196,29 @@
                                     </template>
                                 </div>
                                 <div class="dash-grid dash-grid-wide">
-                                    <div class="dash-card">
+                                    <div class="dash-card glow">
                                         <h3 class="dash-card-title"><span class="kpi-tag real">실제 통계</span> 라인별 전체 픽 승률·픽률 분포와 우리 5픽</h3>
                                         <c-echart class="chart-meta" option={dashMetaOption} height="300px"></c-echart>
                                     </div>
-                                    <div class="dash-card">
+                                    <div class="dash-card glow">
                                         <h3 class="dash-card-title"><span class="kpi-tag index">자체 지수</span> 조합 성향</h3>
                                         <c-echart class="chart-profile" option={dashProfileOption} height="300px"></c-echart>
                                     </div>
                                 </div>
                                 <div class="dash-grid">
-                                    <div class="dash-card">
+                                    <div class="dash-card glow">
                                         <h3 class="dash-card-title"><span class="kpi-tag index">자체 지수</span> 오브젝트 장악 (라인 주도권 + 정글 장악력)</h3>
                                         <c-echart class="chart-objectives" option={dashObjectiveOption} height="190px"></c-echart>
                                     </div>
-                                    <div class="dash-card">
+                                    <div class="dash-card glow">
                                         <h3 class="dash-card-title"><span class="kpi-tag index">자체 지수</span> 라인전 킬 압박</h3>
                                         <c-echart class="chart-lanes" option={dashLaneOption} height="190px"></c-echart>
                                     </div>
-                                    <div class="dash-card">
+                                    <div class="dash-card glow">
                                         <h3 class="dash-card-title"><span class="kpi-tag index">자체 지수</span> 시간대별 전투력</h3>
                                         <c-echart class="chart-power" option={dashPowerOption} height="220px"></c-echart>
                                     </div>
-                                    <div class="dash-card">
+                                    <div class="dash-card glow">
                                         <h3 class="dash-card-title"><span class="kpi-tag index">자체 지수</span> 딜 구성</h3>
                                         <c-echart class="chart-damage" option={dashDamageOption} height="220px"></c-echart>
                                     </div>
@@ -229,7 +238,7 @@
 
                         <!-- 3. 항목별 근거 -->
                         <lightning-layout-item size="12" large-device-size="7" padding="around-small">
-                            <div class="panel">
+                            <div class="panel glow reveal">
                                 <h2 class="panel-title">항목별 점수와 근거</h2>
                                 <template for:each={categories} for:item="c">
                                     <div key={c.key} class="category" title={c.description}>
@@ -246,7 +255,7 @@
 
                         <!-- 4. 왜 좋은가 / 약점 / 교체 -->
                         <lightning-layout-item size="12" large-device-size="5" padding="around-small">
-                            <div class="panel">
+                            <div class="panel glow reveal">
                                 <h2 class="panel-title">이 조합이 좋은 이유</h2>
                                 <ul class="reasons strengths">
                                     <template for:each={strengths} for:item="s">
@@ -285,7 +294,7 @@
 
                     <!-- 6. 조합표 -->
                     <lightning-layout-item size="12" padding="around-small">
-                        <div class="panel">
+                        <div class="panel glow reveal">
                             <div class="panel-bar">
                                 <h2 class="panel-title">추천 조합표 <span class="search-summary slds-text-color_weak">{searchSummary}</span></h2>
                                 <div class="panel-bar-actions">
@@ -306,7 +315,7 @@
 
                     <!-- 7. 라인별 픽 풀 -->
                     <lightning-layout-item size="12" padding="around-small">
-                        <div class="panel">
+                        <div class="panel glow reveal">
                             <div class="panel-bar">
                                 <h2 class="panel-title">라인별 전체 픽 (Patch 26.20 통계) <span class="slds-text-color_weak">★ 팀 선호 · 이 자리 점수 = 현재 조합에서 그 라인만 바꿨을 때 총점</span></h2>
                                 <lightning-input class="pool-filter-toggle" type="toggle" label="선호 픽만" message-toggle-active=""
@@ -354,5 +363,5 @@
                 <lightning-spinner alternative-text="불러오는 중" size="medium"></lightning-spinner>
             </template>
         </div>
-    </lightning-card>
+    </div>
 </template>

@@ -1,65 +1,361 @@
 /*
- * 블랙 & 화이트 테마: 화면 전체를 흰 바탕 + 블랙/그레이 명도 단계로 통일한다.
- * 강조는 색이 아니라 명도(진함 = 강함·선택됨)로 표현하고, 오류 안내만 SLDS 기본 경고색을 유지한다.
+ * 다크 모노크롬 테마 (Vercel·Linear 스타일)
+ * - 배경 #0A0A0A, 카드 #111 ~ #1A1A1A로 층 구분, 테두리 rgba(255,255,255,0.08)
+ * - 텍스트 #FAFAFA / 보조 #A1A1A1 / 비활성 #525252. 포인트 컬러 없음: 강조는 흰색·굵기·크기 대비로만
+ * - 이펙트는 200~600ms, ease-out. bounce 없음. 움직임 줄이기 설정이면 끔
+ * - 오류 안내만 SLDS 기본 경고색 유지 (의미 전달용)
  * 차트 색상은 lolPrediction.js의 COLORS와 같은 값을 쓴다.
  */
 :host {
-    --lol-ink: #111111;
-    --lol-ink-2: #3d3d3d;
-    --lol-mid: #8a8a8a;
-    --lol-light: #c9c9c9;
-    --lol-line: #e6e6e6;
-    --lol-subtle: #f6f6f6;
-    --lol-paper: #ffffff;
-    --lol-muted: #6b6b6b;
+    --bg: #0a0a0a;
+    --surface-1: #111111;
+    --surface-2: #161616;
+    --surface-3: #1a1a1a;
+    --text: #fafafa;
+    --text-2: #a1a1a1;
+    --text-3: #525252;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-strong: rgba(255, 255, 255, 0.16);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --font: 'Pretendard', 'Pretendard Variable', 'Inter', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
 
-    /* Salesforce 기본 컴포넌트(버튼·토글·체크박스·탭·표 링크)의 파란 브랜드색을 블랙으로 */
-    --slds-c-button-brand-color-background: var(--lol-ink);
-    --slds-c-button-brand-color-border: var(--lol-ink);
-    --slds-c-button-brand-color-background-hover: var(--lol-ink-2);
-    --slds-c-button-brand-color-border-hover: var(--lol-ink-2);
-    --slds-c-button-brand-color-background-active: #000000;
-    --slds-c-button-brand-text-color: var(--lol-paper);
-    --slds-c-button-brand-text-color-hover: var(--lol-paper);
-    --slds-c-button-neutral-color-border: var(--lol-light);
-    --slds-c-button-text-color: var(--lol-ink);
-    --slds-c-button-text-color-hover: var(--lol-ink-2);
-    --slds-c-checkbox-toggle-color-background-checked: var(--lol-ink);
-    --slds-c-checkbox-toggle-color-border-checked: var(--lol-ink);
-    --slds-c-checkbox-color-background-checked: var(--lol-ink);
-    --slds-c-checkbox-color-border-checked: var(--lol-ink);
-    --slds-c-icon-color-background: var(--lol-ink);
-    --slds-c-card-color-border: var(--lol-line);
-    --lwc-brandPrimary: var(--lol-ink);
-    --lwc-brandAccessible: var(--lol-ink);
-    --lwc-brandAccessibleActive: #000000;
-    --lwc-colorTextLink: var(--lol-ink);
-    --lwc-colorTextLinkHover: var(--lol-ink-2);
-    --lwc-colorBorderSelection: var(--lol-ink);
-    --slds-g-color-brand-base-50: var(--lol-ink);
-    --slds-g-color-brand-base-60: var(--lol-ink);
-    --dxp-g-brand: var(--lol-ink);
-    color: var(--lol-ink);
+    /*
+     * Salesforce 기본 컴포넌트(버튼·입력·콤보박스·표·탭·토글)는 내부 CSS를 직접 바꿀 수 없어
+     * 디자인 토큰(CSS 변수)으로 다크 색을 넘긴다. Lightning Experience(--lwc-*), SLDS 2(--slds-g-*),
+     * Experience Cloud LWR(--dxp-*) 세 체계를 함께 지정한다.
+     */
+    --slds-c-button-brand-color-background: var(--text);
+    --slds-c-button-brand-color-border: var(--text);
+    --slds-c-button-brand-text-color: var(--bg);
+    --slds-c-button-brand-color-background-hover: var(--bg);
+    --slds-c-button-brand-color-border-hover: var(--text);
+    --slds-c-button-brand-text-color-hover: var(--text);
+    --slds-c-button-brand-color-background-active: var(--bg);
+    --slds-c-button-neutral-color-background: var(--bg);
+    --slds-c-button-neutral-color-border: var(--line-strong);
+    --slds-c-button-neutral-color-background-hover: var(--text);
+    --slds-c-button-neutral-color-border-hover: var(--text);
+    --slds-c-button-text-color: var(--text);
+    --slds-c-button-text-color-hover: var(--bg);
+    --slds-c-button-radius-border: var(--radius-sm);
+    --slds-c-checkbox-toggle-color-background: var(--surface-3);
+    --slds-c-checkbox-toggle-color-border: var(--line-strong);
+    --slds-c-checkbox-toggle-color-background-checked: var(--text);
+    --slds-c-checkbox-toggle-color-border-checked: var(--text);
+    --slds-c-checkbox-toggle-switch-color-background: var(--text-2);
+    --slds-c-checkbox-toggle-switch-color-background-checked: var(--bg);
+    --slds-c-checkbox-color-background: var(--bg);
+    --slds-c-checkbox-color-border: var(--line-strong);
+    --slds-c-checkbox-color-background-checked: var(--text);
+    --slds-c-checkbox-color-border-checked: var(--text);
+    --slds-c-checkbox-mark-color-foreground: var(--bg);
+    --slds-c-input-color-background: var(--surface-1);
+    --slds-c-input-color-border: var(--line-strong);
+    --slds-c-input-text-color: var(--text);
+    --slds-c-combobox-color-background: var(--surface-1);
+    --slds-c-icon-color-foreground-default: var(--text-2);
+    /* 사이트가 :root에서 밝은 회색으로 미리 계산해 두는 변수 → 여기서 직접 덮어써야 함 */
+    --slds-c-listbox-option-color-background-hover: var(--surface-3);
+    --slds-c-listbox-option-color-background-focus: var(--surface-3);
+    --slds-c-listbox-option-color-hover: var(--text);
+    --slds-c-listbox-option-text-color: var(--text);
+    --slds-c-listbox-option-text-color-hover: var(--text);
+    --slds-c-dropdown-color-background: var(--surface-1);
+    --slds-c-dropdown-color-border: var(--line-strong);
+    /* 포커스 링: 파란색 대신 은은한 흰색 */
+    --slds-g-shadow-outline-focus-1: 0 0 0 2px rgba(255, 255, 255, 0.28);
+    --slds-g-shadow-outset-focus-1: 0 0 0 2px rgba(255, 255, 255, 0.28);
+    --slds-g-shadow-inset-focus-1: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    --slds-g-shadow-inset-inverse-focus-1: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    --slds-g-color-border-base-1: var(--line);
+    --slds-g-color-border-base-4: var(--line-strong);
+    --lwc-colorBorderInputActive: var(--text);
+    --lwc-shadowButtonFocus: 0 0 0 2px rgba(255, 255, 255, 0.28);
+    --lwc-shadowButtonFocusInverse: 0 0 0 2px rgba(255, 255, 255, 0.28);
+    --lwc-colorBackgroundDropdown: var(--surface-1);
+    /* Lightning Experience(SLDS 2) 공용 훅: :root에서 밝은 색으로 미리 계산되므로 여기서 직접 지정 */
+    --slds-s-table-color: var(--text);
+    --slds-s-table-header-color: var(--text-2);
+    --slds-s-table-header-color-background: var(--surface-2);
+    --slds-s-table-header-color-background-hover: var(--surface-3);
+    --slds-s-table-header-color-background-selected: var(--surface-3);
+    --slds-s-table-row-color-background-selected: var(--surface-3);
+    --slds-s-table-resize-color: var(--line-strong);
+    --slds-s-table-resize-color-active: var(--text);
+    --_slds-c-datatable-color-border: var(--line);
+    --_slds-c-datatable-row-color-border-hover: var(--line-strong);
+    --_slds-c-datatable-row-shadow-hover: none;
+    --slds-c-tabs-item-text-color: var(--text-2);
+    --slds-c-tabs-item-text-color-active: var(--text);
+    --slds-c-tabs-item-color-border-active: var(--text);
+    --slds-c-tabs-item-color-border-hover: var(--text-3);
+    --slds-c-tabs-list-color-border: var(--line);
+    --slds-s-navigation-color: var(--text-2);
+    --slds-s-navigation-color-hover: var(--text);
+    --slds-s-navigation-color-active: var(--text);
+    --slds-s-navigation-color-background: transparent;
+    --slds-s-navigation-color-background-active: transparent;
+    --slds-s-navigation-color-background-hover: transparent;
+    --slds-s-navigation-color-border: var(--line);
+    --slds-s-navigation-color-border-hover: var(--text-3);
+    --slds-s-link-color: var(--text);
+    --slds-s-link-color-hover: var(--text-2);
+    --slds-s-link-color-active: var(--text);
+    --slds-s-link-color-focus: var(--text);
+    --slds-s-link-outline-color: var(--text-2);
+    --slds-s-input-color: var(--text);
+    --slds-s-input-color-background: var(--surface-1);
+    --slds-s-input-color-background-disabled: var(--surface-2);
+    --slds-s-input-color-border: var(--line-strong);
+    --slds-s-input-color-border-focus: var(--text);
+    --slds-s-input-color-border-checked: var(--text);
+    --slds-s-input-color-focus: var(--text);
+    --slds-s-input-color-placeholder: var(--text-3);
+    --slds-s-input-shadow-focus: 0 0 0 2px rgba(255, 255, 255, 0.28);
+    --slds-s-label-color: var(--text-2);
+    --slds-s-button-color: var(--text);
+    --slds-s-button-color-hover: var(--bg);
+    --slds-s-button-color-background: var(--bg);
+    --slds-s-button-color-background-hover: var(--text);
+    --slds-s-button-color-background-active: var(--text);
+    --slds-s-button-color-background-focus: var(--bg);
+    --slds-s-button-color-border: var(--line-strong);
+    --slds-s-button-color-border-hover: var(--text);
+    --slds-s-button-shadow-focus: 0 0 0 2px rgba(255, 255, 255, 0.28);
+    --slds-s-button-shadow-hover: none;
+    --slds-s-button-brand-shadow-hover: none;
+    --slds-s-button-radius-border: var(--radius-sm);
+    --slds-s-icon-color-foreground: var(--text-2);
+    --slds-s-container-color: var(--surface-1);
+    --slds-s-container-color-border: var(--line);
+    --dxp-s-dropdown-color-background: var(--surface-1);
+    --dxp-s-dropdown-text-color: var(--text);
+    --dxp-s-dropdown-color-background-hover: var(--surface-3);
+    --dxp-s-dropdown-text-color-hover: var(--text);
+
+    --lwc-brandPrimary: var(--text);
+    --lwc-brandAccessible: var(--text);
+    --lwc-brandAccessibleActive: var(--text);
+    --lwc-brandTextLink: var(--text);
+    --lwc-brandTextLinkActive: var(--text-2);
+    --lwc-colorTextLink: var(--text);
+    --lwc-colorTextLinkHover: var(--text-2);
+    --lwc-colorBorderSelection: var(--text);
+    --lwc-colorBackground: var(--surface-1);
+    --lwc-colorBackgroundAlt: var(--surface-1);
+    --lwc-colorBackgroundAlt2: var(--surface-2);
+    --lwc-colorBackgroundRowHover: var(--surface-3);
+    --lwc-colorBackgroundRowSelected: var(--surface-3);
+    --lwc-colorBackgroundHighlight: var(--surface-3);
+    --lwc-colorBackgroundInput: var(--surface-1);
+    --lwc-colorBackgroundInputDisabled: var(--surface-2);
+    --lwc-colorBackgroundSelection: var(--surface-3);
+    --lwc-colorBackgroundDropdownItemHover: var(--surface-3);
+    --lwc-colorBackgroundButtonDefault: var(--bg);
+    --lwc-colorBackgroundButtonDefaultHover: var(--text);
+    --lwc-colorBorder: var(--line);
+    --lwc-colorBorderSeparatorAlt: var(--line);
+    --lwc-colorBorderInput: var(--line-strong);
+    --lwc-colorBorderButtonDefault: var(--line-strong);
+    --lwc-colorTextDefault: var(--text);
+    --lwc-colorTextWeak: var(--text-2);
+    --lwc-colorTextLabel: var(--text-2);
+    --lwc-colorTextPlaceholder: var(--text-3);
+    --lwc-colorTextIconDefault: var(--text-2);
+    --lwc-colorTextButtonDefault: var(--text);
+    --lwc-colorTextButtonDefaultHover: var(--bg);
+    --lwc-colorTextTabLabel: var(--text-2);
+    --lwc-colorTextTabLabelSelected: var(--text);
+    --lwc-colorTextTabLabelHover: var(--text);
+    --lwc-colorTextActionLabel: var(--text-2);
+    --lwc-colorTextActionLabelActive: var(--text);
+    --lwc-buttonBorderRadius: var(--radius-sm);
+    --lwc-borderRadiusMedium: var(--radius-sm);
+
+    --slds-g-color-surface-1: var(--surface-1);
+    --slds-g-color-surface-2: var(--surface-2);
+    --slds-g-color-surface-container-1: var(--surface-1);
+    --slds-g-color-surface-container-2: var(--surface-2);
+    --slds-g-color-surface-container-3: var(--surface-3);
+    --slds-g-color-on-surface-1: var(--text-2);
+    --slds-g-color-on-surface-2: var(--text);
+    --slds-g-color-on-surface-3: var(--text);
+    --slds-g-color-border-1: var(--line);
+    --slds-g-color-border-2: var(--line-strong);
+    --slds-g-color-neutral-base-100: var(--surface-1);
+    --slds-g-color-neutral-base-95: var(--surface-2);
+    --slds-g-color-neutral-base-90: var(--surface-3);
+    --slds-g-color-neutral-base-30: var(--text-2);
+    --slds-g-color-neutral-base-10: var(--text);
+    --slds-g-color-brand-base-50: var(--text);
+    --slds-g-color-brand-base-60: var(--text);
+    --slds-g-color-accent-1: var(--text);
+    --slds-g-color-accent-2: var(--text);
+    --slds-g-color-accent-container-1: var(--text);
+
+    --dxp-g-root: var(--bg);
+    --dxp-g-root-contrast: var(--text);
+    --dxp-g-brand: var(--text);
+    --dxp-g-brand-contrast: var(--bg);
+    --dxp-g-neutral: var(--surface-3);
+    --dxp-g-neutral-contrast: var(--text);
+    --dxp-s-form-element-color-background: var(--surface-1);
+    --dxp-s-form-element-text-color: var(--text);
+    --dxp-s-form-element-color-border: var(--line-strong);
+
+    display: block;
+    color: var(--text);
+    font-family: var(--font);
 }
 
+.app {
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 12px;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ===== 히어로: 옅은 그리드 패턴 + 흰→회색 그라데이션 헤드라인 ===== */
+.hero {
+    position: relative;
+    padding: 4rem 2rem 3rem;
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+}
+.hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    /* 가운데만 보이고 가장자리로 갈수록 사라지게 */
+    -webkit-mask-image: radial-gradient(ellipse 70% 80% at 50% 0%, #000 30%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 80% at 50% 0%, #000 30%, transparent 75%);
+    pointer-events: none;
+}
+.hero-inner {
+    position: relative;
+    max-width: 52rem;
+}
+.hero-eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--text-2);
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.02);
+    margin-bottom: 1.25rem;
+}
+.hero-title {
+    font-size: clamp(2.25rem, 5vw, 3.75rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    background: linear-gradient(180deg, #fafafa 0%, #fafafa 35%, #8a8a8a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+.hero-sub {
+    margin-top: 1rem;
+    max-width: 38rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-2);
+}
 .actions {
     display: flex;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
 }
 
-.panel {
+/* 버튼 hover: 배경 반전(검↔흰). 색 자체는 :host의 버튼 토큰, 여기서는 전환 시간만 */
+.actions lightning-button,
+.panel-bar-actions lightning-button,
+.swap lightning-button {
+    transition: transform 200ms var(--ease);
+}
+
+.content {
+    padding: 1.5rem 1rem 2rem;
+}
+
+/* ===== 패널 공통 ===== */
+.panel,
+.dash {
+    position: relative;
     height: 100%;
-    padding: 0.875rem 1rem;
-    border: 1px solid var(--lol-line);
-    border-radius: 0.625rem;
-    background: var(--lol-paper);
+    padding: 1.25rem 1.375rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface-1);
+    transition: border-color 300ms var(--ease);
+}
+.panel:hover,
+.dash:hover {
+    border-color: var(--line-strong);
+}
+
+/* 스크롤 페이드인: 아래에서 살짝 올라오며 나타남 (0.6s ease-out) */
+.reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+        opacity 600ms var(--ease),
+        transform 600ms var(--ease),
+        border-color 300ms var(--ease);
+}
+.reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* 마우스를 따라다니는 은은한 흰색 radial glow (JS가 --mx/--my 갱신) */
+.glow {
+    position: relative;
+    isolation: isolate;
+}
+.glow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, -200px), rgba(255, 255, 255, 0.06), transparent 45%);
+    opacity: 0;
+    transition: opacity 400ms var(--ease);
+    pointer-events: none;
+    z-index: -1;
+}
+.glow:hover::before {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+    .glow::before {
+        display: none;
+    }
 }
 
 .panel-title {
-    font-size: 0.9375rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 0.875rem;
 }
 
 .panel-bar {
@@ -67,7 +363,7 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .panel-bar-actions {
@@ -81,126 +377,165 @@
     font-weight: 400;
     font-size: 0.75rem;
     margin-left: 0.5rem;
-    color: var(--lol-muted);
+    color: var(--text-3);
 }
 
-/* 라인 입력: 라인 | 챔피언 | 실력 | 고정, 아래 줄에 챔피언 정보 */
+/* SLDS 보조 글자색을 테마 회색으로 (컴포넌트 템플릿 안의 요소만 해당) */
+.slds-text-color_weak {
+    color: var(--text-2) !important;
+}
+
+/* ===== 라인 입력: 라인 | 챔피언 | 실력 | 고정, 아래 줄에 챔피언 정보 ===== */
 .lane-row {
     display: grid;
     grid-template-columns: 3rem minmax(0, 1.6fr) minmax(0, 1fr) 4rem;
     align-items: center;
-    gap: 0.25rem 0.5rem;
-    padding: 0.4rem 0;
-    border-bottom: 1px solid var(--lol-line);
+    gap: 0.375rem 0.625rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--line);
+}
+.lane-row:last-of-type {
+    border-bottom: 0;
 }
 
 .lane-label {
-    font-weight: 700;
+    font-weight: 600;
+    color: var(--text);
 }
 
 .lane-info {
     grid-column: 2 / -1;
     font-size: 0.75rem;
-    color: var(--lol-muted);
+    color: var(--text-3) !important;
 }
 
+/* ===== 점수 ===== */
 .score-head {
     display: flex;
     align-items: baseline;
-    gap: 0.25rem;
+    gap: 0.375rem;
 }
 
 .total {
-    font-size: 2.5rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    background: linear-gradient(180deg, #fafafa 30%, #8a8a8a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* 등급: 높을수록 진하게 */
+/* 등급: 높을수록 밝게 */
 .grade {
     margin-left: auto;
-    padding: 0.1rem 0.75rem;
-    border-radius: 1rem;
+    padding: 0.125rem 0.75rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-size: 0.8125rem;
     font-weight: 700;
-    color: var(--lol-paper);
-    background: var(--lol-mid);
+    color: var(--text-2);
+    background: transparent;
 }
-
 .grade-s {
-    background: var(--lol-ink);
+    color: var(--bg);
+    background: var(--text);
+    border-color: var(--text);
 }
-
 .grade-a {
-    background: var(--lol-ink-2);
+    color: var(--text);
+    border-color: var(--text);
 }
-
-.grade-b {
-    background: var(--lol-mid);
-}
-
 .grade-c {
-    color: var(--lol-ink);
-    background: var(--lol-light);
+    color: var(--text-3);
 }
 
+/* ===== 항목별 점수 ===== */
 .category {
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.875rem;
 }
 
 .category-head {
     display: flex;
     justify-content: space-between;
-    font-size: 0.8rem;
+    font-size: 0.8125rem;
+    color: var(--text-2);
+    margin-bottom: 0.375rem;
 }
 
 .category-points {
-    font-weight: 700;
+    font-weight: 600;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
 }
 
 .bar {
-    height: 0.375rem;
-    border-radius: 0.2rem;
-    background: var(--lol-subtle);
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
     overflow: hidden;
 }
 
 .bar-fill {
     height: 100%;
-    background: var(--lol-ink);
+    border-radius: 999px;
+    background: linear-gradient(90deg, #737373, #fafafa);
+    transition: width 600ms var(--ease);
 }
 
 .category-detail {
+    margin-top: 0.25rem;
     font-size: 0.72rem;
-    color: var(--lol-muted);
+    color: var(--text-3) !important;
 }
 
 .reasons {
-    list-style: disc;
-    padding-left: 1.1rem;
-    font-size: 0.8rem;
+    list-style: none;
+    padding-left: 0;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--text-2);
+}
+.reasons li {
+    position: relative;
+    padding-left: 1rem;
+    margin-bottom: 0.25rem;
+}
+.reasons li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 6px;
+    height: 1px;
+    background: var(--text);
+}
+.weaknesses li::before {
+    background: var(--text-3);
 }
 
-.strengths li::marker {
-    color: var(--lol-ink);
+.plan {
+    font-size: 0.8125rem;
+    color: var(--text-2);
 }
 
-.weaknesses li::marker {
-    color: var(--lol-light);
-}
-
-/* 점수가 오르는 교체·조합: 초록 대신 굵은 블랙 */
+/* 점수가 오르는 교체·조합: 색 대신 흰색 + 굵기 */
 .delta-up {
-    color: var(--lol-ink);
-    font-weight: 800;
+    color: var(--text) !important;
+    font-weight: 700;
 }
 
 .swap {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    font-size: 0.8125rem;
+    color: var(--text-2);
+    padding: 0.25rem 0;
 }
 
+/* ===== Claude 분석 ===== */
 .analyzing {
     position: relative;
     min-height: 3rem;
@@ -208,38 +543,47 @@
     align-items: center;
 }
 
+.analysis {
+    background: var(--surface-1);
+}
+
 .analysis-text {
     white-space: pre-wrap;
-    line-height: 1.6;
-    font-size: 0.85rem;
+    line-height: 1.7;
+    font-size: 0.875rem;
+    color: var(--text-2);
+}
+
+.analysis-meta {
+    font-size: 0.75rem;
 }
 
 .sources {
     list-style: decimal;
     padding-left: 1.25rem;
     font-size: 0.75rem;
+    color: var(--text-3);
 }
 
-.sources a {
-    color: var(--lol-ink);
+.sources a,
+.basis a {
+    color: var(--text);
     text-decoration: underline;
-    text-decoration-color: var(--lol-light);
-    text-underline-offset: 2px;
+    text-decoration-color: var(--text-3);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 200ms var(--ease);
+}
+.sources a:hover,
+.basis a:hover {
+    text-decoration-color: var(--text);
 }
 
 .table {
     max-height: 26rem;
     overflow: auto;
-}
-
-@media (max-width: 480px) {
-    .lane-row {
-        grid-template-columns: 2.5rem minmax(0, 1fr) 3.5rem;
-    }
-
-    .lane-row .tier {
-        grid-column: 2 / 3;
-    }
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    margin-top: 0.75rem;
 }
 
 .waiting {
@@ -248,250 +592,270 @@
     align-items: center;
     min-height: 3rem;
     margin-bottom: 0.5rem;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: var(--radius-sm) !important;
 }
 
 .waiting-text {
     padding-left: 2.5rem;
     font-size: 0.85rem;
+    color: var(--text-2);
 }
 
 /* ===== 분석 이력 ===== */
+.recent {
+    border-top: 1px solid var(--line);
+    padding-top: 1rem;
+}
 .recent-hint {
     font-size: 0.75rem;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
 }
 
 /* 이력이 길어져도 리포트 영역을 밀어내지 않게 고정 높이 스크롤 */
 .recent-list {
-    font-size: 0.8rem;
+    font-size: 0.8125rem;
     max-height: 26rem;
     overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
 }
 
 .recent-item {
-    padding: 0.5rem 0.625rem;
-    border-bottom: 1px solid var(--lol-line);
-    border-left: 3px solid transparent;
+    padding: 0.75rem 0.875rem;
+    border-bottom: 1px solid var(--line);
+    border-left: 2px solid transparent;
+    transition: background-color 200ms var(--ease);
+}
+.recent-item:last-child {
+    border-bottom: 0;
+}
+.recent-item:hover {
+    background: var(--surface-2);
 }
 
 /* 지금 리포트에 열려 있는 이력 */
 .recent-item_open {
-    background: var(--lol-subtle);
-    border-left-color: var(--lol-ink);
+    background: var(--surface-3);
+    border-left-color: var(--text);
 }
 
 .recent-head {
     display: grid;
     grid-template-columns: 4rem 6rem 4rem minmax(0, 1fr) auto;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
+}
+
+.recent-name {
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
 }
 
 .recent-score {
     font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.recent-date {
+    font-size: 0.75rem;
 }
 
 .recent-comp {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.25rem 0.75rem;
-    margin-top: 0.25rem;
+    gap: 0.375rem 1rem;
+    margin-top: 0.5rem;
+    color: var(--text);
 }
 
 .recent-pick {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.375rem;
 }
 
 .recent-icon {
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 50%;
-    filter: grayscale(0.15);
+    border: 1px solid var(--line-strong);
+    filter: grayscale(0.2);
 }
 
 .recent-lane {
-    margin-right: 0.2rem;
-    color: var(--lol-muted);
+    margin-right: 0.25rem;
+    color: var(--text-3);
     font-size: 0.7rem;
 }
 
-/* 상태: 완료 = 블랙, 분석 중 = 블랙 테두리, 대기 = 그레이, 실패 = 연한 바탕 */
+/* 상태: 완료 = 흰색, 분석 중 = 흰 테두리, 대기·실패 = 어두운 회색 */
 .status {
-    padding: 0 0.4rem;
-    border: 1px solid transparent;
-    border-radius: 0.6rem;
+    padding: 0.0625rem 0.5rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
     text-align: center;
-    font-size: 0.72rem;
-    color: var(--lol-paper);
-    background: var(--lol-mid);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--text-2);
+    background: transparent;
 }
-
 .status-completed {
-    background: var(--lol-ink);
+    color: var(--bg);
+    background: var(--text);
+    border-color: var(--text);
 }
-
 .status-processing {
-    color: var(--lol-ink);
-    background: var(--lol-paper);
-    border-color: var(--lol-ink);
+    color: var(--text);
+    border-color: var(--text);
 }
-
 .status-failed {
-    color: var(--lol-ink);
-    background: var(--lol-subtle);
-    border-color: var(--lol-light);
-}
-
-@media (max-width: 480px) {
-    .recent-head {
-        grid-template-columns: 4rem minmax(0, 1fr) auto;
-    }
-
-    .recent-score,
-    .recent-date {
-        display: none;
-    }
+    color: var(--text-3);
 }
 
 /* ===== 분석 리포트: 섹션 제목 + 라인별 카드 ===== */
-.analysis {
-    border-color: var(--lol-ink);
-}
-
 .report-section {
-    margin-top: 0.875rem;
+    margin-top: 1.75rem;
 }
 
 .report-title {
-    font-size: 0.95rem;
+    font-size: 1.125rem;
     font-weight: 700;
-    padding: 0.3rem 0.625rem;
-    color: var(--lol-paper);
-    background: var(--lol-ink);
-    border-radius: 0.375rem;
-    margin-bottom: 0.4rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    padding-bottom: 0.625rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line);
 }
 
 .report-groups {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 0.5rem;
-    margin-top: 0.35rem;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
 }
 
 .report-group {
-    border: 1px solid var(--lol-line);
-    border-radius: 0.5rem;
-    padding: 0.5rem 0.65rem;
-    background: var(--lol-paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 0.875rem 1rem;
+    background: var(--surface-2);
 }
 
 .report-sub {
-    font-weight: 700;
-    color: var(--lol-ink);
-    padding-bottom: 0.25rem;
-    margin-bottom: 0.25rem;
-    border-bottom: 1px solid var(--lol-line);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
 }
 
 .report-bullet,
 .report-para {
     font-size: 0.85rem;
-    line-height: 1.6;
+    line-height: 1.7;
+    color: var(--text-2);
 }
 
 .report-bullet {
     position: relative;
-    padding-left: 0.9rem;
+    padding-left: 1rem;
 }
 
 .report-bullet::before {
     content: '';
     position: absolute;
-    left: 0.2rem;
-    top: 0.65em;
-    width: 0.3rem;
-    height: 0.3rem;
-    border-radius: 50%;
-    background: var(--lol-mid);
+    left: 0.125rem;
+    top: 0.82em;
+    width: 6px;
+    height: 1px;
+    background: var(--text-3);
 }
 
-/* ===== 조합 대시보드: 다른 패널과 같은 흰 카드 ===== */
+/* ===== 조합 대시보드 ===== */
 .dash {
-    background: var(--lol-paper);
-    border: 1px solid var(--lol-line);
-    border-radius: 0.625rem;
-    padding: 1rem;
-    color: var(--lol-ink);
+    padding: 1.5rem;
 }
 .dash-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
 }
 .dash-title {
-    font-size: 1.125rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--lol-ink);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    background: linear-gradient(180deg, #fafafa 40%, #8a8a8a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 .dash-sub {
-    color: var(--lol-muted);
+    color: var(--text-2);
     font-size: 0.75rem;
-    margin-top: 0.125rem;
+    line-height: 1.6;
+    margin-top: 0.375rem;
 }
 .dash-kpis {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 .kpi {
     display: flex;
     flex-direction: column;
-    background: var(--lol-subtle);
-    border: 1px solid var(--lol-line);
-    border-left: 3px solid var(--lol-ink);
-    border-radius: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    gap: 0.125rem;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1rem 1.125rem;
+    transition: border-color 300ms var(--ease);
+}
+.kpi:hover {
+    border-color: var(--line-strong);
 }
 .kpi-label {
-    color: var(--lol-muted);
+    color: var(--text-2);
     font-size: 0.75rem;
 }
 .kpi-value {
-    color: var(--lol-ink);
-    font-size: 1.25rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    color: var(--text);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
 }
 .kpi-sub {
-    color: var(--lol-ink-2);
+    color: var(--text-3);
     font-size: 0.75rem;
 }
 .dash-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 .dash-card {
-    background: var(--lol-paper);
-    border: 1px solid var(--lol-line);
-    border-radius: 0.5rem;
-    padding: 0.625rem 0.75rem 0.25rem;
-    margin-bottom: 0.5rem;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1rem 1.125rem 0.5rem;
+    margin-bottom: 0.75rem;
     min-width: 0;
+    transition: border-color 300ms var(--ease);
+}
+.dash-card:hover {
+    border-color: var(--line-strong);
 }
 .dash-grid .dash-card {
     margin-bottom: 0;
 }
 .dash-card-title {
-    color: var(--lol-ink);
+    color: var(--text);
     font-size: 0.8125rem;
-    font-weight: 700;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
 }
 @media (max-width: 48em) {
     .dash-kpis,
@@ -500,81 +864,129 @@
     }
 }
 
-/* 픽 풀 표 아래: 점수 기준·지표 출처 */
+/* ===== 픽 풀 표 아래: 점수 기준·지표 출처 ===== */
 .basis {
-    border-top: 1px solid var(--lol-line);
-    padding-top: 0.5rem;
+    border-top: 1px solid var(--line);
+    padding-top: 1rem;
     font-size: 0.8125rem;
 }
 .basis-title {
-    font-weight: 700;
-    margin-bottom: 0.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.375rem;
 }
 .basis-list {
-    list-style: disc;
-    padding-left: 1.25rem;
-    color: var(--lol-ink-2);
+    list-style: none;
+    padding-left: 0;
+    color: var(--text-2);
+    line-height: 1.6;
 }
 .basis-list li {
-    margin-bottom: 0.25rem;
+    position: relative;
+    padding-left: 1rem;
+    margin-bottom: 0.375rem;
+}
+.basis-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75em;
+    width: 6px;
+    height: 1px;
+    background: var(--text-3);
+}
+.basis-list b {
+    color: var(--text);
 }
 
 /* 전체 픽 표: 라인당 60여 행이라 표 안에서 스크롤 (헤더 고정) */
 .pool-scroll {
     height: 30rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
 }
 
-/* 근거 구분 배지: 실제 통계(lol.ps) = 블랙 채움 / 자체 지수(능력치 평가) = 테두리 */
+/* 근거 구분 배지: 실제 통계(lol.ps) = 흰색 채움 / 자체 지수(능력치 평가) = 테두리 */
 .kpi-tag {
     display: inline-block;
     font-size: 0.6875rem;
-    font-weight: 700;
-    line-height: 1.4;
-    padding: 0 0.375rem;
-    border: 1px solid var(--lol-ink);
-    border-radius: 0.25rem;
+    font-weight: 600;
+    line-height: 1.5;
+    padding: 0 0.5rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
     margin-right: 0.25rem;
     vertical-align: middle;
 }
 .kpi-tag.real {
-    color: var(--lol-paper);
-    background: var(--lol-ink);
+    color: var(--bg);
+    background: var(--text);
+    border-color: var(--text);
 }
 .kpi-tag.index {
-    color: var(--lol-ink);
-    background: var(--lol-paper);
+    color: var(--text-2);
+    background: transparent;
 }
 .kpi .kpi-tag {
     align-self: flex-start;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.375rem;
 }
 .dash-grid-wide {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 .dash-card-title .kpi-tag {
-    margin-right: 0.375rem;
+    margin-right: 0.5rem;
 }
 .dash-method {
-    margin-top: 0.75rem;
-    color: var(--lol-muted);
+    margin-top: 1rem;
+    color: var(--text-2);
     font-size: 0.75rem;
 }
 .dash-method summary {
     cursor: pointer;
-    color: var(--lol-ink);
-    font-weight: 600;
+    color: var(--text);
+    font-weight: 500;
+    transition: color 200ms var(--ease);
+}
+.dash-method summary:hover {
+    color: var(--text-2);
 }
 .dash-method ul {
     list-style: disc;
     padding-left: 1.25rem;
-    margin-top: 0.375rem;
+    margin-top: 0.5rem;
+    line-height: 1.6;
 }
 .dash-method li {
     margin-bottom: 0.25rem;
 }
+
 @media (max-width: 48em) {
     .dash-grid-wide {
         grid-template-columns: minmax(0, 1fr);
+    }
+    .hero {
+        padding: 2.5rem 1.25rem 2rem;
+    }
+    .content {
+        padding: 1rem 0.5rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .lane-row {
+        grid-template-columns: 2.5rem minmax(0, 1fr) 3.5rem;
+    }
+    .lane-row .tier {
+        grid-column: 2 / 3;
+    }
+    .recent-head {
+        grid-template-columns: 4rem minmax(0, 1fr) auto;
+    }
+    .recent-score,
+    .recent-date {
+        display: none;
     }
 }

@@ -7,7 +7,7 @@ import submitAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.sub
 import getAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.getAnalysisRequest';
 import getRecentRequests from '@salesforce/apex/LolTeamBuilderController.getRecentRequests';
 import { LANES, LANE_LABELS, CLASS_LABELS, normalizeData, scoreTeam, explain, suggestSwaps, findBestTeams, searchPool, sortPoolRows } from './lolScoring';
-import { teamProfile, laneIndex, objectiveIndex, powerCurve, realStats, damageSplit, profileOption, indexBarOption, powerOption, damageOption, metaScatterOption, championIcon } from './lolPrediction';
+import { teamProfile, laneIndex, objectiveIndex, powerCurve, realStats, damageSplit, profileOption, indexBarOption, powerOption, damageOption, metaScatterOption, championIcon, COLORS } from './lolPrediction';
 import { buildWorkbook } from './lolExcel';
 import { parseReport } from './reportParser';
 
@@ -129,6 +129,7 @@ export default class LolTeamBuilder extends LightningElement {
     recentRequests = [];
     pollTimer;
     sheetJsPromise;
+    revealObserver; // 스크롤 페이드인 (renderedCallback에서 생성)
 
     comboColumns = COMBO_COLUMNS;
     poolColumns = POOL_COLUMNS;
@@ -341,22 +342,22 @@ export default class LolTeamBuilder extends LightningElement {
         if (!this.result) return null;
         const best = this.bestTeams[0];
         const indicator = this.result.categories.map((c) => ({ name: c.label, max: 100 }));
-        const series = [{ value: this.result.categories.map((c) => Math.round(c.ratio * 100)), name: '현재 조합', areaStyle: { opacity: 0.25 } }];
+        const series = [{ value: this.result.categories.map((c) => Math.round(c.ratio * 100)), name: '현재 조합', areaStyle: { opacity: 0.1 } }];
         if (best && best.total !== this.result.total) {
             series.push({ value: best.categories.map((c) => Math.round(c.ratio * 100)), name: `탐색 1위 (${best.total})`, lineStyle: { type: 'dashed' } });
         }
         return {
-            // 블랙 & 화이트 테마: 현재 조합 블랙, 비교(탐색 1위) 그레이 점선
-            color: ['#111111', '#9A9A9A'],
-            tooltip: {},
-            legend: { bottom: 0, textStyle: { color: '#3D3D3D' } },
+            // 다크 모노크롬 테마: 현재 조합 흰색, 비교(탐색 1위) 그레이 점선 (색상값은 lolPrediction COLORS와 동일)
+            color: [COLORS.ink, COLORS.mid],
+            tooltip: { backgroundColor: COLORS.paper, borderColor: 'rgba(255,255,255,0.10)', textStyle: { color: COLORS.text } },
+            legend: { bottom: 0, textStyle: { color: COLORS.muted } },
             radar: {
                 indicator,
                 radius: '62%',
-                axisName: { color: '#3D3D3D', fontSize: 11 },
-                splitLine: { lineStyle: { color: '#ECECEC' } },
-                splitArea: { areaStyle: { color: ['#FFFFFF', '#FAFAFA'] } },
-                axisLine: { lineStyle: { color: '#ECECEC' } }
+                axisName: { color: COLORS.muted, fontSize: 11 },
+                splitLine: { lineStyle: { color: COLORS.grid } },
+                splitArea: { areaStyle: { color: ['rgba(255,255,255,0.01)', 'rgba(255,255,255,0.03)'] } },
+                axisLine: { lineStyle: { color: COLORS.grid } }
             },
             series: [{ type: 'radar', data: series }]
         };
@@ -644,6 +645,46 @@ export default class LolTeamBuilder extends LightningElement {
     // ===== Claude Code 모드: 요청 상태 폴링 =====
     disconnectedCallback() {
         this.stopPolling();
+        this.revealObserver?.disconnect();
+        this.revealObserver = undefined;
+    }
+
+    // ===== 이펙트 (다크 모노크롬 테마) =====
+    // 스크롤 페이드인: .reveal 요소가 화면에 들어오면 is-visible을 붙인다 (한 번만).
+    // IntersectionObserver가 없는 환경(Jest 등)에서는 바로 보이게 해 내용이 숨지 않도록 한다.
+    renderedCallback() {
+        const pending = [...this.template.querySelectorAll('.reveal:not(.is-visible):not([data-reveal])')];
+        if (!pending.length) return;
+        if (typeof IntersectionObserver === 'undefined') {
+            pending.forEach((el) => el.classList.add('is-visible'));
+            return;
+        }
+        if (!this.revealObserver) {
+            this.revealObserver = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            this.revealObserver.unobserve(entry.target);
+                        }
+                    });
+                },
+                { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+            );
+        }
+        pending.forEach((el) => {
+            el.dataset.reveal = '1';
+            this.revealObserver.observe(el);
+        });
+    }
+
+    // 카드 위 마우스 위치를 CSS 변수로 넘겨 은은한 흰색 radial glow를 그린다 (요소 하나에 이벤트 위임)
+    handlePointerMove(event) {
+        const card = event.target?.closest?.('.glow');
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${event.clientX - rect.left}px`);
+        card.style.setProperty('--my', `${event.clientY - rect.top}px`);
     }
 
     stopPolling() {

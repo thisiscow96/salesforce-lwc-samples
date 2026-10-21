@@ -5,17 +5,17 @@
 //      지수마다 어떤 챔피언 값이 얼마나 들어갔는지(근거)를 함께 돌려줘 툴팁에 보여 준다.
 import { LANES, LANE_LABELS } from './lolScoring';
 
-// 블랙 & 화이트 테마: 색 대신 명도 단계로 강약을 구분 (진함 = 강함/우리 조합, 연함 = 약함/비교 대상)
+// 다크 모노크롬 테마: 색 대신 밝기 단계로 강약을 구분 (밝음 = 강함/우리 조합, 어두움 = 약함/비교 대상). ink = 강조색(흰색)
 export const COLORS = {
-    ink: '#111111',
-    ink2: '#3D3D3D',
-    mid: '#8A8A8A',
-    light: '#C9C9C9',
-    text: '#1A1A1A',
-    muted: '#6B6B6B',
-    grid: '#ECECEC',
-    faint: '#B5B5B5',
-    paper: '#FFFFFF'
+    ink: '#FAFAFA',
+    ink2: '#D4D4D4',
+    mid: '#737373',
+    light: '#404040',
+    text: '#FAFAFA',
+    muted: '#A1A1A1',
+    grid: 'rgba(255,255,255,0.06)',
+    faint: '#525252',
+    paper: '#111111'
 };
 export const MINUTES = [5, 10, 15, 20, 25, 30, 35, 40];
 const LATE_WEIGHTS = { TOP: 0.15, JUNGLE: 0.1, MID: 0.3, ADC: 0.4, SUPPORT: 0.05 };
@@ -123,7 +123,7 @@ export function championIcon(version, ddId) {
 
 // ===================== ECharts option =====================
 const text = (size = 11, color = COLORS.muted) => ({ color, fontSize: size });
-const tooltip = { backgroundColor: COLORS.paper, borderColor: '#E0E0E0', textStyle: { color: COLORS.text, fontSize: 12 }, extraCssText: 'border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);' };
+const tooltip = { backgroundColor: COLORS.paper, borderColor: 'rgba(255,255,255,0.10)', textStyle: { color: COLORS.text, fontSize: 12 }, extraCssText: 'border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.5);' };
 const basisHtml = (item) => `<b>${item.label} ${item.value} / 10</b><br/>${item.basis.join('<br/>')}`;
 const gradient = (from, to, horizontal = false) => ({
     type: 'linear',
@@ -151,7 +151,7 @@ export function profileOption(axes) {
             splitNumber: 5,
             axisName: text(11, COLORS.text),
             splitLine: { lineStyle: { color: COLORS.grid } },
-            splitArea: { areaStyle: { color: [COLORS.paper, '#FAFAFA'] } },
+            splitArea: { areaStyle: { color: ['rgba(255,255,255,0.01)', 'rgba(255,255,255,0.03)'] } },
             axisLine: { lineStyle: { color: COLORS.grid } }
         },
         series: [
@@ -164,7 +164,7 @@ export function profileOption(axes) {
                         symbolSize: 6,
                         lineStyle: { width: 2, color: COLORS.ink },
                         itemStyle: { color: COLORS.ink },
-                        areaStyle: { color: 'rgba(17,17,17,0.10)' },
+                        areaStyle: { color: 'rgba(250,250,250,0.10)' },
                         label: { show: true, color: COLORS.text, fontSize: 10, formatter: (p) => p.value }
                     },
                     { name: '평균(5)', value: axes.map(() => 5), symbol: 'none', lineStyle: { type: 'dashed', color: COLORS.faint }, itemStyle: { color: COLORS.faint } }
@@ -186,7 +186,7 @@ export function indexBarOption(items) {
                 type: 'bar',
                 barWidth: 14,
                 showBackground: true,
-                backgroundStyle: { color: 'rgba(0,0,0,0.04)', borderRadius: 7 },
+                backgroundStyle: { color: 'rgba(255,255,255,0.04)', borderRadius: 7 },
                 data: items.map((i) => ({ value: i.value, itemStyle: { color: indexColor(i.value), borderRadius: 7 } })),
                 label: { show: true, position: 'right', color: COLORS.text, fontWeight: 600, formatter: '{c}' },
                 // 세로 기준선 라벨은 세로 글자로 돌아가 읽기 어려워 축 눈금("5 평균")으로 대신 표시
@@ -212,14 +212,14 @@ export function powerOption(curve) {
                 data: curve.points.map((p) => p.value),
                 lineStyle: { width: 2.5, color: COLORS.ink },
                 itemStyle: { color: COLORS.ink, borderColor: COLORS.paper, borderWidth: 2 },
-                areaStyle: { color: gradient('rgba(17,17,17,0)', 'rgba(17,17,17,0.12)') },
+                areaStyle: { color: gradient('rgba(250,250,250,0)', 'rgba(250,250,250,0.14)') },
                 markArea: {
                     silent: true,
                     label: { color: COLORS.muted, fontSize: 10, position: 'insideTop' },
                     data: [
-                        [{ name: '초반', xAxis: '5', itemStyle: { color: 'rgba(0,0,0,0.025)' } }, { xAxis: '15' }],
+                        [{ name: '초반', xAxis: '5', itemStyle: { color: 'rgba(255,255,255,0.02)' } }, { xAxis: '15' }],
                         [{ name: '중반', xAxis: '15', itemStyle: { color: 'rgba(0,0,0,0)' } }, { xAxis: '25' }],
-                        [{ name: '후반', xAxis: '25', itemStyle: { color: 'rgba(0,0,0,0.045)' } }, { xAxis: '40' }]
+                        [{ name: '후반', xAxis: '25', itemStyle: { color: 'rgba(255,255,255,0.04)' } }, { xAxis: '40' }]
                     ]
                 },
                 markLine: { symbol: 'none', silent: true, label: { color: COLORS.muted, formatter: '평균 5', position: 'insideEndBottom' }, lineStyle: { color: COLORS.faint, type: 'dashed' }, data: [{ yAxis: 5 }] },
@@ -287,7 +287,7 @@ export function metaScatterOption(ctx, team, version) {
                 name: '전체 픽',
                 type: 'scatter',
                 symbolSize: 6,
-                itemStyle: { color: 'rgba(17,17,17,0.14)' },
+                itemStyle: { color: 'rgba(255,255,255,0.16)' },
                 data: others.map((c) => ({ value: [c.pickRate, c.winRate], champ: c })),
                 markLine: { symbol: 'none', silent: true, label: { color: COLORS.muted, formatter: '승률 50%', position: 'insideEndTop' }, lineStyle: { color: COLORS.faint, type: 'dashed' }, data: [{ yAxis: 50 }] }
             },
