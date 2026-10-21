@@ -1,13 +1,14 @@
 import { LightningElement, api, wire } from 'lwc';
-import { loadScript } from 'lightning/platformResourceLoader';
+import { loadScript, loadStyle } from 'lightning/platformResourceLoader';
 import SHEETJS from '@salesforce/resourceUrl/sheetjs';
+import LOL_THEME from '@salesforce/resourceUrl/lolTheme';
 import getBuilderData from '@salesforce/apex/LolTeamBuilderController.getBuilderData';
 import startAnalysis from '@salesforce/apexContinuation/LolTeamBuilderController.startAnalysis';
 import submitAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.submitAnalysisRequest';
 import getAnalysisRequest from '@salesforce/apex/LolTeamBuilderController.getAnalysisRequest';
 import getRecentRequests from '@salesforce/apex/LolTeamBuilderController.getRecentRequests';
 import { LANES, LANE_LABELS, CLASS_LABELS, normalizeData, scoreTeam, explain, suggestSwaps, findBestTeams, searchPool, sortPoolRows } from './lolScoring';
-import { teamProfile, laneIndex, objectiveIndex, powerCurve, realStats, damageSplit, profileOption, indexBarOption, powerOption, damageOption, metaScatterOption, championIcon, COLORS } from './lolPrediction';
+import { teamProfile, laneIndex, objectiveIndex, powerCurve, realStats, damageSplit, profileOption, indexBarOption, powerOption, damageOption, metaScatterOption, championIcon, COLORS, FONT } from './lolPrediction';
 import { buildWorkbook } from './lolExcel';
 import { parseReport } from './reportParser';
 
@@ -86,6 +87,9 @@ function percent(value) {
 }
 
 // 픽 선택 목록 표시: ★ 선호 · 역할 · 티어 · 승률 · 픽률 (Sort_Order: 선호 픽이 위, 나머지는 티어 순)
+// 티어 배지 명도 단계 (c-lol-picker의 badge-* 클래스)
+const TIER_TONES = { 'S+': 'splus', S: 's', A: 'a', B: 'b', C: 'c', D: 'c' };
+
 function optionLabel(c) {
     const tier = c.tier === '-' ? '미집계' : c.tier;
     return `${c.preferred ? '★ ' : ''}${c.name} · ${CLASS_LABELS[c.cls]} · ${tier} · 승 ${percent(c.winRate)} · 픽 ${percent(c.pickRate)}`;
@@ -222,20 +226,41 @@ export default class LolTeamBuilder extends LightningElement {
 
     get laneRows() {
         if (!this.ctx) return [];
-        const tierOptions = this.ctx.tiers.map((t) => ({ label: t.label, value: t.key }));
+        const tierOptions = this.ctx.tiers.map((t) => ({ label: t.label, value: t.key, name: t.label }));
         return LANES.map((lane) => {
             const champ = this.ctx.byId.get(this.picks[lane]);
+            const locked = !!this.locks[lane];
             return {
                 lane,
                 label: LANE_LABELS[lane],
-                options: this.ctx.byLane[lane].map((c) => ({ label: optionLabel(c), value: c.id })),
+                // 커스텀 드롭다운(c-lol-picker): 초상화 + 이름 + 티어 배지 + 역할 칩 + 승률. label은 검색·접근성용 전체 문구
+                options: this.ctx.byLane[lane].map((c) => ({
+                    label: optionLabel(c),
+                    value: c.id,
+                    name: c.name,
+                    icon: championIcon(this.ddragonVersion, c.ddId),
+                    badge: c.tier === '-' ? '' : c.tier,
+                    tone: TIER_TONES[c.tier] || 'none',
+                    chips: [CLASS_LABELS[c.cls], c.dmgType].filter(Boolean),
+                    stat: c.winRate == null ? null : { label: '승', value: `${c.winRate}%` },
+                    preferred: c.preferred
+                })),
                 value: this.picks[lane] || null,
                 tierOptions,
                 tier: this.tiers[lane],
-                locked: !!this.locks[lane],
-                info: champ
-                    ? `${champ.preferred ? '★ 팀 선호 · ' : ''}${CLASS_LABELS[champ.cls]} · ${champ.dmgType} · 승률 ${percent(champ.winRate)} · 픽률 ${percent(champ.pickRate)} · 밴률 ${percent(champ.banRate)} · ${champ.note || ''}`
-                    : ''
+                locked,
+                lockAria: String(locked),
+                lockClass: locked ? 'lock switch switch_on' : 'lock switch',
+                // 점으로 이어 붙이지 않고: 역할·딜 타입 칩 / 승률·픽률·밴률 미니 스탯 / 설명 한 줄
+                chips: champ ? [champ.preferred ? '팀 선호' : null, CLASS_LABELS[champ.cls], champ.dmgType].filter(Boolean).map((text, i) => ({ key: `${lane}-chip${i}`, text })) : [],
+                stats: champ
+                    ? [
+                          { key: `${lane}-wr`, label: '승률', value: percent(champ.winRate) },
+                          { key: `${lane}-pr`, label: '픽률', value: percent(champ.pickRate) },
+                          { key: `${lane}-br`, label: '밴률', value: percent(champ.banRate) }
+                      ]
+                    : [],
+                note: champ?.note || ''
             };
         });
     }
@@ -349,6 +374,7 @@ export default class LolTeamBuilder extends LightningElement {
         return {
             // 다크 모노크롬 테마: 현재 조합 흰색, 비교(탐색 1위) 그레이 점선 (색상값은 lolPrediction COLORS와 동일)
             color: [COLORS.ink, COLORS.mid],
+            textStyle: { fontFamily: FONT },
             tooltip: { backgroundColor: COLORS.paper, borderColor: 'rgba(255,255,255,0.10)', textStyle: { color: COLORS.text } },
             legend: { bottom: 0, textStyle: { color: COLORS.muted } },
             radar: {
@@ -527,8 +553,10 @@ export default class LolTeamBuilder extends LightningElement {
         this.tiers = { ...this.tiers, [event.target.dataset.lane]: event.detail.value };
     }
 
-    handleLockChange(event) {
-        this.locks = { ...this.locks, [event.target.dataset.lane]: event.target.checked };
+    // 고정 토글 스위치 (button role="switch")
+    handleLockToggle(event) {
+        const lane = event.currentTarget.dataset.lane;
+        this.locks = { ...this.locks, [lane]: !this.locks[lane] };
     }
 
     handlePoolModeToggle(event) {
@@ -643,6 +671,12 @@ export default class LolTeamBuilder extends LightningElement {
     }
 
     // ===== Claude Code 모드: 요청 상태 폴링 =====
+    // 웹폰트(Pretendard·Inter)는 @font-face가 컴포넌트 CSS(shadow) 안에서 동작하지 않아 문서 전역 스타일로 로드.
+    // 실패해도(차단 등) 시스템 폰트로 계속 표시되므로 오류는 무시
+    connectedCallback() {
+        loadStyle(this, LOL_THEME).catch(() => {});
+    }
+
     disconnectedCallback() {
         this.stopPolling();
         this.revealObserver?.disconnect();

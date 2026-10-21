@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
+    <cacheControl>Public</cacheControl>
+    <contentType>text/css</contentType>
+    <description>LoL 팀 조합 분석기 전역 테마: 폰트(Pretendard + Inter, jsDelivr CDN) + 공개 사이트 헤더 띠 배경</description>
+</StaticResource>

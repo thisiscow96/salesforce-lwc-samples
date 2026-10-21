@@ -17,6 +17,8 @@ export const COLORS = {
     faint: '#525252',
     paper: '#111111'
 };
+// 차트 글꼴: 화면과 같은 웹폰트 (Inter = 숫자·영문, Pretendard = 한글)
+export const FONT = "'Inter Variable', 'Pretendard Variable', 'Pretendard', sans-serif";
 export const MINUTES = [5, 10, 15, 20, 25, 30, 35, 40];
 const LATE_WEIGHTS = { TOP: 0.15, JUNGLE: 0.1, MID: 0.3, ADC: 0.4, SUPPORT: 0.05 };
 const AP_FACTOR = { AD: 0, AP: 1, Mixed: 0.5 };
@@ -142,6 +144,7 @@ const indexColor = (v) => (v >= 6.5 ? COLORS.ink : v >= 5 ? COLORS.mid : COLORS.
 /** 조합 성향: 레이더 (우리 조합 vs 평균 5) */
 export function profileOption(axes) {
     return {
+        textStyle: { fontFamily: FONT },
         tooltip: { ...tooltip, formatter: () => axes.map((a) => `${a.label} <b>${a.value}</b>`).join('<br/>') },
         legend: { bottom: 0, textStyle: text(11), data: ['우리 조합', '평균(5)'] },
         radar: {
@@ -177,6 +180,7 @@ export function profileOption(axes) {
 /** 지수 가로 막대 (라인 압박·오브젝트 장악 공용): 둥근 막대 + 배경 트랙 + 평균 5 기준선 */
 export function indexBarOption(items) {
     return {
+        textStyle: { fontFamily: FONT },
         tooltip: { ...tooltip, trigger: 'item', formatter: (p) => basisHtml(items[p.dataIndex]) },
         grid: { left: 96, right: 44, top: 10, bottom: 22 },
         xAxis: { type: 'value', min: 0, max: 10, interval: 2.5, axisLabel: { ...text(10), formatter: (v) => (v === 5 ? '5 평균' : v) }, splitLine: { lineStyle: { color: COLORS.grid } } },
@@ -199,6 +203,7 @@ export function indexBarOption(items) {
 /** 시간대별 전투력 지수: 구간 배경(초반·중반·후반) + 그라데이션 영역 + 정점 표시 */
 export function powerOption(curve) {
     return {
+        textStyle: { fontFamily: FONT },
         tooltip: { ...tooltip, trigger: 'axis', formatter: (items) => `${items[0].name}분 전투력 지수 <b>${items[0].value}</b> / 10<br/>(초반 능력치 → 후반 능력치로 옮겨 가는 가중 평균)` },
         grid: { left: 36, right: 16, top: 26, bottom: 26 },
         xAxis: { type: 'category', boundaryGap: false, data: curve.points.map((p) => p.minute), axisLabel: { ...text(10), formatter: '{value}분' }, axisLine: { lineStyle: { color: COLORS.grid } } },
@@ -240,6 +245,7 @@ export function powerOption(curve) {
 export function damageOption(damage) {
     const main = damage.ap >= damage.ad ? `마법 ${damage.ap}%` : `물리 ${damage.ad}%`;
     return {
+        textStyle: { fontFamily: FONT },
         tooltip: { ...tooltip, formatter: '{b}: {c}%' },
         title: { text: main, subtext: '딜 비중', left: 'center', top: '40%', textStyle: { color: COLORS.text, fontSize: 18, fontWeight: 700 }, subtextStyle: text(11) },
         series: [
@@ -272,6 +278,7 @@ export function metaScatterOption(ctx, team, version) {
     const yMin = Math.floor((Math.min(50, ...rates) - 0.5) / 2) * 2;
     const yMax = Math.ceil((Math.max(50, ...rates) + 0.5) / 2) * 2;
     return {
+        textStyle: { fontFamily: FONT },
         tooltip: {
             ...tooltip,
             formatter: (p) => {

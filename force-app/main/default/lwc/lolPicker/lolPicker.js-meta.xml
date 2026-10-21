@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>LoL 팀 조합 분석기용 다크 테마 커스텀 드롭다운 (챔피언 초상화·티어 배지·검색)</description>
+</LightningComponentBundle>

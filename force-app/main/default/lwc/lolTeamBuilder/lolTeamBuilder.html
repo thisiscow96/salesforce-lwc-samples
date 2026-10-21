@@ -142,14 +142,33 @@
                             <template for:each={laneRows} for:item="row">
                                 <div key={row.lane} class="lane-row">
                                     <div class="lane-label">{row.label}</div>
-                                    <lightning-combobox class="pick" data-lane={row.lane} label="챔피언" variant="label-hidden"
-                                        placeholder="챔피언 선택" options={row.options} value={row.value}
-                                        onchange={handlePickChange}></lightning-combobox>
-                                    <lightning-combobox class="tier" data-lane={row.lane} label="실력" variant="label-hidden"
-                                        options={row.tierOptions} value={row.tier} onchange={handleTierChange}></lightning-combobox>
-                                    <lightning-input class="lock" data-lane={row.lane} type="checkbox" label="고정"
-                                        checked={row.locked} onchange={handleLockChange}></lightning-input>
-                                    <div class="lane-info slds-text-color_weak">{row.info}</div>
+                                    <c-lol-picker class="pick" data-lane={row.lane} label={row.label} placeholder="챔피언 선택" searchable
+                                        options={row.options} value={row.value} onchange={handlePickChange}></c-lol-picker>
+                                    <c-lol-picker class="tier" data-lane={row.lane} label="플레이어 실력"
+                                        options={row.tierOptions} value={row.tier} onchange={handleTierChange}></c-lol-picker>
+                                    <button type="button" class={row.lockClass} role="switch" aria-checked={row.lockAria} data-lane={row.lane}
+                                        title="최적 조합 찾기에서 이 라인을 고정" onclick={handleLockToggle}>
+                                        <span class="switch-track"><span class="switch-thumb"></span></span>
+                                        <span class="switch-label">고정</span>
+                                    </button>
+                                    <div class="lane-detail">
+                                        <div class="lane-meta">
+                                            <span class="lane-chips">
+                                                <template for:each={row.chips} for:item="chip">
+                                                    <span key={chip.key} class="chip">{chip.text}</span>
+                                                </template>
+                                            </span>
+                                            <span class="mini-stats">
+                                                <template for:each={row.stats} for:item="st">
+                                                    <span key={st.key} class="mini-stat">
+                                                        <span class="mini-stat-label">{st.label}</span>
+                                                        <span class="mini-stat-value">{st.value}</span>
+                                                    </span>
+                                                </template>
+                                            </span>
+                                        </div>
+                                        <p class="lane-note">{row.note}</p>
+                                    </div>
                                 </div>
                             </template>
                             <template lwc:if={duplicateChampion}>

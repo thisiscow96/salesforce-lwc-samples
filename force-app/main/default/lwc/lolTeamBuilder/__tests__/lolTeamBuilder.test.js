@@ -10,7 +10,7 @@ import getRecentRequests from '@salesforce/apex/LolTeamBuilderController.getRece
 const realXlsx = require('../../../staticresources/sheetjs.js');
 const { builderData } = require('./data/fixtures');
 
-jest.mock('lightning/platformResourceLoader', () => ({ loadScript: jest.fn() }), { virtual: true });
+jest.mock('lightning/platformResourceLoader', () => ({ loadScript: jest.fn(), loadStyle: jest.fn(() => Promise.resolve()) }), { virtual: true });
 jest.mock(
     '@salesforce/apex/LolTeamBuilderController.getBuilderData',
     () => {
@@ -34,7 +34,7 @@ const microtasks = async () => {
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0)); // eslint-disable-line @lwc/lwc/no-async-operation
 const $ = (el, selector) => el.shadowRoot.querySelector(selector);
 const $$ = (el, selector) => [...el.shadowRoot.querySelectorAll(selector)];
-const pickBox = (el, lane) => $(el, `lightning-combobox.pick[data-lane="${lane}"]`);
+const pickBox = (el, lane) => $(el, `c-lol-picker.pick[data-lane="${lane}"]`);
 
 async function mount(mode = 'CLAUDE_CODE') {
     const el = createElement('c-lol-team-builder', { is: LolTeamBuilder });
@@ -66,8 +66,8 @@ describe('c-lol-team-builder', () => {
         const el = await mount();
 
         expect(pickBox(el, 'TOP').value).toBeTruthy();
-        expect($(el, 'lightning-combobox.tier[data-lane="MID"]').value).toBe('MASTER_500');
-        expect($(el, 'lightning-combobox.tier[data-lane="TOP"]').value).toBe('EMERALD_LOW');
+        expect($(el, 'c-lol-picker.tier[data-lane="MID"]').value).toBe('MASTER_500');
+        expect($(el, 'c-lol-picker.tier[data-lane="TOP"]').value).toBe('EMERALD_LOW');
         expect(Number($(el, '.total').textContent)).toBeGreaterThan(70);
         expect($$(el, '.category')).toHaveLength(7); // 실제 통계 1 + 조합 기본기 6
         expect($$(el, '.strengths li').length).toBeGreaterThan(0);
@@ -101,9 +101,11 @@ describe('c-lol-team-builder', () => {
     it('라인 고정 후 탐색하면 조합표가 고정 챔피언만 사용하고, 행 적용 시 선택이 바뀐다', async () => {
         const el = await mount();
         pickBox(el, 'ADC').dispatchEvent(new CustomEvent('change', { detail: { value: 'Caitlyn_Adc' } }));
-        const lock = $(el, 'lightning-input.lock[data-lane="ADC"]');
-        lock.checked = true;
-        lock.dispatchEvent(new CustomEvent('change'));
+        const lock = $(el, 'button.lock[data-lane="ADC"]'); // 커스텀 토글 스위치
+        expect(lock.getAttribute('aria-checked')).toBe('false');
+        lock.click();
+        await flush();
+        expect($(el, 'button.lock[data-lane="ADC"]').getAttribute('aria-checked')).toBe('true');
         $(el, '.search-button').click();
         await flush();
 
@@ -117,6 +119,48 @@ describe('c-lol-team-builder', () => {
             return box.options.find((o) => o.value === box.value).label.split(' · ')[0].replace(/^★ /, ''); // 선호 픽은 ★ 표시
         };
         ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT'].forEach((lane) => expect(selectedName(lane)).toBe(rows[2][lane]));
+    });
+
+    it('라인 행: 커스텀 드롭다운(초상화·티어 배지)과 칩·미니 스탯·설명으로 챔피언 정보를 보여 주고, 웹폰트를 로드한다', async () => {
+        const el = await mount();
+        const { loadStyle } = require('lightning/platformResourceLoader');
+        expect(loadStyle).toHaveBeenCalled();
+
+        const picker = pickBox(el, 'MID');
+        const opt = picker.options.find((o) => o.value === picker.value);
+        expect(opt.icon).toContain('/img/champion/');
+        expect(opt.badge).toBeTruthy();
+        expect(opt.chips.length).toBeGreaterThan(0);
+
+        // 닫힌 버튼에 선택한 챔피언 초상화·이름·배지
+        const trigger = picker.shadowRoot.querySelector('.trigger');
+        expect(trigger.querySelector('.icon').src).toContain('/img/champion/');
+        expect(trigger.querySelector('.name').textContent).toBe(opt.name);
+        expect(trigger.querySelector('.badge').textContent).toBe(opt.badge);
+
+        // 펼치면 검색 가능한 목록, 검색어로 거르고 Enter로 선택 → change 이벤트
+        const changes = [];
+        picker.addEventListener('change', (e) => changes.push(e.detail.value));
+        trigger.click();
+        await flush();
+        expect(picker.shadowRoot.querySelectorAll('.option').length).toBe(picker.options.length);
+        const search = picker.shadowRoot.querySelector('.search-input');
+        const target = picker.options.find((o) => o.value !== picker.value);
+        search.value = target.name;
+        search.dispatchEvent(new CustomEvent('input'));
+        await flush();
+        expect([...picker.shadowRoot.querySelectorAll('.option-name')].some((n) => n.textContent.startsWith(target.name))).toBe(true);
+        search.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+        await flush();
+        expect(changes[0]).toBeTruthy();
+        expect(picker.shadowRoot.querySelector('.menu')).toBeNull(); // 선택 후 닫힘
+
+        // 점으로 이어 붙인 문구 대신: 칩 / 승률·픽률·밴률 미니 스탯 / 설명 줄
+        const row = $$(el, '.lane-row')[2];
+        expect(row.querySelectorAll('.chip').length).toBeGreaterThan(0);
+        expect([...row.querySelectorAll('.mini-stat-label')].map((n) => n.textContent)).toEqual(['승률', '픽률', '밴률']);
+        expect(row.querySelector('.mini-stat-value').textContent).toMatch(/%$/);
+        expect(row.textContent).not.toContain(' · 승률 ');
     });
 
     it('같은 챔피언을 두 라인에 고르면 점수 대신 경고를 보여 준다', async () => {
