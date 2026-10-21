@@ -107,6 +107,17 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(guide.contains('1순위(항상 먼저 참조): lol.ps'), guide);
         Assert.isTrue(prompt.contains('lol.ps: https://lol.ps/champ/222?tier=2&region=0&lane=3'), '징크스 원딜 lol.ps 페이지');
         Assert.areEqual('https://lol.ps/champ/516?tier=2&region=0&lane=0', LolClaudeAnalysisService.lolpsChampionUrl(516, 'TOP'));
+        // lol.ps 수치를 프롬프트에 직접 포함 (워커가 lol.ps 페이지를 못 읽어도 근거 수치가 있도록) + 출처 읽기 실패로 중단 금지
+        Assert.isTrue(prompt.contains('  lol.ps 통계: 티어 '), prompt);
+        Assert.isTrue(prompt.contains('[상대 정글러 픽률 상위 5 (lol.ps 한국 에메랄드+)]'), prompt);
+        Assert.isTrue(guide.contains('분석을 중단하거나 실패 처리하지 않는다'), guide);
+        List<LoL_Champion__mdt> junglers = LolClaudeAnalysisService.topPicked('JUNGLE', 5);
+        Assert.areEqual(5, junglers.size());
+        for (Integer i = 1; i < junglers.size(); i++) {
+            Assert.isTrue(junglers[i - 1].Pick_Rate__c >= junglers[i].Pick_Rate__c, '픽률 내림차순');
+            Assert.areEqual('JUNGLE', junglers[i].Lane__c);
+        }
+        Assert.isTrue(prompt.contains('- ' + junglers[0].MasterLabel + ': 픽률 '), '픽률 1위 정글러 포함');
     }
 
     @IsTest

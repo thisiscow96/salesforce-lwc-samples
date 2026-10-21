@@ -22,16 +22,21 @@ Salesforce 화면의 [Claude Code 분석 요청] 버튼이 만든 `LoL_Analysis_
 2. 각 요청마다 순서대로:
    1. `node scripts/lol/claude-worker.js claim <id>`
    2. `prompt`의 [지침]·[기준]·[출력 양식]에 따라 분석한다. [지침]의 리서치 규칙·금지 표현이 이 문서보다 우선한다.
-      - **lol.ps(프로관전러 P.S, 한국 서버 · 에메랄드+)를 항상 1순위로 참조한다.** prompt [우리 조합]의 `lol.ps:` 챔피언 페이지 5개를 WebFetch로 먼저 열어
-        승률·픽률·밴률·PS 점수·카운터를 확인하고, 통계 수치는 lol.ps 값을 기준으로 쓴다. 상대 정글러 픽률 등 전체 통계는 `https://lol.ps/statistics?tier=2&region=0`.
-        lol.ps 페이지는 `sources`에 반드시 포함한다.
+      - **lol.ps(프로관전러 P.S, 한국 서버 · 에메랄드+)를 항상 1순위로 참조한다.**
+        - prompt의 `lol.ps 통계:` 줄과 [상대 정글러 픽률 상위 5]는 이미 lol.ps에서 가져온 값이다. 통계 수치는 이 값을 그대로 쓴다.
+        - lol.ps 페이지는 **WebFetch로 읽지 않는다.** 수치가 페이지 스크립트 데이터에 있어 WebFetch(화면 글자 변환)로는 "승률 픽률 밴율" 제목만 남고 숫자가 비어 보인다.
+          대신 아래 명령으로 읽는다 (챔피언 키 = `lol.ps:` 주소의 /champ/<키>, 라인 = 주소의 lane 번호 또는 TOP/JUNGLE/MID/ADC/SUPPORT):
+          `node scripts/lol/claude-worker.js lolps <챔피언키> <라인>` → 승률·픽률·밴률·PS 점수, 상대하기 어려운/쉬운 챔피언 5명씩(myWinRate = 우리 챔피언 승률)
+          `node scripts/lol/claude-worker.js lolps-tier JUNGLE 5` → 정글 픽률 상위 5명 (상대 정글러 후보)
+        - 이 명령이 실패하면(네트워크 차단 등) prompt의 lol.ps 수치를 쓰고, 카운터는 lolalytics·op.gg 등으로 대체한 뒤 `■ 데이터 기준`에 한 줄 적는다.
+        - lol.ps 챔피언 페이지 주소 5개는 `sources`에 반드시 포함한다.
       - 검색은 최소 12회. 항목마다 2개 이상 출처를 교차 확인하고(lol.ps + 다른 사이트 1곳 이상), 답이 안 나오면 검색어를 바꿔(영어/한국어, 챔피언명+build·matchup·counter, 패치 번호) 3번 더 찾는다.
         검색 결과 요약만으로 부족하면 WebFetch로 페이지를 직접 열어 확인한다 (op.gg, u.gg, lolalytics, mobalytics, deeplol, leagueofgraphs, leagueoflegends.com).
         1. 오브젝트 규칙 전용: 기준 패치의 공식 패치노트·시즌 공지에서 어떤 오브젝트가 있는지·등장 시간 (시즌 시작 패치에서 오브젝트가 추가·삭제됨: 예 2026 시즌 아타칸 삭제).
            이 정보는 판단 근거로만 쓰고 본문에 시간·규칙을 나열하지 않는다. 운영 섹션은 [운영 작성 규칙]대로 우세·비등·열세별 행동과 맞교환, 역할별 위치를 쓴다.
            필요하면 운영·셋업 가이드(웨이브 주도권·시야·합류 속도, 맞교환)를 검색해 이 조합에 맞게 적용한다.
         2. 조합 5명 각각의 스킬 이름·용도: Data Dragon `https://ddragon.leagueoflegends.com/cdn/<버전>/data/ko_KR/champion/<영문id>.json`의 spells·passive 설명으로
-           정식 한국어 스킬명과 용도(진입·차단·생존·추격)를 확인한다. 라인별 상위 카운터는 lol.ps 챔피언 페이지에서 확인한다. 템트리(룬·아이템)는 찾지도 쓰지도 않는다.
+           정식 한국어 스킬명과 용도(진입·차단·생존·추격)를 확인한다. 라인별 상위 카운터는 `lolps` 명령의 hardMatchups로 확인한다. 템트리(룬·아이템)는 찾지도 쓰지도 않는다.
         3. 기준 패치 픽률 상위 정글러 5명과 각자의 첫 동선, 우리 정글러의 레드/블루 시작 동선.
         4. 상대 조합 유형 6가지의 기준 패치 대표 챔피언, 우리 조합 승률·티어.
         5. 운영 메커니즘 전용: 조합 5명 각각의 운영에 영향을 주는 스킬·패시브(포탑 압박, 순간 합류, 오브젝트 사냥 속도, 시야 장악, 강제 이니시, 소환물)를 정리한다.
@@ -59,5 +64,6 @@ Salesforce 화면의 [Claude Code 분석 요청] 버튼이 만든 `LoL_Analysis_
       `{ "text": "분석 본문", "sources": [{ "title": "페이지 제목", "url": "https://..." }], "searchCount": 검색횟수 }`
       - `sources`에는 실제로 근거로 쓴 페이지만 넣는다 (페이지 제목과 URL). 화면이 리포트 아래 "출처"로 표시한다.
    4. `node scripts/lol/claude-worker.js complete <id> .lol-worker/<id>.json`
-   - 분석 중 오류가 나면 `node scripts/lol/claude-worker.js fail <id> "사유"`로 기록하고 다음 요청으로 넘어간다.
+   - `fail`은 큐·Salesforce 연결 오류처럼 결과를 저장할 수 없을 때만 쓴다: `node scripts/lol/claude-worker.js fail <id> "사유"` 후 다음 요청으로 넘어간다.
+     출처 사이트를 읽지 못했거나 일부 수치를 찾지 못한 것은 실패 사유가 아니다. prompt의 수치와 대체 출처로 끝까지 작성하고, 부족한 부분만 `■ 데이터 기준`에 적어 `complete` 한다.
 3. 처리한 건수와 각 요청의 조합·결과 한 줄 요약을 보고한다.

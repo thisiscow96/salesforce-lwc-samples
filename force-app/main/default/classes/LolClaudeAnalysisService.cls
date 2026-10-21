@@ -127,7 +127,9 @@ public with sharing class LolClaudeAnalysisService {
             '',
             '[리서치 규칙: 반드시 지킬 것]',
             '1) 직접 여러 사이트를 검색해 내용을 채운다. 한 항목당 최소 2개 출처를 교차 확인한다.',
-            '   - 1순위(항상 먼저 참조): lol.ps (프로관전러 P.S, 한국 서버 · 에메랄드+). [우리 조합]에 적힌 lol.ps 챔피언 페이지를 먼저 열어 승률·픽률·밴률·PS 점수·카운터를 확인하고, 통계 수치는 lol.ps 값을 기준으로 쓴다.',
+            '   - 1순위(항상 먼저 참조): lol.ps (프로관전러 P.S, 한국 서버 · 에메랄드+). [우리 조합]의 "lol.ps 통계"와 [상대 정글러 픽률 상위 5]는 lol.ps에서 이미 가져온 값이므로 통계 수치는 이 값을 그대로 쓴다.',
+            '     카운터 등 추가 수치는 lol.ps 챔피언 페이지에서 확인한다. lol.ps는 수치가 페이지 스크립트 데이터에 있어 일반 웹 읽기(화면 글자)로는 비어 보일 수 있다 → 그때는 lolalytics·op.gg 등으로 대체하고 "데이터 기준"에 한 줄 적는다.',
+            '     출처를 읽지 못했다는 이유로 분석을 중단하거나 실패 처리하지 않는다. 수치를 지어내지 않는 범위에서 끝까지 작성한다.',
             '   - 교차 확인용 통계·카운터: op.gg, u.gg, lolalytics, mobalytics, deeplol, leagueofgraphs',
             '   - 패치 변경·오브젝트 규칙: leagueoflegends.com 공식 패치노트·시즌 공지',
             '   - 운영·동선·매치업 팁: mobalytics 가이드, 프로·챌린저 가이드, 커뮤니티 공략',
@@ -248,9 +250,19 @@ public with sharing class LolClaudeAnalysisService {
             }));
             // 분석 시 항상 먼저 열어 볼 lol.ps(프로관전러) 챔피언 페이지. lane 번호는 lol.ps 기준(0 탑 ~ 4 서폿)
             if (c.Riot_Key__c != null) {
-                lines.add('  lol.ps: ' + lolpsChampionUrl(c.Riot_Key__c.intValue(), lane) +
-                    (c.PS_Score__c == null ? '' : ' (PS 점수 ' + c.PS_Score__c + (c.Honey__c ? ', 꿀챔' : '') + ')'));
+                lines.add('  lol.ps: ' + lolpsChampionUrl(c.Riot_Key__c.intValue(), lane));
             }
+            if (c.PS_Score__c != null) {
+                // Salesforce에 저장된 lol.ps 수치(scripts/lol/fetch-stats.js로 수집): 페이지를 못 읽어도 근거 수치가 있도록
+                lines.add('  lol.ps 통계: 티어 ' + c.Meta_Tier__c + ' · 승률 ' + c.Win_Rate__c + '% · 픽률 ' + c.Pick_Rate__c + '% · 밴률 ' + c.Ban_Rate__c +
+                    '% · PS 점수 ' + c.PS_Score__c + (c.Honey__c ? ' · 꿀챔' : ''));
+            }
+        }
+        // "상대 정글러별 첫 3분 대응"의 근거: lol.ps 정글 픽률 상위 5명 (Salesforce에 저장된 값)
+        lines.add('');
+        lines.add('[상대 정글러 픽률 상위 5 (lol.ps 한국 에메랄드+)]');
+        for (LoL_Champion__mdt j : topPicked('JUNGLE', 5)) {
+            lines.add('- ' + j.MasterLabel + ': 픽률 ' + j.Pick_Rate__c + '% · 승률 ' + j.Win_Rate__c + '% · 티어 ' + j.Meta_Tier__c);
         }
         // 대체 픽을 팀이 실제로 할 수 있는 챔피언 안에서 고르도록 후보 풀을 함께 전달
         lines.add('');
@@ -282,7 +294,7 @@ public with sharing class LolClaudeAnalysisService {
         lines.add('  ▶ 다이브 조합 (예: 자르반·말파이트·카밀) ▶ 포킹·시즈 조합 (예: 제이스·제라스·직스) ▶ 스플릿 푸시 조합 (예: 피오라·잭스·트런들)');
         lines.add('  ▶ 픽·암살 조합 (예: 카직스·제드·블리츠크랭크) ▶ 보호형 하이퍼캐리 조합 (예: 룰루·코그모) ▶ 초반 스노우볼 조합 (예: 렉사이·드레이븐·판테온)');
         lines.add('  예시 챔피언은 기준 패치에서 실제로 많이 쓰이는 챔피언으로 검색해 교체해도 된다.');
-        lines.add('  마지막에 "▶ 상대 정글러별 첫 3분 대응" 소제목: 기준 패치 픽률 상위 정글러 5명 각각 "- 챔피언: 예상 동선 / 우리 팀 대응" 한 줄.');
+        lines.add('  마지막에 "▶ 상대 정글러별 첫 3분 대응" 소제목: [상대 정글러 픽률 상위 5]의 5명 각각 "- 챔피언: 예상 동선 / 우리 팀 대응" 한 줄.');
         lines.add('■ 라인별 해야 할 것 / 주의사항: ▶ 탑 ▶ 정글 ▶ 미드 ▶ 원딜 ▶ 서폿 소제목마다 "- 라인전:", "- 해야 할 것:" 3개, "- 주의사항:" 2개, "- 카운터:" 이 라인의 상위 카운터 챔피언 3개와 대처 1줄');
         lines.add('■ 정글 동선과 갱킹: ▶ 레드 시작 ▶ 블루 시작 (각각 시작 캠프부터 첫 귀환까지 캠프 순서) ▶ 첫 갱 타이밍과 우선 라인 ▶ 역갱·카정 대응');
         lines.add('■ 오브젝트 운영: [운영 작성 규칙]대로 쓴다. 기준 패치에 있는 오브젝트만 "▶ 공허 유충" "▶ 첫 드래곤" "▶ 협곡의 전령" "▶ 바론" "▶ 드래곤 영혼·장로" 소제목으로 쓰고, 소제목마다 아래 글머리표를 쓴다.');
@@ -306,6 +318,35 @@ public with sharing class LolClaudeAnalysisService {
             Decimal x = a.Sort_Order__c == null ? 999 : a.Sort_Order__c;
             Decimal y = b.Sort_Order__c == null ? 999 : b.Sort_Order__c;
             return x == y ? 0 : (x < y ? -1 : 1);
+        }
+    }
+
+    /** 라인별 픽률 상위 N명 (lol.ps 수치가 있는 레코드만) */
+    @TestVisible
+    static List<LoL_Champion__mdt> topPicked(String lane, Integer count) {
+        List<PickRateOrder> rows = new List<PickRateOrder>();
+        for (LoL_Champion__mdt c : LoL_Champion__mdt.getAll().values()) {
+            if (c.Lane__c == lane && c.Pick_Rate__c != null) {
+                rows.add(new PickRateOrder(c));
+            }
+        }
+        rows.sort();
+        List<LoL_Champion__mdt> top = new List<LoL_Champion__mdt>();
+        for (Integer i = 0; i < Math.min(count, rows.size()); i++) {
+            top.add(rows[i].champion);
+        }
+        return top;
+    }
+
+    class PickRateOrder implements Comparable {
+        LoL_Champion__mdt champion;
+        PickRateOrder(LoL_Champion__mdt champion) {
+            this.champion = champion;
+        }
+        public Integer compareTo(Object other) {
+            Decimal mine = champion.Pick_Rate__c;
+            Decimal theirs = ((PickRateOrder) other).champion.Pick_Rate__c;
+            return mine == theirs ? 0 : (mine > theirs ? -1 : 1); // 픽률 내림차순
         }
     }
 

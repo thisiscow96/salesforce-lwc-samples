@@ -6,6 +6,9 @@
  *   node scripts/lol/claude-worker.js complete <Id> <결과.json>   결과 기록 → Completed
  *        결과.json = { "text": "분석 본문", "sources": [{ "title": "...", "url": "https://..." }], "searchCount": 3 }
  *   node scripts/lol/claude-worker.js fail <Id> "사유"    Failed로 표시
+ *   node scripts/lol/claude-worker.js lolps <챔피언키> <라인>   lol.ps 승률·픽률·밴률·PS 점수·상대하기 어려운/쉬운 챔피언 (JSON)
+ *   node scripts/lol/claude-worker.js lolps-tier <라인> [N]    lol.ps 라인별 픽률 상위 N명 (예: JUNGLE 5 = 상대 정글러 후보)
+ *        라인 = 0~4 또는 TOP/JUNGLE/MID/ADC/SUPPORT. lol.ps는 수치가 스크립트 데이터에 있어 WebFetch로는 비어 보이므로 이 명령을 쓴다
  *
  * 연결 방식 (환경 변수로 자동 선택)
  *   - 로컬 PC (기본): sf CLI 로그인(chartjs-dev)으로 REST API 호출. 토큰은 sf CLI가 처리.
@@ -154,9 +157,109 @@ function cleanSources(sources) {
         .map((s) => ({ title: String(s.title || s.url).slice(0, 200), url: String(s.url).slice(0, 1000) }));
 }
 
+// ---------- lol.ps (프로관전러) 수치 읽기 ----------
+// lol.ps는 수치를 화면 글자가 아니라 페이지 안 스크립트 데이터(SvelteKit)에 넣는다.
+// WebFetch처럼 화면 글자만 읽으면 "승률 픽률 밴율" 제목만 남고 숫자가 빠지므로, 원본 HTML을 받아 스크립트 데이터를 직접 파싱한다.
+const LOLPS_LANES = ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT']; // lol.ps lane 번호 0~4
+const LOLPS_QUERY = 'tier=2&region=0'; // 에메랄드+ · 한국
+
+function curlText(url) {
+    try {
+        return execFileSync('curl', ['-sSL', '--max-time', '30', '-A', 'Mozilla/5.0', url], { encoding: 'utf8', maxBuffer: 20 * 1024 * 1024 });
+    } catch (e) {
+        throw new Error(`${url} 연결 실패 (네트워크 허용 도메인 확인): ${(e.stderr || e.message || '').toString().slice(0, 200)}`);
+    }
+}
+
+function laneNumber(value) {
+    const n = /^\d$/.test(String(value)) ? Number(value) : LOLPS_LANES.indexOf(String(value || '').toUpperCase());
+    if (n < 0 || n > 4) throw new Error(`라인은 0~4 또는 TOP/JUNGLE/MID/ADC/SUPPORT: ${value}`);
+    return n;
+}
+
+// "{key:값, ...}" (따옴표 없는 키) 객체에서 숫자·문자열·숫자 배열 필드 추출
+function psField(chunk, name) {
+    const m = new RegExp(`[{,]${name}:(\\[[^\\]]*\\]|"[^"]*"|[-\\d.]+|true|false|null)`).exec(chunk);
+    if (!m) return null;
+    const raw = m[1];
+    if (raw.startsWith('[')) return raw.slice(1, -1).split(',').filter(Boolean).map(Number);
+    if (raw.startsWith('"')) return raw.slice(1, -1);
+    if (raw === 'true' || raw === 'false') return raw === 'true';
+    return raw === 'null' ? null : Number(raw);
+}
+
+// Riot 숫자 키 → 한국어 이름 (Data Dragon). 실패하면 숫자 키 그대로
+function championNames() {
+    try {
+        const version = JSON.parse(curlText('https://ddragon.leagueoflegends.com/api/versions.json'))[0];
+        const data = JSON.parse(curlText(`https://ddragon.leagueoflegends.com/cdn/${version}/data/ko_KR/champion.json`)).data;
+        return Object.fromEntries(Object.values(data).map((c) => [Number(c.key), c.name]));
+    } catch {
+        return {};
+    }
+}
+
+function lolpsChampion(riotKey, lane) {
+    const key = Number(riotKey);
+    if (!Number.isInteger(key) || key <= 0) throw new Error(`잘못된 챔피언 키: ${riotKey}`);
+    const laneNo = laneNumber(lane);
+    const url = `https://lol.ps/champ/${key}?${LOLPS_QUERY}&lane=${laneNo}`;
+    const html = curlText(url);
+    const start = html.indexOf('champSummary:[');
+    if (start < 0) throw new Error(`lol.ps 페이지에 champSummary 데이터가 없음 (페이지 구조 변경 또는 해당 라인 표본 없음): ${url}`);
+    const chunk = html.slice(start, html.indexOf('}', start) + 1);
+    const names = championNames();
+    const matchups = (ids, rates, counts) => (ids || []).map((id, i) => ({ champion: names[id] || String(id), myWinRate: rates[i], games: counts[i] }));
+    const versionLabel = (/versionInfo:\[\{versionId:\d+,description:"([^"]+)"/.exec(html) || [])[1];
+    return {
+        source: 'lol.ps (프로관전러 P.S) 한국 · 에메랄드+',
+        patch: versionLabel || null,
+        url,
+        lane: LOLPS_LANES[laneNo],
+        winRate: Number(psField(chunk, 'winRate')),
+        pickRate: Number(psField(chunk, 'pickRate')),
+        banRate: Number(psField(chunk, 'banRate')),
+        psScore: Number(psField(chunk, 'psScore')),
+        ranking: psField(chunk, 'ranking'),
+        // myWinRate = 이 챔피언이 그 상대를 만났을 때의 승률 (낮을수록 상대하기 어려움)
+        hardMatchups: matchups(psField(chunk, 'counterChampionIdList'), psField(chunk, 'counterWinrateList') || [], psField(chunk, 'counterCountList') || []),
+        easyMatchups: matchups(psField(chunk, 'counterEasyChampionIdList'), psField(chunk, 'counterEasyWinrateList') || [], psField(chunk, 'counterEasyCountList') || [])
+    };
+}
+
+// 라인별 픽률 상위 N명 (상대 정글러 픽률 상위 등)
+function lolpsTier(lane, limit) {
+    const laneNo = laneNumber(lane);
+    const url = `https://lol.ps/statistics?${LOLPS_QUERY}`;
+    const html = curlText(url);
+    const start = html.indexOf('tierlist:[');
+    if (start < 0) throw new Error(`lol.ps 통계 페이지에 tierlist 데이터가 없음 (페이지 구조 변경): ${url}`);
+    const rows = html
+        .slice(start, html.indexOf(']', start))
+        .split('{count:')
+        .slice(1)
+        .map((body) => `{count:${body}`)
+        .filter((chunk) => psField(chunk, 'laneId') === laneNo)
+        .map((chunk) => ({
+            champion: (/nameKr:"([^"]+)"/.exec(chunk) || [])[1],
+            winRate: Number(psField(chunk, 'winRate')),
+            pickRate: Number(psField(chunk, 'pickRate')),
+            banRate: Number(psField(chunk, 'banRate')),
+            psScore: Number(psField(chunk, 'opScore')),
+            honey: psField(chunk, 'isHoney') === true
+        }))
+        .sort((a, b) => b.pickRate - a.pickRate)
+        .slice(0, limit);
+    return { source: 'lol.ps (프로관전러 P.S) 한국 · 에메랄드+', url, lane: LOLPS_LANES[laneNo], orderedBy: 'pickRate', rows };
+}
+
 function main() {
     const [command, arg1, arg2] = process.argv.slice(2);
-    if (command === 'pending') {
+    if (command === 'lolps') {
+        console.log(JSON.stringify(lolpsChampion(arg1, arg2), null, 2));
+    } else if (command === 'lolps-tier') {
+        console.log(JSON.stringify(lolpsTier(arg1, Math.max(1, Math.min(Number(arg2) || 5, 20))), null, 2));
+    } else if (command === 'pending') {
         const limit = Math.max(1, Math.min(Number(arg1) || 3, 10));
         console.log(JSON.stringify(backend.pending(limit), null, 2));
     } else if (command === 'claim') {
@@ -175,7 +278,7 @@ function main() {
         backend.fail(requireId(arg1), String(arg2 || '처리 실패').slice(0, 255));
         console.log(`failed ${arg1} (${backend.name})`);
     } else {
-        console.log('사용법: pending [N] | claim <Id> | complete <Id> <결과.json> | fail <Id> "사유"');
+        console.log('사용법: pending [N] | claim <Id> | complete <Id> <결과.json> | fail <Id> "사유" | lolps <챔피언키> <라인> | lolps-tier <라인> [N]');
         process.exitCode = 1;
     }
 }
