@@ -293,8 +293,8 @@ describe('c-lol-team-builder', () => {
         expect(getRecentRequests).not.toHaveBeenCalled();
     });
 
-    it('공개 사이트 방문자: 분석 버튼은 보이고, 최근 요청 목록 대신 공유·횟수 제한 안내를 보여 준다', async () => {
-        submitAnalysisRequest.mockResolvedValue('a01GUEST');
+    it('공개 사이트 방문자: Apex REST로 요청하고(IP별 제한), 최근 요청 목록 대신 공유·횟수 제한 안내를 보여 준다', async () => {
+        global.fetch = jest.fn(() => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ id: 'a01GUEST' }) }));
         getAnalysisRequest.mockResolvedValue({ Id: 'a01GUEST', Name: 'LAR-00100', Status__c: 'Pending', Composition__c: 'x' });
         const el = createElement('c-lol-team-builder', { is: LolTeamBuilder });
         document.body.appendChild(el);
@@ -304,14 +304,38 @@ describe('c-lol-team-builder', () => {
 
         expect($(el, '.analyze-button')).not.toBeNull();
         expect($(el, '.recent')).toBeNull();
-        expect($(el, '.guest-info').textContent).toContain('시간당');
+        expect($(el, '.guest-info').textContent).toContain('같은 네트워크(IP)당 10분에 5건');
         expect(getRecentRequests).not.toHaveBeenCalled();
 
         $(el, '.analyze-button').click();
         await flush();
-        expect(submitAnalysisRequest).toHaveBeenCalledTimes(1);
+        await flush();
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+        const [url, init] = global.fetch.mock.calls[0];
+        expect(url).toBe('/lolvforcesite/services/apexrest/lol/guest/requests');
+        expect(init.method).toBe('POST');
+        expect(Object.keys(JSON.parse(init.body))).toEqual(['picks', 'tiers', 'totalScore', 'categoryPoints']); // ID·숫자만 전송
+        expect(submitAnalysisRequest).not.toHaveBeenCalled(); // 방문자는 Aura 경로를 쓰지 않음
         expect($(el, '.waiting-text').textContent).toContain('LAR-00100 대기 중');
         expect(getRecentRequests).not.toHaveBeenCalled(); // 요청 후에도 목록을 불러오지 않음
+        delete global.fetch;
+    });
+
+    it('공개 사이트 방문자: IP별 횟수를 넘으면 서버 안내 문구를 그대로 보여 준다', async () => {
+        const message = '같은 네트워크에서 10분에 5건까지 새 분석을 요청할 수 있습니다. 잠시 후 다시 시도하거나, 이미 분석된 조합을 확인하세요.';
+        global.fetch = jest.fn(() => Promise.resolve({ ok: false, status: 429, json: () => Promise.resolve({ message }) }));
+        const el = createElement('c-lol-team-builder', { is: LolTeamBuilder });
+        document.body.appendChild(el);
+        getBuilderData.emit(builderData('CLAUDE_CODE', true, true));
+        await flush();
+        await flush();
+
+        $(el, '.analyze-button').click();
+        await flush();
+        await flush();
+        expect($(el, '.analysis-error').textContent).toBe(message);
+        expect($(el, '.waiting-text')).toBeNull();
+        delete global.fetch;
     });
 
     it('분석 패널은 화면 맨 위에 있고, 리포트는 섹션 제목과 라인별 카드로 표시된다', async () => {

@@ -156,6 +156,9 @@ const TYPES = {
             { name: 'Guest_Analysis_Enabled__c', label: 'Guest Analysis Enabled', description: '공개 사이트 방문자의 분석 요청 허용', type: 'Checkbox', defaultValue: false },
             num('Guest_Hourly_Limit__c', 'Guest Hourly Limit', '방문자 전체의 시간당 새 분석 요청 상한 (같은 조합 결과 재사용은 제외)', 4, 0),
             num('Guest_Cache_Hours__c', 'Guest Cache Hours', '같은 조합의 방문자 분석 결과를 재사용하는 시간', 4, 0),
+            num('Guest_Ip_Limit__c', 'Guest IP Limit', '방문자 IP 1개당 새 분석 요청 상한 (Guest_Ip_Window_Minutes__c 동안, 결과 재사용은 제외)', 3, 0),
+            num('Guest_Ip_Window_Minutes__c', 'Guest IP Window Minutes', 'IP별 요청 횟수를 세는 시간(분)', 4, 0),
+            text('Guest_Api_Path__c', 'Guest API Path', '방문자 분석 요청 Apex REST 경로 (사이트 도메인 기준, 접속 IP로 IP별 상한 적용). 값이 있으면 방문자의 Aura 요청 경로는 막힘', 255),
             text('Routine_Fire_Path__c', 'Routine Fire Path', '클라우드 루틴 API 트리거 경로 /v1/claude_code/routines/<id>/fire (비우면 즉시 실행 안 함)', 255),
             { name: 'Team_Goal__c', label: 'Team Goal', description: '팀 성향·목표 (분석 프롬프트에 포함)', type: 'LongTextArea', length: 2000 }
         ]
@@ -243,6 +246,9 @@ record('LoL_AI_Setting__mdt', 'Default', 'Default', {
     Guest_Analysis_Enabled__c: true,
     Guest_Hourly_Limit__c: 10,
     Guest_Cache_Hours__c: 24,
+    Guest_Ip_Limit__c: 5, // IP 1개당 10분에 5건
+    Guest_Ip_Window_Minutes__c: 10,
+    Guest_Api_Path__c: '/lolvforcesite/services/apexrest/lol/guest/requests', // Experience 사이트의 Salesforce Sites 경로 (LWR 경로 /lol 아래에서는 Apex REST 불가)
     Routine_Fire_Path__c: '/v1/claude_code/routines/trig_016zhLGx3x9QL1KiPxuV8KQm/fire',
     Team_Goal__c: TEAM_GOAL
 });

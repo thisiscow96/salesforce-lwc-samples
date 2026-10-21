@@ -47,6 +47,18 @@
         <value xsi:type="xsd:double">24</value>
     </values>
     <values>
+        <field>Guest_Ip_Limit__c</field>
+        <value xsi:type="xsd:double">5</value>
+    </values>
+    <values>
+        <field>Guest_Ip_Window_Minutes__c</field>
+        <value xsi:type="xsd:double">10</value>
+    </values>
+    <values>
+        <field>Guest_Api_Path__c</field>
+        <value xsi:type="xsd:string">/lolvforcesite/services/apexrest/lol/guest/requests</value>
+    </values>
+    <values>
         <field>Routine_Fire_Path__c</field>
         <value xsi:type="xsd:string">/v1/claude_code/routines/trig_016zhLGx3x9QL1KiPxuV8KQm/fire</value>
     </values>

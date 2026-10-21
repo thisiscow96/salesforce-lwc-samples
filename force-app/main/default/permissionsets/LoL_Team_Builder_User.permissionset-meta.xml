@@ -30,6 +30,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>LoL_Analysis_Request__c.Client_Key__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>LoL_Analysis_Request__c.Composition_Key__c</field>
         <readable>true</readable>

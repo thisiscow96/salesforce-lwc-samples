@@ -13,7 +13,10 @@ function builderData(mode = 'CLAUDE_CODE', canRequestAnalysis = true, isGuest = 
         ddragonVersion: '16.20.1',
         mode,
         canRequestAnalysis,
-        isGuest
+        isGuest,
+        guestApiPath: isGuest ? '/lolvforcesite/services/apexrest/lol/guest/requests' : null,
+        guestIpLimit: 5,
+        guestIpWindowMinutes: 10
     };
 }
 

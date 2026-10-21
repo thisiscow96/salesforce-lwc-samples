@@ -20,6 +20,9 @@ public with sharing class LolTeamBuilderController {
         @AuraEnabled public String mode;
         @AuraEnabled public Boolean canRequestAnalysis; // 화면에서 분석 버튼 표시 여부
         @AuraEnabled public Boolean isGuest; // 공개 사이트 방문자 (최근 요청 목록은 숨김: 모든 방문자가 같은 게스트 계정)
+        @AuraEnabled public String guestApiPath; // 방문자 분석 요청 경로 (Apex REST: 접속 IP로 IP별 상한)
+        @AuraEnabled public Integer guestIpLimit; // 방문자 안내 문구용: IP당 상한
+        @AuraEnabled public Integer guestIpWindowMinutes; // 방문자 안내 문구용: 상한을 세는 시간(분)
     }
 
     @AuraEnabled(cacheable=true)
@@ -35,6 +38,9 @@ public with sharing class LolTeamBuilderController {
         data.mode = String.isBlank(s?.Mode__c) ? 'CLAUDE_CODE' : s.Mode__c;
         data.canRequestAnalysis = canRequestAnalysis();
         data.isGuest = isGuest();
+        data.guestApiPath = data.isGuest ? s?.Guest_Api_Path__c : null;
+        data.guestIpLimit = s?.Guest_Ip_Limit__c?.intValue();
+        data.guestIpWindowMinutes = s?.Guest_Ip_Window_Minutes__c?.intValue();
         return data;
     }
 
@@ -70,7 +76,11 @@ public with sharing class LolTeamBuilderController {
             LolClaudeAnalysisService.validate(req);
             LoL_AI_Setting__mdt s = LolClaudeAnalysisService.setting();
             if (isGuest()) {
-                return LolGuestAnalysis.submit(req, s);
+                // 방문자는 IP별 상한을 위해 Apex REST(LolGuestApi)로만 요청 → 이 경로로 상한을 우회하지 못하게 막음
+                if (String.isNotBlank(s.Guest_Api_Path__c)) {
+                    throw new LolClaudeAnalysisService.AnalysisException('화면을 새로고침한 뒤 다시 요청하세요.');
+                }
+                return LolGuestAnalysis.submit(req, s, null);
             }
             LoL_Analysis_Request__c record = new LoL_Analysis_Request__c(
                 Status__c = 'Pending',

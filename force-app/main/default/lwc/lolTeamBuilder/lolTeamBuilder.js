@@ -122,6 +122,9 @@ export default class LolTeamBuilder extends LightningElement {
     mode = 'CLAUDE_CODE';
     canAnalyze = false; // 서버가 알려 준 분석 요청 가능 여부
     isGuestUser = false; // Experience Cloud 공개 사이트 방문자
+    guestApiPath; // 방문자 분석 요청 Apex REST 경로 (IP별 횟수 제한)
+    guestIpLimit; // 방문자 안내 문구: IP당 상한 (설정값)
+    guestIpWindowMinutes;
     queued; // Claude Code 모드에서 추적 중인 요청 { id, name, status, composition, processedBy }
     recentRequests = [];
     pollTimer;
@@ -139,6 +142,9 @@ export default class LolTeamBuilder extends LightningElement {
             this.mode = data.mode || 'CLAUDE_CODE';
             this.canAnalyze = data.canRequestAnalysis === true;
             this.isGuestUser = data.isGuest === true;
+            this.guestApiPath = data.guestApiPath;
+            this.guestIpLimit = data.guestIpLimit;
+            this.guestIpWindowMinutes = data.guestIpWindowMinutes;
             if (this.showRecent) {
                 this.loadRecent();
             }
@@ -454,6 +460,11 @@ export default class LolTeamBuilder extends LightningElement {
     get guestNoteText() {
         return this.isGuestUser ? '공개 사이트의 Claude 분석 요청이 현재 꺼져 있습니다. 조합 점수·추천 조합표·Excel 다운로드는 이용할 수 있습니다.' : 'Claude 분석 요청 권한이 없습니다. 관리자에게 권한 집합(LoL Team Builder User)을 요청하세요.';
     }
+    get guestInfoText() {
+        const ipRule = this.guestIpLimit && this.guestIpWindowMinutes ? `같은 네트워크(IP)당 ${this.guestIpWindowMinutes}분에 ${this.guestIpLimit}건, ` : '';
+        return `공개 사이트 안내: 같은 조합은 최근 분석 결과를 함께 보여 주며, 새 분석 요청은 ${ipRule}사이트 전체 시간당 횟수가 제한됩니다. 분석에는 1~2분 정도 걸립니다.`;
+    }
+
     get showGuestInfo() {
         return this.isGuestUser && this.canAnalyze;
     }
@@ -566,7 +577,8 @@ export default class LolTeamBuilder extends LightningElement {
             };
             const json = JSON.stringify(request);
             if (this.isClaudeCodeMode) {
-                const id = await submitAnalysisRequest({ requestJson: json });
+                // 공개 사이트 방문자: Apex REST로 요청 (서버가 접속 IP로 IP별 횟수 제한). 로그인 사용자는 기존 Apex 호출
+                const id = this.isGuestUser && this.guestApiPath ? await this.submitAsGuest(json) : await submitAnalysisRequest({ requestJson: json });
                 this.watchRequest(id);
                 this.loadRecent();
             } else {
@@ -578,6 +590,25 @@ export default class LolTeamBuilder extends LightningElement {
         } finally {
             this.analyzing = false;
         }
+    }
+
+    // 방문자 분석 요청 (같은 사이트 도메인의 Apex REST: LolGuestApi). 실패 시 서버 안내 문구를 그대로 보여 줌
+    async submitAsGuest(json) {
+        const response = await fetch(this.guestApiPath, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: json
+        });
+        let body = {};
+        try {
+            body = await response.json();
+        } catch {
+            body = {};
+        }
+        if (!response.ok || !body.id) {
+            throw new Error(body.message || `분석 요청을 저장하지 못했습니다 (HTTP ${response.status}). 잠시 후 다시 시도하세요.`);
+        }
+        return body.id;
     }
 
     // ===== Claude Code 모드: 요청 상태 폴링 =====

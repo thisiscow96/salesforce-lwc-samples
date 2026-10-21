@@ -331,11 +331,19 @@ private class LolTeamBuilderControllerTest {
         Id second;
         LoL_Analysis_Request__c fetched;
         String apiModeError;
+        String auraPathError;
         Test.startTest();
         System.runAs(guest) {
             data = LolTeamBuilderController.getBuilderData();
-            first = LolTeamBuilderController.submitAnalysisRequest(JSON.serialize(validRequest()));
-            second = LolTeamBuilderController.submitAnalysisRequest(JSON.serialize(validRequest()));
+            // 방문자는 Apex REST(LolGuestApi)로 요청 (접속 IP로 IP별 상한)
+            first = (Id) ((Map<String, Object>) JSON.deserializeUntyped(callGuestApi(JSON.serialize(validRequest()), '198.51.100.40').responseBody.toString())).get('id');
+            second = (Id) ((Map<String, Object>) JSON.deserializeUntyped(callGuestApi(JSON.serialize(validRequest()), '198.51.100.40').responseBody.toString())).get('id');
+            // 방문자의 Aura 요청 경로는 막힘 (IP별 상한 우회 방지)
+            try {
+                LolTeamBuilderController.submitAnalysisRequest(JSON.serialize(validRequest()));
+            } catch (AuraHandledException e) {
+                auraPathError = e.getMessage();
+            }
             fetched = LolTeamBuilderController.getAnalysisRequest(first);
             Assert.isTrue(LolTeamBuilderController.getRecentRequests().isEmpty(), '방문자는 최근 요청 목록 없음');
             try {
@@ -348,6 +356,9 @@ private class LolTeamBuilderControllerTest {
 
         Assert.isTrue(data.isGuest);
         Assert.isTrue(data.canRequestAnalysis, '설정이 켜져 있으면 방문자도 분석 버튼 표시');
+        Assert.areEqual(LoL_AI_Setting__mdt.getInstance('Default').Guest_Api_Path__c, data.guestApiPath, '방문자에게 REST 경로 전달');
+        Assert.areEqual('화면을 새로고침한 뒤 다시 요청하세요.', auraPathError);
+        Assert.areEqual(LoL_AI_Setting__mdt.getInstance('Default').Guest_Ip_Limit__c.intValue(), data.guestIpLimit, '안내 문구용 IP 상한');
         Assert.areEqual(first, second, '같은 조합은 진행 중 요청을 재사용 (Claude 실행 1회)');
         Assert.areEqual(1, [SELECT COUNT() FROM LoL_Analysis_Request__c]);
         Assert.areEqual('Pending', fetched.Status__c);
@@ -375,11 +386,9 @@ private class LolTeamBuilderControllerTest {
                 filler.add(new LoL_Analysis_Request__c(Status__c = 'Completed', Composition__c = 'filler ' + i, Composition_Key__c = 'filler-' + i, Completed_At__c = Datetime.now()));
             }
             insert filler;
-            try {
-                LolTeamBuilderController.submitAnalysisRequest(JSON.serialize(validRequest()));
-            } catch (AuraHandledException e) {
-                limitError = e.getMessage();
-            }
+            // IP가 달라도(새 네트워크) 방문자 전체 시간당 상한은 적용
+            RestResponse res = callGuestApi(JSON.serialize(validRequest()), '198.51.100.50');
+            limitError = (String) ((Map<String, Object>) JSON.deserializeUntyped(res.responseBody.toString())).get('message');
             try {
                 LolTeamBuilderController.getAnalysisRequest(memberRow.Id);
             } catch (AuraHandledException e) {
@@ -392,6 +401,65 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(limitError.contains('시간당 ' + hourlyLimit + '건'), limitError);
         Assert.areEqual('분석 요청을 찾을 수 없습니다.', hiddenError, '로그인 사용자의 요청은 방문자에게 보이지 않음');
         Assert.areEqual(hourlyLimit + 1, [SELECT COUNT() FROM LoL_Analysis_Request__c], '새 요청이 만들어지지 않음');
+    }
+
+    // Apex REST(LolGuestApi) 호출 흉내: 요청 본문과 접속 IP를 지정
+    static RestResponse callGuestApi(String body, String ip) {
+        RestRequest req = new RestRequest();
+        req.requestURI = '/services/apexrest/lol/guest/requests';
+        req.httpMethod = 'POST';
+        req.requestBody = Blob.valueOf(body);
+        req.remoteAddress = ip;
+        RestContext.request = req;
+        RestContext.response = new RestResponse();
+        LolGuestApi.submit();
+        return RestContext.response;
+    }
+
+    @IsTest
+    static void guestApiLimitsPerIpAndStoresOnlyHash() {
+        Test.setMock(HttpCalloutMock.class, new FireMock());
+        User guest = siteGuest();
+        LoL_AI_Setting__mdt s = LoL_AI_Setting__mdt.getInstance('Default');
+        Integer ipLimit = s.Guest_Ip_Limit__c.intValue();
+        Integer windowMinutes = s.Guest_Ip_Window_Minutes__c.intValue();
+        String blockedIp = '203.0.113.7';
+
+        RestResponse blocked;
+        RestResponse allowed;
+        RestResponse badBody;
+        Test.startTest();
+        System.runAs(guest) {
+            // 같은 IP에서 최근 상한만큼 이미 요청함
+            List<LoL_Analysis_Request__c> filler = new List<LoL_Analysis_Request__c>();
+            for (Integer i = 0; i < ipLimit; i++) {
+                filler.add(new LoL_Analysis_Request__c(Status__c = 'Completed', Composition__c = 'ip filler ' + i, Composition_Key__c = 'ip-filler-' + i, Client_Key__c = LolGuestAnalysis.clientKey(blockedIp), Completed_At__c = Datetime.now()));
+            }
+            insert filler;
+            blocked = callGuestApi(JSON.serialize(validRequest()), blockedIp);
+            allowed = callGuestApi(JSON.serialize(validRequest()), '198.51.100.20'); // 다른 네트워크는 영향 없음
+            badBody = callGuestApi('{not json', '198.51.100.21');
+        }
+        Test.stopTest();
+
+        Assert.areEqual(429, blocked.statusCode, '같은 IP 상한 초과 → 429');
+        Assert.isTrue(blocked.responseBody.toString().contains(windowMinutes + '분에 ' + ipLimit + '건'), blocked.responseBody.toString());
+        Assert.areEqual(200, allowed.statusCode, allowed.responseBody.toString());
+        Id createdId = (Id) ((Map<String, Object>) JSON.deserializeUntyped(allowed.responseBody.toString())).get('id');
+        LoL_Analysis_Request__c created = [SELECT Client_Key__c, Prompt__c FROM LoL_Analysis_Request__c WHERE Id = :createdId];
+        Assert.areEqual(LolGuestAnalysis.clientKey('198.51.100.20'), created.Client_Key__c, 'IP 해시 저장');
+        Assert.areEqual(64, created.Client_Key__c.length(), 'SHA-256 해시(64자)만 저장');
+        Assert.isFalse(created.Client_Key__c.contains('198.51'), '원본 IP는 저장하지 않음');
+        Assert.isTrue(created.Prompt__c.startsWith('[지침]'), '프롬프트는 서버가 조립');
+        Assert.areEqual(400, badBody.statusCode);
+        Assert.isNull(LolGuestAnalysis.clientKey(null), 'IP를 모르면 IP별 상한 미적용');
+    }
+
+    @IsTest
+    static void guestApiRejectsLoggedInUsers() {
+        RestResponse res = callGuestApi(JSON.serialize(validRequest()), '198.51.100.30');
+        Assert.areEqual(403, res.statusCode, '로그인 사용자는 Aura 경로 사용');
+        Assert.areEqual(0, [SELECT COUNT() FROM LoL_Analysis_Request__c]);
     }
 
     @IsTest
