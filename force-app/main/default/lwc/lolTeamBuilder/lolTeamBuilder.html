@@ -270,7 +270,7 @@
                                 <template lwc:if={hasSwaps}>
                                     <template for:each={swapItems} for:item="x">
                                         <div key={x.key} class="swap">
-                                            <span>{x.text} <b class="slds-text-color_success">{x.delta}</b></span>
+                                            <span>{x.text} <b class="delta-up">{x.delta}</b></span>
                                             <lightning-button variant="base" label="적용" data-lane={x.lane} data-id={x.id}
                                                 onclick={handleSwap}></lightning-button>
                                         </div>

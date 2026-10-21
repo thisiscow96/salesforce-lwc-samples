@@ -346,10 +346,18 @@ export default class LolTeamBuilder extends LightningElement {
             series.push({ value: best.categories.map((c) => Math.round(c.ratio * 100)), name: `탐색 1위 (${best.total})`, lineStyle: { type: 'dashed' } });
         }
         return {
-            color: ['#0176D3', '#FE9339'],
+            // 블랙 & 화이트 테마: 현재 조합 블랙, 비교(탐색 1위) 그레이 점선
+            color: ['#111111', '#9A9A9A'],
             tooltip: {},
-            legend: { bottom: 0 },
-            radar: { indicator, radius: '62%', axisName: { color: '#444', fontSize: 11 } },
+            legend: { bottom: 0, textStyle: { color: '#3D3D3D' } },
+            radar: {
+                indicator,
+                radius: '62%',
+                axisName: { color: '#3D3D3D', fontSize: 11 },
+                splitLine: { lineStyle: { color: '#ECECEC' } },
+                splitArea: { areaStyle: { color: ['#FFFFFF', '#FAFAFA'] } },
+                axisLine: { lineStyle: { color: '#ECECEC' } }
+            },
             series: [{ type: 'radar', data: series }]
         };
     }
@@ -394,7 +402,7 @@ export default class LolTeamBuilder extends LightningElement {
                         banRateLabel: percent(c.banRate),
                         honeyLabel: c.honey ? '🍯' : '',
                         fitScore,
-                        fitClass: fitScore != null && fitScore > this.result.total ? 'slds-text-color_success' : ''
+                        fitClass: fitScore != null && fitScore > this.result.total ? 'delta-up' : ''
                     };
                 }), this.poolSortBy, this.poolSortDirection)
             };

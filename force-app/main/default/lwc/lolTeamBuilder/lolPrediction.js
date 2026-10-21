@@ -5,18 +5,17 @@
 //      지수마다 어떤 챔피언 값이 얼마나 들어갔는지(근거)를 함께 돌려줘 툴팁에 보여 준다.
 import { LANES, LANE_LABELS } from './lolScoring';
 
+// 블랙 & 화이트 테마: 색 대신 명도 단계로 강약을 구분 (진함 = 강함/우리 조합, 연함 = 약함/비교 대상)
 export const COLORS = {
-    blue: '#5383E8',
-    blueLight: '#7FA4F4',
-    red: '#E84057',
-    gold: '#F4C874',
-    teal: '#00BBA3',
-    purple: '#9E6CF2',
-    text: '#E5E7F0',
-    muted: '#9E9EB1',
-    grid: '#2E3350',
-    card: '#1E2235',
-    faint: '#4A5070'
+    ink: '#111111',
+    ink2: '#3D3D3D',
+    mid: '#8A8A8A',
+    light: '#C9C9C9',
+    text: '#1A1A1A',
+    muted: '#6B6B6B',
+    grid: '#ECECEC',
+    faint: '#B5B5B5',
+    paper: '#FFFFFF'
 };
 export const MINUTES = [5, 10, 15, 20, 25, 30, 35, 40];
 const LATE_WEIGHTS = { TOP: 0.15, JUNGLE: 0.1, MID: 0.3, ADC: 0.4, SUPPORT: 0.05 };
@@ -124,7 +123,7 @@ export function championIcon(version, ddId) {
 
 // ===================== ECharts option =====================
 const text = (size = 11, color = COLORS.muted) => ({ color, fontSize: size });
-const tooltip = { backgroundColor: '#11131F', borderColor: COLORS.grid, textStyle: { color: COLORS.text, fontSize: 12 }, extraCssText: 'border-radius:8px;' };
+const tooltip = { backgroundColor: COLORS.paper, borderColor: '#E0E0E0', textStyle: { color: COLORS.text, fontSize: 12 }, extraCssText: 'border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);' };
 const basisHtml = (item) => `<b>${item.label} ${item.value} / 10</b><br/>${item.basis.join('<br/>')}`;
 const gradient = (from, to, horizontal = false) => ({
     type: 'linear',
@@ -137,7 +136,8 @@ const gradient = (from, to, horizontal = false) => ({
         { offset: 1, color: to }
     ]
 });
-const indexColor = (v) => (v >= 6.5 ? gradient('#3B5FC0', COLORS.blueLight, true) : v >= 5 ? gradient('#8A6A2B', COLORS.gold, true) : gradient('#8E2336', COLORS.red, true));
+// 강함(6.5↑) 블랙 · 보통(5↑) 그레이 · 약함 라이트그레이
+const indexColor = (v) => (v >= 6.5 ? COLORS.ink : v >= 5 ? COLORS.mid : COLORS.light);
 
 /** 조합 성향: 레이더 (우리 조합 vs 평균 5) */
 export function profileOption(axes) {
@@ -151,7 +151,7 @@ export function profileOption(axes) {
             splitNumber: 5,
             axisName: text(11, COLORS.text),
             splitLine: { lineStyle: { color: COLORS.grid } },
-            splitArea: { areaStyle: { color: ['rgba(83,131,232,0.02)', 'rgba(83,131,232,0.06)'] } },
+            splitArea: { areaStyle: { color: [COLORS.paper, '#FAFAFA'] } },
             axisLine: { lineStyle: { color: COLORS.grid } }
         },
         series: [
@@ -162,9 +162,9 @@ export function profileOption(axes) {
                         name: '우리 조합',
                         value: axes.map((a) => a.value),
                         symbolSize: 6,
-                        lineStyle: { width: 2, color: COLORS.blueLight },
-                        itemStyle: { color: COLORS.blueLight },
-                        areaStyle: { color: { type: 'radial', x: 0.5, y: 0.5, r: 0.6, colorStops: [{ offset: 0, color: 'rgba(127,164,244,0.15)' }, { offset: 1, color: 'rgba(83,131,232,0.55)' }] } },
+                        lineStyle: { width: 2, color: COLORS.ink },
+                        itemStyle: { color: COLORS.ink },
+                        areaStyle: { color: 'rgba(17,17,17,0.10)' },
                         label: { show: true, color: COLORS.text, fontSize: 10, formatter: (p) => p.value }
                     },
                     { name: '평균(5)', value: axes.map(() => 5), symbol: 'none', lineStyle: { type: 'dashed', color: COLORS.faint }, itemStyle: { color: COLORS.faint } }
@@ -186,7 +186,7 @@ export function indexBarOption(items) {
                 type: 'bar',
                 barWidth: 14,
                 showBackground: true,
-                backgroundStyle: { color: 'rgba(255,255,255,0.04)', borderRadius: 7 },
+                backgroundStyle: { color: 'rgba(0,0,0,0.04)', borderRadius: 7 },
                 data: items.map((i) => ({ value: i.value, itemStyle: { color: indexColor(i.value), borderRadius: 7 } })),
                 label: { show: true, position: 'right', color: COLORS.text, fontWeight: 600, formatter: '{c}' },
                 // 세로 기준선 라벨은 세로 글자로 돌아가 읽기 어려워 축 눈금("5 평균")으로 대신 표시
@@ -210,16 +210,16 @@ export function powerOption(curve) {
                 symbol: 'circle',
                 symbolSize: 7,
                 data: curve.points.map((p) => p.value),
-                lineStyle: { width: 3, color: gradient(COLORS.gold, COLORS.blueLight, true) },
-                itemStyle: { color: COLORS.blueLight, borderColor: '#11131F', borderWidth: 2 },
-                areaStyle: { color: gradient('rgba(83,131,232,0.02)', 'rgba(83,131,232,0.45)') },
+                lineStyle: { width: 2.5, color: COLORS.ink },
+                itemStyle: { color: COLORS.ink, borderColor: COLORS.paper, borderWidth: 2 },
+                areaStyle: { color: gradient('rgba(17,17,17,0)', 'rgba(17,17,17,0.12)') },
                 markArea: {
                     silent: true,
                     label: { color: COLORS.muted, fontSize: 10, position: 'insideTop' },
                     data: [
-                        [{ name: '초반', xAxis: '5', itemStyle: { color: 'rgba(244,200,116,0.05)' } }, { xAxis: '15' }],
-                        [{ name: '중반', xAxis: '15', itemStyle: { color: 'rgba(255,255,255,0.02)' } }, { xAxis: '25' }],
-                        [{ name: '후반', xAxis: '25', itemStyle: { color: 'rgba(83,131,232,0.06)' } }, { xAxis: '40' }]
+                        [{ name: '초반', xAxis: '5', itemStyle: { color: 'rgba(0,0,0,0.025)' } }, { xAxis: '15' }],
+                        [{ name: '중반', xAxis: '15', itemStyle: { color: 'rgba(0,0,0,0)' } }, { xAxis: '25' }],
+                        [{ name: '후반', xAxis: '25', itemStyle: { color: 'rgba(0,0,0,0.045)' } }, { xAxis: '40' }]
                     ]
                 },
                 markLine: { symbol: 'none', silent: true, label: { color: COLORS.muted, formatter: '평균 5', position: 'insideEndBottom' }, lineStyle: { color: COLORS.faint, type: 'dashed' }, data: [{ yAxis: 5 }] },
@@ -227,8 +227,8 @@ export function powerOption(curve) {
                     symbol: 'roundRect',
                     symbolSize: [62, 22],
                     symbolOffset: [0, -18],
-                    itemStyle: { color: COLORS.gold },
-                    label: { color: '#1E2235', fontWeight: 700, fontSize: 11, formatter: () => `정점 ${curve.peak.value}` },
+                    itemStyle: { color: COLORS.ink },
+                    label: { color: COLORS.paper, fontWeight: 700, fontSize: 11, formatter: () => `정점 ${curve.peak.value}` },
                     data: [{ coord: [String(curve.peak.minute), curve.peak.value] }]
                 }
             }
@@ -251,8 +251,8 @@ export function damageOption(damage) {
                 itemStyle: { borderRadius: 8 },
                 label: { show: false },
                 data: [
-                    { name: '물리(AD)', value: damage.ad, itemStyle: { color: gradient('#8E2336', COLORS.red) } },
-                    { name: '마법(AP)', value: damage.ap, itemStyle: { color: gradient('#3B5FC0', COLORS.blueLight) } }
+                    { name: '물리(AD)', value: damage.ad, itemStyle: { color: COLORS.ink } },
+                    { name: '마법(AP)', value: damage.ap, itemStyle: { color: COLORS.light } }
                 ]
             }
         ]
@@ -287,7 +287,7 @@ export function metaScatterOption(ctx, team, version) {
                 name: '전체 픽',
                 type: 'scatter',
                 symbolSize: 6,
-                itemStyle: { color: 'rgba(158,158,177,0.28)' },
+                itemStyle: { color: 'rgba(17,17,17,0.14)' },
                 data: others.map((c) => ({ value: [c.pickRate, c.winRate], champ: c })),
                 markLine: { symbol: 'none', silent: true, label: { color: COLORS.muted, formatter: '승률 50%', position: 'insideEndTop' }, lineStyle: { color: COLORS.faint, type: 'dashed' }, data: [{ yAxis: 50 }] }
             },
@@ -304,7 +304,7 @@ export function metaScatterOption(ctx, team, version) {
                         value: [c.pickRate, c.winRate],
                         champ: c,
                         symbol: icon ? `image://${icon}` : 'circle',
-                        itemStyle: icon ? undefined : { color: COLORS.blue },
+                        itemStyle: icon ? undefined : { color: COLORS.ink },
                         label: { show: true, position: near ? 'top' : 'bottom', distance: 4, color: COLORS.text, fontSize: 11, fontWeight: 600, formatter: c.name }
                     };
                 })

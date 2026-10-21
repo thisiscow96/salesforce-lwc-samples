@@ -1,3 +1,47 @@
+/*
+ * 블랙 & 화이트 테마: 화면 전체를 흰 바탕 + 블랙/그레이 명도 단계로 통일한다.
+ * 강조는 색이 아니라 명도(진함 = 강함·선택됨)로 표현하고, 오류 안내만 SLDS 기본 경고색을 유지한다.
+ * 차트 색상은 lolPrediction.js의 COLORS와 같은 값을 쓴다.
+ */
+:host {
+    --lol-ink: #111111;
+    --lol-ink-2: #3d3d3d;
+    --lol-mid: #8a8a8a;
+    --lol-light: #c9c9c9;
+    --lol-line: #e6e6e6;
+    --lol-subtle: #f6f6f6;
+    --lol-paper: #ffffff;
+    --lol-muted: #6b6b6b;
+
+    /* Salesforce 기본 컴포넌트(버튼·토글·체크박스·탭·표 링크)의 파란 브랜드색을 블랙으로 */
+    --slds-c-button-brand-color-background: var(--lol-ink);
+    --slds-c-button-brand-color-border: var(--lol-ink);
+    --slds-c-button-brand-color-background-hover: var(--lol-ink-2);
+    --slds-c-button-brand-color-border-hover: var(--lol-ink-2);
+    --slds-c-button-brand-color-background-active: #000000;
+    --slds-c-button-brand-text-color: var(--lol-paper);
+    --slds-c-button-brand-text-color-hover: var(--lol-paper);
+    --slds-c-button-neutral-color-border: var(--lol-light);
+    --slds-c-button-text-color: var(--lol-ink);
+    --slds-c-button-text-color-hover: var(--lol-ink-2);
+    --slds-c-checkbox-toggle-color-background-checked: var(--lol-ink);
+    --slds-c-checkbox-toggle-color-border-checked: var(--lol-ink);
+    --slds-c-checkbox-color-background-checked: var(--lol-ink);
+    --slds-c-checkbox-color-border-checked: var(--lol-ink);
+    --slds-c-icon-color-background: var(--lol-ink);
+    --slds-c-card-color-border: var(--lol-line);
+    --lwc-brandPrimary: var(--lol-ink);
+    --lwc-brandAccessible: var(--lol-ink);
+    --lwc-brandAccessibleActive: #000000;
+    --lwc-colorTextLink: var(--lol-ink);
+    --lwc-colorTextLinkHover: var(--lol-ink-2);
+    --lwc-colorBorderSelection: var(--lol-ink);
+    --slds-g-color-brand-base-50: var(--lol-ink);
+    --slds-g-color-brand-base-60: var(--lol-ink);
+    --dxp-g-brand: var(--lol-ink);
+    color: var(--lol-ink);
+}
+
 .actions {
     display: flex;
     gap: 0.5rem;
@@ -5,15 +49,16 @@
 
 .panel {
     height: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--slds-g-color-border-1, #e5e5e5);
-    border-radius: 0.5rem;
-    background: var(--slds-g-color-neutral-base-100, #fff);
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--lol-line);
+    border-radius: 0.625rem;
+    background: var(--lol-paper);
 }
 
 .panel-title {
-    font-size: 0.9rem;
+    font-size: 0.9375rem;
     font-weight: 700;
+    letter-spacing: -0.01em;
     margin-bottom: 0.5rem;
 }
 
@@ -36,6 +81,7 @@
     font-weight: 400;
     font-size: 0.75rem;
     margin-left: 0.5rem;
+    color: var(--lol-muted);
 }
 
 /* 라인 입력: 라인 | 챔피언 | 실력 | 고정, 아래 줄에 챔피언 정보 */
@@ -44,8 +90,8 @@
     grid-template-columns: 3rem minmax(0, 1.6fr) minmax(0, 1fr) 4rem;
     align-items: center;
     gap: 0.25rem 0.5rem;
-    padding: 0.35rem 0;
-    border-bottom: 1px dashed var(--slds-g-color-border-1, #e5e5e5);
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--lol-line);
 }
 
 .lane-label {
@@ -55,6 +101,7 @@
 .lane-info {
     grid-column: 2 / -1;
     font-size: 0.75rem;
+    color: var(--lol-muted);
 }
 
 .score-head {
@@ -64,33 +111,36 @@
 }
 
 .total {
-    font-size: 2.25rem;
-    font-weight: 700;
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
 }
 
+/* 등급: 높을수록 진하게 */
 .grade {
     margin-left: auto;
     padding: 0.1rem 0.75rem;
     border-radius: 1rem;
     font-weight: 700;
-    color: #fff;
-    background: #747474;
+    color: var(--lol-paper);
+    background: var(--lol-mid);
 }
 
 .grade-s {
-    background: #c23934;
+    background: var(--lol-ink);
 }
 
 .grade-a {
-    background: #fe9339;
+    background: var(--lol-ink-2);
 }
 
 .grade-b {
-    background: #0176d3;
+    background: var(--lol-mid);
 }
 
 .grade-c {
-    background: #2e844a;
+    color: var(--lol-ink);
+    background: var(--lol-light);
 }
 
 .category {
@@ -108,19 +158,20 @@
 }
 
 .bar {
-    height: 0.4rem;
+    height: 0.375rem;
     border-radius: 0.2rem;
-    background: var(--slds-g-color-neutral-base-90, #e5e5e5);
+    background: var(--lol-subtle);
     overflow: hidden;
 }
 
 .bar-fill {
     height: 100%;
-    background: #0176d3;
+    background: var(--lol-ink);
 }
 
 .category-detail {
     font-size: 0.72rem;
+    color: var(--lol-muted);
 }
 
 .reasons {
@@ -130,11 +181,17 @@
 }
 
 .strengths li::marker {
-    color: #2e844a;
+    color: var(--lol-ink);
 }
 
 .weaknesses li::marker {
-    color: #c23934;
+    color: var(--lol-light);
+}
+
+/* 점수가 오르는 교체·조합: 초록 대신 굵은 블랙 */
+.delta-up {
+    color: var(--lol-ink);
+    font-weight: 800;
 }
 
 .swap {
@@ -161,6 +218,13 @@
     list-style: decimal;
     padding-left: 1.25rem;
     font-size: 0.75rem;
+}
+
+.sources a {
+    color: var(--lol-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--lol-light);
+    text-underline-offset: 2px;
 }
 
 .table {
@@ -191,10 +255,7 @@
     font-size: 0.85rem;
 }
 
-.recent-list {
-    font-size: 0.8rem;
-}
-
+/* ===== 분석 이력 ===== */
 .recent-hint {
     font-size: 0.75rem;
     margin-bottom: 0.25rem;
@@ -202,20 +263,21 @@
 
 /* 이력이 길어져도 리포트 영역을 밀어내지 않게 고정 높이 스크롤 */
 .recent-list {
+    font-size: 0.8rem;
     max-height: 26rem;
     overflow-y: auto;
 }
 
 .recent-item {
-    padding: 0.4rem 0.5rem;
-    border-bottom: 1px dashed var(--slds-g-color-border-1, #e5e5e5);
+    padding: 0.5rem 0.625rem;
+    border-bottom: 1px solid var(--lol-line);
     border-left: 3px solid transparent;
 }
 
 /* 지금 리포트에 열려 있는 이력 */
 .recent-item_open {
-    background: var(--slds-g-color-brand-base-95, #eef4ff);
-    border-left-color: #0176d3;
+    background: var(--lol-subtle);
+    border-left-color: var(--lol-ink);
 }
 
 .recent-head {
@@ -246,32 +308,40 @@
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 50%;
+    filter: grayscale(0.15);
 }
 
 .recent-lane {
     margin-right: 0.2rem;
-    color: var(--slds-g-color-neutral-base-50, #747474);
+    color: var(--lol-muted);
     font-size: 0.7rem;
 }
 
+/* 상태: 완료 = 블랙, 분석 중 = 블랙 테두리, 대기 = 그레이, 실패 = 연한 바탕 */
 .status {
     padding: 0 0.4rem;
+    border: 1px solid transparent;
     border-radius: 0.6rem;
     text-align: center;
-    color: #fff;
-    background: #747474;
+    font-size: 0.72rem;
+    color: var(--lol-paper);
+    background: var(--lol-mid);
 }
 
 .status-completed {
-    background: #2e844a;
+    background: var(--lol-ink);
 }
 
 .status-processing {
-    background: #0176d3;
+    color: var(--lol-ink);
+    background: var(--lol-paper);
+    border-color: var(--lol-ink);
 }
 
 .status-failed {
-    background: #c23934;
+    color: var(--lol-ink);
+    background: var(--lol-subtle);
+    border-color: var(--lol-light);
 }
 
 @media (max-width: 480px) {
@@ -285,22 +355,23 @@
     }
 }
 
-/* 분석 리포트: 섹션 제목 + 라인별 카드 */
+/* ===== 분석 리포트: 섹션 제목 + 라인별 카드 ===== */
 .analysis {
-    border-color: var(--slds-g-color-brand-base-60, #0176d3);
+    border-color: var(--lol-ink);
 }
 
 .report-section {
-    margin-top: 0.75rem;
+    margin-top: 0.875rem;
 }
 
 .report-title {
     font-size: 0.95rem;
     font-weight: 700;
-    padding: 0.25rem 0.5rem;
-    border-left: 4px solid #0176d3;
-    background: var(--slds-g-color-neutral-base-95, #f3f3f3);
-    margin-bottom: 0.35rem;
+    padding: 0.3rem 0.625rem;
+    color: var(--lol-paper);
+    background: var(--lol-ink);
+    border-radius: 0.375rem;
+    margin-bottom: 0.4rem;
 }
 
 .report-groups {
@@ -311,15 +382,18 @@
 }
 
 .report-group {
-    border: 1px solid var(--slds-g-color-border-1, #e5e5e5);
-    border-radius: 0.375rem;
+    border: 1px solid var(--lol-line);
+    border-radius: 0.5rem;
     padding: 0.5rem 0.65rem;
+    background: var(--lol-paper);
 }
 
 .report-sub {
     font-weight: 700;
-    color: #0176d3;
+    color: var(--lol-ink);
+    padding-bottom: 0.25rem;
     margin-bottom: 0.25rem;
+    border-bottom: 1px solid var(--lol-line);
 }
 
 .report-bullet,
@@ -334,18 +408,23 @@
 }
 
 .report-bullet::before {
-    content: '•';
+    content: '';
     position: absolute;
-    left: 0.15rem;
-    color: #747474;
+    left: 0.2rem;
+    top: 0.65em;
+    width: 0.3rem;
+    height: 0.3rem;
+    border-radius: 50%;
+    background: var(--lol-mid);
 }
 
-/* ===== 조합 예측 대시보드: 전적 사이트 스타일 다크 카드 ===== */
+/* ===== 조합 대시보드: 다른 패널과 같은 흰 카드 ===== */
 .dash {
-    background: linear-gradient(180deg, #161a2b 0%, #12141f 100%);
-    border-radius: 0.75rem;
+    background: var(--lol-paper);
+    border: 1px solid var(--lol-line);
+    border-radius: 0.625rem;
     padding: 1rem;
-    color: #e5e7f0;
+    color: var(--lol-ink);
 }
 .dash-head {
     display: flex;
@@ -355,11 +434,12 @@
 }
 .dash-title {
     font-size: 1.125rem;
-    font-weight: 700;
-    color: #ffffff;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--lol-ink);
 }
 .dash-sub {
-    color: #9e9eb1;
+    color: var(--lol-muted);
     font-size: 0.75rem;
     margin-top: 0.125rem;
 }
@@ -372,23 +452,24 @@
 .kpi {
     display: flex;
     flex-direction: column;
-    background: #1e2235;
-    border: 1px solid #2c3150;
-    border-left: 3px solid #5383e8;
+    background: var(--lol-subtle);
+    border: 1px solid var(--lol-line);
+    border-left: 3px solid var(--lol-ink);
     border-radius: 0.5rem;
     padding: 0.5rem 0.75rem;
 }
 .kpi-label {
-    color: #9e9eb1;
+    color: var(--lol-muted);
     font-size: 0.75rem;
 }
 .kpi-value {
-    color: #ffffff;
-    font-size: 1.125rem;
-    font-weight: 700;
+    color: var(--lol-ink);
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 .kpi-sub {
-    color: #f4c874;
+    color: var(--lol-ink-2);
     font-size: 0.75rem;
 }
 .dash-grid {
@@ -397,8 +478,8 @@
     gap: 0.5rem;
 }
 .dash-card {
-    background: #1e2235;
-    border: 1px solid #2c3150;
+    background: var(--lol-paper);
+    border: 1px solid var(--lol-line);
     border-radius: 0.5rem;
     padding: 0.625rem 0.75rem 0.25rem;
     margin-bottom: 0.5rem;
@@ -408,9 +489,9 @@
     margin-bottom: 0;
 }
 .dash-card-title {
-    color: #c8cbe0;
+    color: var(--lol-ink);
     font-size: 0.8125rem;
-    font-weight: 600;
+    font-weight: 700;
 }
 @media (max-width: 48em) {
     .dash-kpis,
@@ -421,7 +502,7 @@
 
 /* 픽 풀 표 아래: 점수 기준·지표 출처 */
 .basis {
-    border-top: 1px solid var(--slds-g-color-border-1, #e5e5e5);
+    border-top: 1px solid var(--lol-line);
     padding-top: 0.5rem;
     font-size: 0.8125rem;
 }
@@ -432,7 +513,7 @@
 .basis-list {
     list-style: disc;
     padding-left: 1.25rem;
-    color: var(--slds-g-color-neutral-base-30, #444);
+    color: var(--lol-ink-2);
 }
 .basis-list li {
     margin-bottom: 0.25rem;
@@ -443,24 +524,25 @@
     height: 30rem;
 }
 
-/* 근거 구분 배지: 실제 통계(lol.ps) / 자체 지수(능력치 평가) */
+/* 근거 구분 배지: 실제 통계(lol.ps) = 블랙 채움 / 자체 지수(능력치 평가) = 테두리 */
 .kpi-tag {
     display: inline-block;
     font-size: 0.6875rem;
     font-weight: 700;
     line-height: 1.4;
     padding: 0 0.375rem;
+    border: 1px solid var(--lol-ink);
     border-radius: 0.25rem;
     margin-right: 0.25rem;
     vertical-align: middle;
 }
 .kpi-tag.real {
-    color: #0b3b33;
-    background: #00bba3;
+    color: var(--lol-paper);
+    background: var(--lol-ink);
 }
 .kpi-tag.index {
-    color: #ffffff;
-    background: #6d4bc4;
+    color: var(--lol-ink);
+    background: var(--lol-paper);
 }
 .kpi .kpi-tag {
     align-self: flex-start;
@@ -475,12 +557,12 @@
 }
 .dash-method {
     margin-top: 0.75rem;
-    color: #9e9eb1;
+    color: var(--lol-muted);
     font-size: 0.75rem;
 }
 .dash-method summary {
     cursor: pointer;
-    color: #c8cbe0;
+    color: var(--lol-ink);
     font-weight: 600;
 }
 .dash-method ul {
