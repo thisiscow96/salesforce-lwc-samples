@@ -77,7 +77,7 @@ private class LolTeamBuilderControllerTest {
             '▶ 상대 정글러별 첫 3분 대응', '■ 정글 운영과 갱킹', '▶ 캐리 라인 설정', '▶ 갱킹 우선순위와 호응', '■ 오브젝트 운영', '■ 추천 밴 3개', '■ 데이터 기준',
             // 운영: 등장 시간 나열 대신 상황(우세·비등·열세)별 행동 지침
             '▶ 첫 공허 유충: "- 결론:"', '"- 상대가 강할 때:" 반대편 이득', '▶ 첫 드래곤: "- 결론:"', '"- 포기할 때:" 반대편 이득', '"- 오브젝트:"(14~25분은 전령·드래곤', '■ 한타 포지션', '▶ 역할 분류', '▶ 지형별 포지션', '"- 상대가 여는 경우(받아치기):"',
-            '■ 사이드 운영', '▶ 인원 수싸움 공식', '▶ 텔레포트 유무별 위치', '"- 1순위 챔피언 (위협 유형): 위협 사유 / 열렸을 때 위험"', '"- 웨이브 배치:"(1-3-1 / 1-4 / 5인 뭉침',
+            '■ 사이드 운영', '▶ 인원 수싸움 공식', '▶ 텔레포트 유무별 위치', '"- 1순위 챔피언 (위협 유형): 위협 사유 / 열렸을 때 위험"', '"- 웨이브 배치:"(14분 이후는 1-1-3 / 1-4 / 1-3-1 / 5인 뭉침',
             '- 기준 패치: ' + s.Base_Patch__c, '- 기준 티어: 에메랄드+'
         }) {
             Assert.isTrue(prompt.contains(required), '프롬프트에 "' + required + '" 포함');
@@ -99,6 +99,13 @@ private class LolTeamBuilderControllerTest {
         Assert.isTrue(guide.contains('3) 중후반 위치 배정'), guide);
         Assert.isTrue(prompt.contains('▶ 중후반 위치 배정'), prompt);
         Assert.isTrue(prompt.contains('(위협 유형)'), prompt);
+        // 100점 리포트 4대 조건: 본대 미드 = 원딜·서폿·정글, 실전 스위치, 승리 플랜 파괴자 밴, 타임라인 일관성
+        Assert.isTrue(guide.contains('본대 미드는 항상 [원딜 + 서폿 + 정글]'), guide);
+        Assert.isTrue(prompt.contains('본대 미드 = 원딜·서폿·정글'), prompt);
+        Assert.isTrue(guide.contains('8) 실전 스위치'), guide);
+        Assert.isTrue(guide.contains('조합 승리 플랜 파괴자'), guide);
+        Assert.isTrue(guide.contains('9) 타임라인 일관성'), guide);
+        Assert.isTrue(prompt.contains('궁극기·코어 아이템은 쓰지 않는다'), prompt);
         Assert.isTrue(prompt.contains('  스킬 확인: Data Dragon id '), prompt);
         Assert.isTrue(prompt.contains(', 초반 '), '파워 커브 근거: 초반 능력치 포함');
         Assert.isFalse(guide.contains('2명 이하가 보일 때 즉시 후퇴'), '기계적인 인원 체크 제거');
